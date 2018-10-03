@@ -24,6 +24,10 @@ ADD webpack.config.js app.json package.json package-lock.json tsconfig.json webp
 WORKDIR /app
 RUN npm install
 
+# Build API schema and types
+RUN npm run build-schema && \
+  npm run generate-types
+
 # Build static
 ADD ./saleor/static /app/saleor/static/
 ADD ./templates /app/templates/
@@ -55,12 +59,12 @@ WORKDIR /app
 
 
 RUN SECRET_KEY=dummy \
-    STATIC_URL=${STATIC_URL} \
-    python3 manage.py collectstatic --no-input
+  STATIC_URL=${STATIC_URL} \
+  python3 manage.py collectstatic --no-input
 
 RUN useradd --system saleor && \
-    mkdir -p /app/media /app/static && \
-    chown -R saleor:saleor /app/
+  mkdir -p /app/media /app/static && \
+  chown -R saleor:saleor /app/
 
 USER saleor
 
