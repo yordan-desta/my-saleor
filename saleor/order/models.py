@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import ExpressionWrapper, F, Max, Sum
+from django.db.models import F, Max, Sum
 from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import pgettext_lazy
@@ -24,7 +24,7 @@ from ..discount.models import Voucher
 from ..payment import ChargeStatus, TransactionKind
 from ..shipping.models import ShippingMethod
 
-from ..merchant.models import Merchant
+from ..mycustom_features.merchant.models import Merchant
 
 
 class OrderQueryset(models.QuerySet):

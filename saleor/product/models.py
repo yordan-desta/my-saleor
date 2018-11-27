@@ -20,6 +20,7 @@ from prices import TaxedMoneyRange
 from text_unidecode import unidecode
 from versatileimagefield.fields import PPOIField, VersatileImageField
 
+from ..mycustom_features.merchant.models import Merchant
 from ..core import TaxRateType
 from ..core.exceptions import InsufficientStock
 from ..core.models import SortableModel
@@ -132,6 +133,7 @@ class Product(SeoModel):
     weight = MeasurementField(
         measurement=Weight, unit_choices=WeightUnits.CHOICES,
         blank=True, null=True)
+    merchant = models.ForeignKey(Merchant, related_name='products', on_delete= models.PROTECT)
 
     objects = ProductQuerySet.as_manager()
     translated = TranslationProxy()

@@ -11,6 +11,7 @@ from django.utils.translation import pgettext_lazy
 from django_countries.fields import Country, CountryField
 from phonenumber_field.modelfields import PhoneNumber, PhoneNumberField
 
+from ..mycustom_features.merchant.models import Merchant
 from .validators import validate_possible_number
 
 
@@ -123,6 +124,9 @@ class User(PermissionsMixin, AbstractBaseUser):
         on_delete=models.SET_NULL)
 
     USERNAME_FIELD = 'email'
+
+    merchant = models.ForeignKey(Merchant,
+                                 on_delete= models.PROTECT, related_name='users')
 
     objects = UserManager()
 

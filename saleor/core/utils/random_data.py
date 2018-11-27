@@ -17,6 +17,7 @@ from faker.providers import BaseProvider
 from measurement.measures import Weight
 from prices import Money
 
+from ...mycustom_features.merchant.models import Merchant, ACTIVE, MerchantProfile
 from ...account.models import Address, User
 from ...account.utils import store_user_address
 from ...checkout import AddressType
@@ -179,11 +180,19 @@ def create_products(products_data, placeholder_dir, create_images):
         # We are skipping products without images
         if pk not in IMAGES_MAPPING:
             continue
+
+        merchant = Merchant.objects.first()
+        if merchant is None:
+            global merchant
+            create_merchant()
+            merchant = Merchant.objects.first()
+
         defaults = product['fields']
         defaults['weight'] = get_weight(defaults['weight'])
         defaults['category_id'] = defaults.pop('category')
         defaults['product_type_id'] = defaults.pop('product_type')
         defaults['attributes'] = json.loads(defaults['attributes'])
+        defaults['merchant_id'] = merchant.uuid
         product, _ = Product.objects.update_or_create(pk=pk, defaults=defaults)
 
         if create_images:
@@ -631,3 +640,38 @@ def get_product_list_images_dir(placeholder_dir):
 def get_image(image_dir, image_name):
     img_path = os.path.join(image_dir, image_name)
     return File(open(img_path, 'rb'), name=image_name)
+
+
+# my custom
+def create_fake_merchant():
+    user = random.choice([None, User.objects.filter(
+        is_superuser=False).order_by('?').first()])
+    if user is None:
+        global user
+        user = create_fake_user()
+        user = User.objects.create(user)
+    shipping_method = ShippingMethod.objects.order_by('?').first()
+    shipping_zone = ShippingZone.objects.order_by('?').first()
+    merchant = Merchant.objects.create(user=user, ShippingZone=shipping_zone, ShippingMethod=shipping_method,
+                                       status=ACTIVE)
+
+    return merchant
+
+
+def create_fake_merchant_profile(merchant = None):
+
+    if merchant is None:
+        merchant = create_fake_merchant()
+
+    return MerchantProfile.objects.create(merchant=merchant, company_name="My company",
+                                          company_email="support@company.com", company_phone='+2312231212')
+
+
+def create_merchant():
+    merchant = create_fake_merchant()
+    create_fake_merchant_profile(merchant)
+
+    yield 'Merchant: %s'%(str(merchant.uuid))
+
+
+

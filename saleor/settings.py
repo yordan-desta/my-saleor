@@ -238,7 +238,10 @@ INSTALLED_APPS = [
     'django_celery_results',
     'impersonate',
     'phonenumber_field',
-    'captcha']
+    'captcha',
+
+    # customization apps
+    'saleor.mycustom_features.merchant']
 
 if DEBUG:
     MIDDLEWARE.append(
