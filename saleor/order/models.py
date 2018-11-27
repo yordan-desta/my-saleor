@@ -24,6 +24,8 @@ from ..discount.models import Voucher
 from ..payment import ChargeStatus, TransactionKind
 from ..shipping.models import ShippingMethod
 
+from ..merchant.models import Merchant
+
 
 class OrderQueryset(models.QuerySet):
     def confirmed(self):
@@ -123,13 +125,17 @@ class Order(models.Model):
     weight = MeasurementField(
         measurement=Weight, unit_choices=WeightUnits.CHOICES,
         default=zero_weight)
+
+    merchant = models.ForeignKey(Merchant, related_name='orders',
+                                 on_delete=models.PROTECT)
+
     objects = OrderQueryset.as_manager()
 
     class Meta:
         ordering = ('-pk',)
         permissions = ((
-            'manage_orders',
-            pgettext_lazy('Permission description', 'Manage orders.')),)
+                           'manage_orders',
+                           pgettext_lazy('Permission description', 'Manage orders.')),)
 
     def save(self, *args, **kwargs):
         if not self.token:
@@ -370,7 +376,7 @@ class OrderEvent(models.Model):
         on_delete=models.SET_NULL, related_name='+')
 
     class Meta:
-        ordering = ('date', )
+        ordering = ('date',)
 
     def __repr__(self):
         return 'OrderEvent(type=%r, user=%r)' % (self.type, self.user)

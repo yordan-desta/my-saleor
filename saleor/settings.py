@@ -572,3 +572,7 @@ PAYMENT_GATEWAYS = {
         }
     }
 }
+
+
+
+# custom setting variables

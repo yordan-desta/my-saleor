@@ -11,7 +11,7 @@ MERCHANT_ACCOUNT_STATUS = ((PENDING, "Pending"), (ACTIVE, "Active"), (SUSPENDED,
 
 
 class AbstractModel(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key= True)
     created_on = models.DateTimeField(auto_now=True)
     modified_on = models.DateTimeField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
@@ -37,6 +37,7 @@ class Merchant(AbstractModel):
 
     shipping_method = models.ManyToManyField(ship.ShippingMethod, related_name="shipping_method",
                                              related_query_name="shipping_methods")
+
     shipping_zone = models.ManyToManyField(ship.ShippingZone, related_name="shipping_zone",
                                            related_query_name="shipping_zones")
 
@@ -45,7 +46,7 @@ class Merchant(AbstractModel):
     status = models.CharField(max_length=5, choices=MERCHANT_ACCOUNT_STATUS)
 
     def is_active(self):
-        return self.status == (ACTIVE)
+        return self.status == ACTIVE
 
 
 class MerchantProfile(AbstractModel):
