@@ -123,6 +123,8 @@ class Order(models.Model):
     weight = MeasurementField(
         measurement=Weight, unit_choices=WeightUnits.CHOICES,
         default=zero_weight)
+    merchant = models.ForeignKey('merchant.Merchant', on_delete=models.PROTECT, related_name='orders', null= True, blank= True)
+
     objects = OrderQueryset.as_manager()
 
     class Meta:
