@@ -136,7 +136,10 @@ class User(PermissionsMixin, AbstractBaseUser):
                     'Permission description', 'Manage staff.')),
             (
                 'impersonate_users', pgettext_lazy(
-                    'Permission description', 'Impersonate customers.')))
+                    'Permission description', 'Impersonate customers.')),
+            (
+                'manage_merchants',
+                pgettext_lazy('Permission description', 'Manage merchants.'))        )
 
     def get_full_name(self):
         return self.email

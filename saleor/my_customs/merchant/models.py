@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils.translation import pgettext_lazy
+
 from ...shipping import models as ship
 
 import uuid
@@ -29,4 +31,4 @@ class Merchant(models.Model):
         return self.status == ACTIVE
 
     class Meta:
-        ordering = ["-modified_on", ]
+        ordering = ('-modified_on',)

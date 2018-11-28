@@ -23,3 +23,11 @@ def get_permissions(permissions=None):
     codenames = split_permission_codename(permissions)
     return Permission.objects.filter(codename__in=codenames).prefetch_related(
         'content_type').order_by('codename')
+
+# custom permissions
+
+
+CUSTOME_MODEL_PERMISSIONS = [
+    'account.manage_merchants'
+]
+MODELS_PERMISSIONS.extend(CUSTOME_MODEL_PERMISSIONS)
