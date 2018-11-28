@@ -135,6 +135,7 @@ class Product(SeoModel):
 
     objects = ProductQuerySet.as_manager()
     translated = TranslationProxy()
+    merchant = models.ForeignKey('merchant.Merchant', on_delete=models.PROTECT, related_name='products', null= True, blank= True)
 
     class Meta:
         app_label = 'product'
