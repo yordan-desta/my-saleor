@@ -238,7 +238,8 @@ INSTALLED_APPS = [
     'django_celery_results',
     'impersonate',
     'phonenumber_field',
-    'captcha']
+    'captcha',
+    'saleor.my_customs.merchant']
 
 if DEBUG:
     MIDDLEWARE.append(
@@ -572,3 +573,6 @@ PAYMENT_GATEWAYS = {
         }
     }
 }
+
+
+# custom settings

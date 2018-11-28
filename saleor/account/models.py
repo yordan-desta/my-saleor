@@ -13,7 +13,6 @@ from phonenumber_field.modelfields import PhoneNumber, PhoneNumberField
 
 from .validators import validate_possible_number
 
-
 class PossiblePhoneNumberField(PhoneNumberField):
     """Less strict field for phone numbers written to database."""
 
@@ -121,6 +120,7 @@ class User(PermissionsMixin, AbstractBaseUser):
     default_billing_address = models.ForeignKey(
         Address, related_name='+', null=True, blank=True,
         on_delete=models.SET_NULL)
+    merchant = models.ForeignKey('merchant.Merchant', on_delete=models.PROTECT, related_name='users', null= True, blank= True)
 
     USERNAME_FIELD = 'email'
 
