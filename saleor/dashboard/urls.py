@@ -15,6 +15,7 @@ from .shipping.urls import urlpatterns as shipping_urls
 from .sites.urls import urlpatterns as site_urls
 from .staff.urls import urlpatterns as staff_urls
 from .taxes.urls import urlpatterns as taxes_urls
+from .my_customs.merchant.urls import  urlpatterns as merchant_urls
 
 urlpatterns = [
     url(r'^$', core_views.index, name='index'),
@@ -32,4 +33,6 @@ urlpatterns = [
     url(r'^style-guide/', core_views.styleguide, name='styleguide'),
     url(r'^search/', include(search_urls)),
     url(r'^taxes/', include(taxes_urls)),
-    url(r'^next/', TemplateView.as_view(template_name='dashboard/next.html'))]
+    url(r'^next/', TemplateView.as_view(template_name='dashboard/next.html')),
+    url(r'^merchants/', include(merchant_urls)),
+]

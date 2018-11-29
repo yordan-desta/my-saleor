@@ -32,3 +32,6 @@ class Merchant(models.Model):
 
     class Meta:
         ordering = ('-modified_on',)
+
+    def get_all_members(self):
+        return self.users.all()

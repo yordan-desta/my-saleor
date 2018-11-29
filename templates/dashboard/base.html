@@ -139,6 +139,24 @@
               </ul>
             </li>
             {% endif %}
+            {% if perms.account.manage_merchants %}
+              <li class="side-nav-section">
+              <p>
+                {% trans "Merchants" context "Dashboard merchants. `Merchants' is noun of to merchant" %}
+              </p>
+              <ul>
+                {% if perms.account.manage_merchants %}
+                  <li class="{% block menu_merchants_class %}{% endblock %}">
+                    <a href="{% url 'dashboard:merchants' %}">
+                      {% trans "Merchants" context "Dashboard merchants list" %}
+                    </a>
+                  </li>
+                {% endif %}
+
+              </ul>
+            </li>
+            {% endif %}
+
             {% if perms.order.manage_orders or perms.account.manage_users %}
             <li class="side-nav-section">
               <p>

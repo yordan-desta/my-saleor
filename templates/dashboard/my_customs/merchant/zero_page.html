@@ -1,0 +1,11 @@
+{% extends 'dashboard/base_zero_page.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "No Merchants found." %}{% endblock %}
+{% block content %}
+  {% static "dashboard/images/add.svg" as img_path %}
+  {% blocktrans %}
+    Merchants are companies authorized to sell their item on the website.<br>
+  {% endblocktrans %}
+{% endblock %}

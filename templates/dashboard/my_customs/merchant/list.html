@@ -1,0 +1,114 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+{% load status %}
+{% load utils %}
+{% load static %}
+
+{% block title %}{% trans "Merchants" context "Dashboard merchants list" %} - {{ block.super }}{% endblock %}
+
+{% block body_class %}body-merchants{% endblock %}
+
+{% block menu_orders_class %}active{% endblock %}
+
+{% block header_extra %}
+  <div class="btn-fab-fixed">
+    <form method="POST" action="{% url "dashboard:merchant-create" %}">
+      {% csrf_token %}
+      <label class="btn-fab-default waves-effect waves-light svg-submit-btn"
+             title="{% trans "Add merchant" context "Merchant list add button text" %}">
+        <input type="submit"/>
+        <svg data-src="{% static "dashboard/images/add.svg" %}"/>
+      </label>
+    </form>
+  </div>
+{% endblock %}
+
+{% block breadcrumbs %}
+  <ul class="breadcrumbs">
+    <li class="visible-s">{% trans "Merchants" context "Dashboard merchants list" %}</li>
+  </ul>
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col s12 l9">
+      {% if merchants %}
+        <div class="card">
+          <div class="data-table-container">
+            <table class="bordered highlight responsive data-table last-right-align">
+              <thead>
+              <tr>
+                {% sorting_header 'pk' '#' %}
+
+                <th></th>
+
+                {% trans "Merchant" context "Merchants table header" as label %}
+                {% sorting_header 'name' label %}
+                {% trans "Description" context "Merchants table header" as label %}
+                {% sorting_header 'description' label %}
+                {% trans "Email" context "Merchants table header" as label %}
+                {% sorting_header 'email' label %}
+                {% trans "Phone" context "Merchants table header" as label %}
+                {% sorting_header 'phone' label %}
+
+                {% trans "Status" context "Merchants table header" as label %}
+                {% sorting_header 'status' label %}
+                {% trans "Created on" context "Merchants table header" as label %}
+                {% sorting_header 'created_on' label %}
+
+
+              </tr>
+              </thead>
+              <tbody>
+              {% for merchant in merchants %}
+                <tr data-action-go="{% url 'dashboard:merchant-details' merchant_pk=merchant.pk %}">
+                  <td>
+                    #{{ merchant.id }}
+                  </td>
+                  <td>
+                    {{ merchant.company_name }}
+                  </td>
+                  <td>
+                    {{ merchant.company_desc }}
+                  </td>
+                  <td>
+                    {{ merchant.company_email }}
+                  </td>
+                  <td>
+                    {{ merchant.company_phone }}
+                  </td>
+                  <td>
+                    {{ merchant.status }}
+                  </td>
+                  <td>
+                    {{ merchant.created_on }}
+                  </td>
+
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="row">
+          {% paginate orders %}
+        </div>
+      {% else %}
+        {% if is_empty %}
+          {% include 'dashboard/my_customs/merchant/zero_page.html' %}
+        {% else %}
+          <div class="col s12">
+            <div class="not-found">
+              <p class="grey-text">
+                {% trans "No Merchants found." context "Empty merchant list message" %}
+              </p>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+    <div class="col s12 l3" id="filters">
+      {% if not is_empty %}{% filters filter_set %}{% endif %}
+    </div>
+  </div>
+{% endblock %}
