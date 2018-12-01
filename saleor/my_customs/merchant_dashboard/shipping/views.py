@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.translation import pgettext_lazy
 
-from ...core.utils import get_paginator_items
-from ...shipping.models import ShippingMethod, ShippingZone
+from ....core.utils import get_paginator_items
+from ....shipping.models import ShippingMethod, ShippingZone
 from ..views import staff_member_required
 from .filters import ShippingZoneFilter
 from .forms import ChangeDefaultWeightUnit, ShippingZoneForm, get_shipping_form
@@ -36,7 +36,7 @@ def shipping_zone_list(request):
         'shipping_zones': zones, 'filter_set': shipping_zone_filter,
         'is_empty': not shipping_zone_filter.queryset.exists(),
         'form': form}
-    return TemplateResponse(request, 'dashboard/shipping/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/shipping/list.html', ctx)
 
 
 @staff_member_required
@@ -50,7 +50,7 @@ def shipping_zone_add(request):
         messages.success(request, msg)
         return redirect('dashboard:shipping-zone-details', pk=zone.pk)
     ctx = {'form': form, 'shipping_zone': form.instance}
-    return TemplateResponse(request, 'dashboard/shipping/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/shipping/form.html', ctx)
 
 
 @staff_member_required
@@ -64,7 +64,7 @@ def shipping_zone_edit(request, pk):
         messages.success(request, msg)
         return redirect('dashboard:shipping-zone-details', pk=zone.pk)
     ctx = {'form': form, 'shipping_zone': zone}
-    return TemplateResponse(request, 'dashboard/shipping/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/shipping/form.html', ctx)
 
 
 @staff_member_required
@@ -77,7 +77,7 @@ def shipping_zone_details(request, pk):
         'shipping_zone': zone, 'price_based': price_based,
         'weight_based': weight_based}
     return TemplateResponse(
-        request, 'dashboard/shipping/detail.html', ctx)
+        request, 'my_customs/merchant_dashboard/shipping/detail.html', ctx)
 
 
 @staff_member_required
@@ -94,7 +94,7 @@ def shipping_zone_delete(request, pk):
         return redirect('dashboard:shipping-zone-list')
     ctx = {'shipping_zone': shipping_zone}
     return TemplateResponse(
-        request, 'dashboard/shipping/modal/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/shipping/modal/confirm_delete.html', ctx)
 
 
 @staff_member_required
@@ -118,7 +118,7 @@ def shipping_method_add(request, shipping_zone_pk, type):
         'form': form, 'shipping_zone': shipping_zone,
         'shipping_method': shipping_method}
     return TemplateResponse(
-        request, 'dashboard/shipping/methods/form.html', ctx)
+        request, 'my_customs/merchant_dashboard/shipping/methods/form.html', ctx)
 
 
 @staff_member_required
@@ -142,7 +142,7 @@ def shipping_method_edit(request, shipping_zone_pk, shipping_method_pk):
         'form': form, 'shipping_zone': shipping_zone,
         'shipping_method': shipping_method}
     return TemplateResponse(
-        request, 'dashboard/shipping/methods/form.html', ctx)
+        request, 'my_customs/merchant_dashboard/shipping/methods/form.html', ctx)
 
 
 @staff_member_required
@@ -163,4 +163,4 @@ def shipping_method_delete(
         'shipping_method': shipping_method,
         'shipping_zone_pk': shipping_zone_pk}
     return TemplateResponse(
-        request, 'dashboard/shipping/modal/method_confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/shipping/modal/method_confirm_delete.html', ctx)

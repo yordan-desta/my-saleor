@@ -6,9 +6,9 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from templated_email import send_templated_mail
 
-from ..account.models import User
-from ..core.emails import get_email_base_context
-from ..core.utils import build_absolute_uri
+from ...account.models import User
+from ...core.emails import get_email_base_context
+from ...core.utils import build_absolute_uri
 
 
 @shared_task

@@ -7,7 +7,7 @@ from django.templatetags.static import static
 from django_filters.fields import RangeField
 from versatileimagefield.widgets import VersatileImagePPOIClickWidget
 
-from ...product.utils.costs import (
+from ....product.utils.costs import (
     get_margin_for_variant, get_variant_costs_data)
 from ..product.widgets import ImagePreviewWidget
 from .chips import (

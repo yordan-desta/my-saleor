@@ -8,10 +8,10 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from ...core.utils import get_paginator_items
-from ...menu.models import Menu, MenuItem
-from ...page.models import Page
-from ...product.models import Category, Collection
+from ....core.utils import get_paginator_items
+from ....menu.models import Menu, MenuItem
+from ....page.models import Page
+from ....product.models import Category, Collection
 from ..views import staff_member_required
 from .filters import MenuFilter, MenuItemFilter
 from .forms import AssignMenuForm, MenuForm, MenuItemForm, ReorderMenuItemsForm
@@ -40,7 +40,7 @@ def menu_list(request):
         'menus': menus, 'filter_set': menu_filter,
         'is_empty': not menu_filter.queryset.exists(),
         'assign_menu_form': assign_menu_form}
-    return TemplateResponse(request, 'dashboard/menu/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/menu/list.html', ctx)
 
 
 @staff_member_required
@@ -54,7 +54,7 @@ def menu_create(request):
         messages.success(request, msg)
         return redirect('dashboard:menu-list')
     ctx = {'form': form, 'menu': menu}
-    return TemplateResponse(request, 'dashboard/menu/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/menu/form.html', ctx)
 
 
 @staff_member_required
@@ -68,7 +68,7 @@ def menu_edit(request, pk):
         messages.success(request, msg)
         return redirect('dashboard:menu-details', pk=menu.pk)
     ctx = {'form': form, 'menu': menu}
-    template = 'dashboard/menu/form.html'
+    template = 'my_customs/merchant_dashboard/menu/form.html'
     return TemplateResponse(request, template, ctx)
 
 
@@ -85,7 +85,7 @@ def menu_details(request, pk):
     ctx = {
         'menu': menu, 'menu_items': menu_items, 'filter_set': menu_item_filter,
         'is_empty': not menu_item_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/menu/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/menu/detail.html', ctx)
 
 
 @staff_member_required
@@ -100,7 +100,7 @@ def menu_delete(request, pk):
     ctx = {
         'menu': menu, 'descendants': list(menu.items.all())}
     return TemplateResponse(
-        request, 'dashboard/menu/modal/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/menu/modal/confirm_delete.html', ctx)
 
 
 @staff_member_required
@@ -128,7 +128,7 @@ def menu_item_create(request, menu_pk, root_pk=None):
         return redirect('dashboard:menu-details', pk=menu.pk)
     ctx = {
         'form': form, 'menu': menu, 'menu_item': menu_item, 'path': path}
-    return TemplateResponse(request, 'dashboard/menu/item/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/menu/item/form.html', ctx)
 
 
 @staff_member_required
@@ -148,7 +148,7 @@ def menu_item_edit(request, menu_pk, item_pk):
             'dashboard:menu-item-details', menu_pk=menu.pk, item_pk=item_pk)
     ctx = {
         'form': form, 'menu': menu, 'menu_item': menu_item, 'path': path}
-    return TemplateResponse(request, 'dashboard/menu/item/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/menu/item/form.html', ctx)
 
 
 @staff_member_required
@@ -177,7 +177,7 @@ def menu_item_delete(request, menu_pk, item_pk):
         'menu_item': menu_item,
         'descendants': list(menu_item.get_descendants())}
     return TemplateResponse(
-        request, 'dashboard/menu/item/modal/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/menu/item/modal/confirm_delete.html', ctx)
 
 
 @staff_member_required
@@ -195,7 +195,7 @@ def menu_item_details(request, menu_pk, item_pk):
         'menu': menu, 'menu_item': menu_item, 'menu_items': menu_items,
         'path': path, 'filter_set': menu_item_filter,
         'is_empty': not menu_item_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/menu/item/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/menu/item/detail.html', ctx)
 
 
 @staff_member_required

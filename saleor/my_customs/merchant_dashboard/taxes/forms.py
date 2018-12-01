@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
-from ...site.models import SiteSettings
+from ....site.models import SiteSettings
 
 
 class TaxesConfigurationForm(forms.ModelForm):

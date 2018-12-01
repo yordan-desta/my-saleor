@@ -8,8 +8,8 @@ from django.template.context_processors import csrf
 from django.template.response import TemplateResponse
 from django.utils.translation import pgettext_lazy
 
-from ...account.models import CustomerNote, User
-from ...core.utils import get_paginator_items
+from ....account.models import CustomerNote, User
+from ....core.utils import get_paginator_items
 from ..emails import send_set_password_email
 from ..views import staff_member_required
 from .filters import UserFilter
@@ -34,7 +34,7 @@ def customer_list(request):
     ctx = {
         'customers': customers, 'filter_set': customer_filter,
         'is_empty': not customer_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/customer/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/customer/list.html', ctx)
 
 
 @staff_member_required
@@ -49,7 +49,7 @@ def customer_details(request, pk):
     ctx = {
         'customer': customer, 'customer_orders': customer_orders,
         'notes': notes}
-    return TemplateResponse(request, 'dashboard/customer/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/customer/detail.html', ctx)
 
 
 @staff_member_required
@@ -65,7 +65,7 @@ def customer_create(request):
         messages.success(request, msg)
         return redirect('dashboard:customer-details', pk=customer.pk)
     ctx = {'form': form, 'customer': customer}
-    return TemplateResponse(request, 'dashboard/customer/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/customer/form.html', ctx)
 
 
 @staff_member_required
@@ -80,7 +80,7 @@ def customer_edit(request, pk=None):
         messages.success(request, msg)
         return redirect('dashboard:customer-details', pk=customer.pk)
     ctx = {'form': form, 'customer': customer}
-    return TemplateResponse(request, 'dashboard/customer/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/customer/form.html', ctx)
 
 
 @staff_member_required
@@ -115,7 +115,7 @@ def customer_add_note(request, customer_pk):
         status = 400
     ctx = {'customer': customer, 'form': form}
     ctx.update(csrf(request))
-    template = 'dashboard/customer/modal/add_note.html'
+    template = 'my_customs/merchant_dashboard/customer/modal/add_note.html'
     return TemplateResponse(request, template, ctx, status=status)
 
 
@@ -138,5 +138,5 @@ def customer_delete(request, pk):
         status = 400
     ctx = {'customer': customer, 'form': form}
     return TemplateResponse(
-        request, 'dashboard/customer/modal/confirm_delete.html', ctx,
+        request, 'my_customs/merchant_dashboard/customer/modal/confirm_delete.html', ctx,
         status=status)

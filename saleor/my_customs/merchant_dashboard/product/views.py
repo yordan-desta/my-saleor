@@ -11,13 +11,13 @@ from django.utils.translation import npgettext_lazy, pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from . import forms
-from ...core.utils import get_paginator_items
-from ...discount.models import Sale
-from ...product.models import (
+from ....core.utils import get_paginator_items
+from ....discount.models import Sale
+from ....product.models import (
     Attribute, AttributeValue, Product, ProductImage, ProductType,
     ProductVariant)
-from ...product.utils.availability import get_availability
-from ...product.utils.costs import (
+from ....product.utils.availability import get_availability
+from ....product.utils.costs import (
     get_margin_for_variant, get_product_costs_data)
 from ..views import staff_member_required
 from .filters import AttributeFilter, ProductFilter, ProductTypeFilter
@@ -38,7 +38,7 @@ def product_list(request):
         'products': products, 'product_types': product_types,
         'filter_set': product_filter,
         'is_empty': not product_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/product/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/product/list.html', ctx)
 
 
 @staff_member_required
@@ -65,7 +65,7 @@ def product_details(request, pk):
         'images': images, 'no_variants': no_variants,
         'only_variant': only_variant, 'purchase_cost': purchase_cost,
         'margin': margin, 'is_empty': not variants.exists()}
-    return TemplateResponse(request, 'dashboard/product/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/product/detail.html', ctx)
 
 
 @require_POST
@@ -95,7 +95,7 @@ def product_select_type(request):
     elif form.errors:
         status = 400
     ctx = {'form': form}
-    template = 'dashboard/product/modal/select_type.html'
+    template = 'my_customs/merchant_dashboard/product/modal/select_type.html'
     return TemplateResponse(request, template, ctx, status=status)
 
 
@@ -131,7 +131,7 @@ def product_create(request, type_pk):
     ctx = {
         'product_form': product_form, 'variant_form': variant_form,
         'product': product}
-    return TemplateResponse(request, 'dashboard/product/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/product/form.html', ctx)
 
 
 @staff_member_required
@@ -161,7 +161,7 @@ def product_edit(request, pk):
         return redirect('dashboard:product-details', pk=product.pk)
     ctx = {
         'product': product, 'product_form': form, 'variant_form': variant_form}
-    return TemplateResponse(request, 'dashboard/product/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/product/form.html', ctx)
 
 
 @staff_member_required
@@ -176,7 +176,7 @@ def product_delete(request, pk):
         return redirect('dashboard:product-list')
     return TemplateResponse(
         request,
-        'dashboard/product/modal/confirm_delete.html',
+        'my_customs/merchant_dashboard/product/modal/confirm_delete.html',
         {'product': product})
 
 
@@ -232,7 +232,7 @@ def product_type_list(request):
         'is_empty': not type_filter.queryset.exists()}
     return TemplateResponse(
         request,
-        'dashboard/product/product_type/list.html',
+        'my_customs/merchant_dashboard/product/product_type/list.html',
         ctx)
 
 
@@ -250,7 +250,7 @@ def product_type_create(request):
     ctx = {'form': form, 'product_type': product_type}
     return TemplateResponse(
         request,
-        'dashboard/product/product_type/form.html',
+        'my_customs/merchant_dashboard/product/product_type/form.html',
         ctx)
 
 
@@ -268,7 +268,7 @@ def product_type_edit(request, pk):
     ctx = {'form': form, 'product_type': product_type}
     return TemplateResponse(
         request,
-        'dashboard/product/product_type/form.html',
+        'my_customs/merchant_dashboard/product/product_type/form.html',
         ctx)
 
 
@@ -287,7 +287,7 @@ def product_type_delete(request, pk):
         'products': product_type.products.all()}
     return TemplateResponse(
         request,
-        'dashboard/product/product_type/modal/confirm_delete.html',
+        'my_customs/merchant_dashboard/product/product_type/modal/confirm_delete.html',
         ctx)
 
 
@@ -311,7 +311,7 @@ def variant_details(request, product_pk, variant_pk):
         'margin': margin, 'discounted_price': discounted_price}
     return TemplateResponse(
         request,
-        'dashboard/product/product_variant/detail.html',
+        'my_customs/merchant_dashboard/product/product_variant/detail.html',
         ctx)
 
 
@@ -335,7 +335,7 @@ def variant_create(request, product_pk):
     ctx = {'form': form, 'product': product, 'variant': variant}
     return TemplateResponse(
         request,
-        'dashboard/product/product_variant/form.html',
+        'my_customs/merchant_dashboard/product/product_variant/form.html',
         ctx)
 
 
@@ -356,7 +356,7 @@ def variant_edit(request, product_pk, variant_pk):
     ctx = {'form': form, 'product': product, 'variant': variant}
     return TemplateResponse(
         request,
-        'dashboard/product/product_variant/form.html',
+        'my_customs/merchant_dashboard/product/product_variant/form.html',
         ctx)
 
 
@@ -376,7 +376,7 @@ def variant_delete(request, product_pk, variant_pk):
         'variant': variant}
     return TemplateResponse(
         request,
-        'dashboard/product/product_variant/modal/confirm_delete.html',
+        'my_customs/merchant_dashboard/product/product_variant/modal/confirm_delete.html',
         ctx)
 
 
@@ -395,7 +395,7 @@ def variant_images(request, product_pk, variant_pk):
     ctx = {'form': form, 'product': product, 'variant': variant}
     return TemplateResponse(
         request,
-        'dashboard/product/product_variant/modal/select_images.html',
+        'my_customs/merchant_dashboard/product/product_variant/modal/select_images.html',
         ctx)
 
 
@@ -435,7 +435,7 @@ def product_images(request, product_pk):
     ctx = {
         'product': product, 'images': images, 'is_empty': not images.exists()}
     return TemplateResponse(
-        request, 'dashboard/product/product_image/list.html', ctx)
+        request, 'my_customs/merchant_dashboard/product/product_image/list.html', ctx)
 
 
 @staff_member_required
@@ -455,7 +455,7 @@ def product_image_create(request, product_pk):
     ctx = {'form': form, 'product': product, 'product_image': product_image}
     return TemplateResponse(
         request,
-        'dashboard/product/product_image/form.html',
+        'my_customs/merchant_dashboard/product/product_image/form.html',
         ctx)
 
 
@@ -476,7 +476,7 @@ def product_image_edit(request, product_pk, img_pk):
     ctx = {'form': form, 'product': product, 'product_image': product_image}
     return TemplateResponse(
         request,
-        'dashboard/product/product_image/form.html',
+        'my_customs/merchant_dashboard/product/product_image/form.html',
         ctx)
 
 
@@ -493,7 +493,7 @@ def product_image_delete(request, product_pk, img_pk):
         return redirect('dashboard:product-image-list', product_pk=product.pk)
     return TemplateResponse(
         request,
-        'dashboard/product/product_image/modal/confirm_delete.html',
+        'my_customs/merchant_dashboard/product/product_image/modal/confirm_delete.html',
         {'product': product, 'image': image})
 
 
@@ -547,7 +547,7 @@ def attribute_list(request):
         'filter_set': attribute_filter,
         'is_empty': not attribute_filter.queryset.exists()}
     return TemplateResponse(
-        request, 'dashboard/product/attribute/list.html', ctx)
+        request, 'my_customs/merchant_dashboard/product/attribute/list.html', ctx)
 
 
 @staff_member_required
@@ -561,7 +561,7 @@ def attribute_details(request, pk):
     ctx = {
         'attribute': attribute, 'product_type': product_type, 'values': values}
     return TemplateResponse(
-        request, 'dashboard/product/attribute/detail.html', ctx)
+        request, 'my_customs/merchant_dashboard/product/attribute/detail.html', ctx)
 
 
 @staff_member_required
@@ -577,7 +577,7 @@ def attribute_create(request):
     ctx = {'attribute': attribute, 'form': form}
     return TemplateResponse(
         request,
-        'dashboard/product/attribute/form.html',
+        'my_customs/merchant_dashboard/product/attribute/form.html',
         ctx)
 
 
@@ -594,7 +594,7 @@ def attribute_edit(request, pk):
     ctx = {'attribute': attribute, 'form': form}
     return TemplateResponse(
         request,
-        'dashboard/product/attribute/form.html',
+        'my_customs/merchant_dashboard/product/attribute/form.html',
         ctx)
 
 
@@ -610,7 +610,7 @@ def attribute_delete(request, pk):
         return redirect('dashboard:attributes')
     return TemplateResponse(
         request,
-        'dashboard/product/attribute/modal/'
+        'my_customs/merchant_dashboard/product/attribute/modal/'
         'attribute_confirm_delete.html',
         {'attribute': attribute})
 
@@ -630,7 +630,7 @@ def attribute_value_create(request, attribute_pk):
     ctx = {'attribute': attribute, 'value': value, 'form': form}
     return TemplateResponse(
         request,
-        'dashboard/product/attribute/values/form.html',
+        'my_customs/merchant_dashboard/product/attribute/values/form.html',
         ctx)
 
 
@@ -649,7 +649,7 @@ def attribute_value_edit(request, attribute_pk, value_pk):
     ctx = {'attribute': attribute, 'value': value, 'form': form}
     return TemplateResponse(
         request,
-        'dashboard/product/attribute/values/form.html',
+        'my_customs/merchant_dashboard/product/attribute/values/form.html',
         ctx)
 
 
@@ -666,7 +666,7 @@ def attribute_value_delete(request, attribute_pk, value_pk):
         return redirect('dashboard:attribute-details', pk=attribute_pk)
     return TemplateResponse(
         request,
-        'dashboard/product/attribute/values/modal/confirm_delete.html',
+        'my_customs/merchant_dashboard/product/attribute/values/modal/confirm_delete.html',
         {'value': value, 'attribute_pk': attribute_pk})
 
 

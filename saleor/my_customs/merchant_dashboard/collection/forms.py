@@ -4,9 +4,9 @@ from django.utils.text import slugify
 from django.utils.translation import pgettext_lazy
 from text_unidecode import unidecode
 
-from ...product.models import Collection, Product
-from ...product.thumbnails import create_collection_background_image_thumbnails
-from ...site.models import SiteSettings
+from ....product.models import Collection, Product
+from ....product.thumbnails import create_collection_background_image_thumbnails
+from ....site.models import SiteSettings
 from ..forms import AjaxSelect2MultipleChoiceField
 from ..seo.fields import SeoDescriptionField, SeoTitleField
 

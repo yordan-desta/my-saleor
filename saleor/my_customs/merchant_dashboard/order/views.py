@@ -12,16 +12,16 @@ from django.utils.translation import npgettext_lazy, pgettext_lazy
 from django.views.decorators.http import require_POST
 from django_prices.templatetags import prices_i18n
 
-from ...core.exceptions import InsufficientStock
-from ...core.utils import get_paginator_items
-from ...core.utils.taxes import get_taxes_for_address
-from ...order import OrderEvents, OrderEventsEmails, OrderStatus
-from ...order.emails import (
+from ....core.exceptions import InsufficientStock
+from ....core.utils import get_paginator_items
+from ....core.utils.taxes import get_taxes_for_address
+from ....order import OrderEvents, OrderEventsEmails, OrderStatus
+from ....order.emails import (
     send_fulfillment_confirmation, send_fulfillment_update,
     send_order_confirmation)
-from ...order.models import Fulfillment, FulfillmentLine, Order
-from ...order.utils import update_order_prices, update_order_status
-from ...shipping.models import ShippingMethod
+from ....order.models import Fulfillment, FulfillmentLine, Order
+from ....order.utils import update_order_prices, update_order_status
+from ....shipping.models import ShippingMethod
 from ..views import staff_member_required
 from .filters import OrderFilter
 from .forms import (
@@ -49,7 +49,7 @@ def order_list(request):
     ctx = {
         'orders': orders, 'filter_set': order_filter,
         'is_empty': not order_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/order/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/order/list.html', ctx)
 
 
 @require_POST
@@ -91,7 +91,7 @@ def create_order_from_draft(request, order_pk):
         return redirect('dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
-    template = 'dashboard/order/modal/create_order.html'
+    template = 'my_customs/merchant_dashboard/order/modal/create_order.html'
     ctx = {'form': form, 'order': order}
     return TemplateResponse(request, template, ctx, status=status)
 
@@ -106,7 +106,7 @@ def remove_draft_order(request, order_pk):
             'Dashboard message', 'Draft order successfully removed')
         messages.success(request, msg)
         return redirect('dashboard:orders')
-    template = 'dashboard/order/modal/remove_order.html'
+    template = 'my_customs/merchant_dashboard/order/modal/remove_order.html'
     ctx = {'order': order}
     return TemplateResponse(request, template, ctx)
 
@@ -126,7 +126,7 @@ def order_details(request, order_pk):
         'notes': order.events.filter(type=OrderEvents.NOTE_ADDED.value),
         'events': order.events.all(),
         'order_fulfillments': order.fulfillments.all()}
-    return TemplateResponse(request, 'dashboard/order/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/order/detail.html', ctx)
 
 
 @staff_member_required
@@ -148,7 +148,7 @@ def order_add_note(request, order_pk):
         status = 400
     ctx = {'order': order, 'form': form}
     ctx.update(csrf(request))
-    template = 'dashboard/order/modal/add_note.html'
+    template = 'my_customs/merchant_dashboard/order/modal/add_note.html'
     return TemplateResponse(request, template, ctx, status=status)
 
 
@@ -178,7 +178,7 @@ def capture_payment(request, order_pk, payment_pk):
         'form': form,
         'order': order,
         'payment': payment}
-    return TemplateResponse(request, 'dashboard/order/modal/capture.html', ctx,
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/order/modal/capture.html', ctx,
                             status=status)
 
 
@@ -209,7 +209,7 @@ def refund_payment(request, order_pk, payment_pk):
         'form': form,
         'order': order,
         'payment': payment}
-    return TemplateResponse(request, 'dashboard/order/modal/refund.html', ctx,
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/order/modal/refund.html', ctx,
                             status=status)
 
 
@@ -230,7 +230,7 @@ def void_payment(request, order_pk, payment_pk):
     status = 400 if form.errors else 200
     ctx = {
         'form': form, 'order': order, 'payment': payment}
-    return TemplateResponse(request, 'dashboard/order/modal/void.html', ctx,
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/order/modal/void.html', ctx,
                             status=status)
 
 
@@ -257,7 +257,7 @@ def orderline_change_quantity(request, order_pk, line_pk):
     elif form.errors:
         status = 400
     ctx = {'order': order, 'object': line, 'form': form}
-    template = 'dashboard/order/modal/change_quantity.html'
+    template = 'my_customs/merchant_dashboard/order/modal/change_quantity.html'
     return TemplateResponse(request, template, ctx, status=status)
 
 
@@ -280,7 +280,7 @@ def orderline_cancel(request, order_pk, line_pk):
         status = 400
     ctx = {'order': order, 'item': line, 'form': form}
     return TemplateResponse(
-        request, 'dashboard/order/modal/cancel_line.html',
+        request, 'my_customs/merchant_dashboard/order/modal/cancel_line.html',
         ctx, status=status)
 
 
@@ -315,7 +315,7 @@ def add_variant_to_order(request, order_pk):
     elif form.errors:
         status = 400
     ctx = {'order': order, 'form': form}
-    template = 'dashboard/order/modal/add_variant_to_order.html'
+    template = 'my_customs/merchant_dashboard/order/modal/add_variant_to_order.html'
     return TemplateResponse(request, template, ctx, status=status)
 
 
@@ -349,7 +349,7 @@ def order_address(request, order_pk, address_type):
         messages.success(request, success_msg)
         return redirect('dashboard:order-details', order_pk=order_pk)
     ctx = {'order': order, 'address_type': address_type, 'form': form}
-    return TemplateResponse(request, 'dashboard/order/address_form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/order/address_form.html', ctx)
 
 
 @staff_member_required
@@ -381,7 +381,7 @@ def order_customer_edit(request, order_pk):
         status = 400
     ctx = {'order': order, 'form': form}
     return TemplateResponse(
-        request, 'dashboard/order/modal/edit_customer.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/edit_customer.html', ctx,
         status=status)
 
 
@@ -417,7 +417,7 @@ def order_shipping_edit(request, order_pk):
         status = 400
     ctx = {'order': order, 'form': form}
     return TemplateResponse(
-        request, 'dashboard/order/modal/edit_shipping.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/edit_shipping.html', ctx,
         status=status)
 
 
@@ -449,7 +449,7 @@ def order_discount_edit(request, order_pk):
         status = 400
     ctx = {'order': order, 'form': form}
     return TemplateResponse(
-        request, 'dashboard/order/modal/edit_discount.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/edit_discount.html', ctx,
         status=status)
 
 
@@ -468,7 +468,7 @@ def order_voucher_edit(request, order_pk):
         status = 400
     ctx = {'order': order, 'form': form}
     return TemplateResponse(
-        request, 'dashboard/order/modal/edit_voucher.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/edit_voucher.html', ctx,
         status=status)
 
 
@@ -496,7 +496,7 @@ def cancel_order(request, order_pk):
         status = 400
     ctx = {'form': form, 'order': order}
     return TemplateResponse(
-        request, 'dashboard/order/modal/cancel_order.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/cancel_order.html', ctx,
         status=status)
 
 
@@ -549,7 +549,7 @@ def mark_order_as_paid(request, order_pk):
         status = 400
     ctx = {'form': form, 'order': order}
     return TemplateResponse(
-        request, 'dashboard/order/modal/mark_as_paid.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/mark_as_paid.html', ctx,
         status=status)
 
 
@@ -633,7 +633,7 @@ def fulfill_order_lines(request, order_pk):
     ctx = {
         'form': form, 'formset': formset, 'order': order,
         'unfulfilled_lines': unfulfilled_lines}
-    template = 'dashboard/order/fulfillment.html'
+    template = 'my_customs/merchant_dashboard/order/fulfillment.html'
     return TemplateResponse(request, template, ctx, status=status)
 
 
@@ -666,7 +666,7 @@ def cancel_fulfillment(request, order_pk, fulfillment_pk):
         status = 400
     ctx = {'form': form, 'order': order, 'fulfillment': fulfillment}
     return TemplateResponse(
-        request, 'dashboard/order/modal/cancel_fulfillment.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/cancel_fulfillment.html', ctx,
         status=status)
 
 
@@ -701,7 +701,7 @@ def change_fulfillment_tracking(request, order_pk, fulfillment_pk):
         status = 400
     ctx = {'form': form, 'order': order, 'fulfillment': fulfillment}
     return TemplateResponse(
-        request, 'dashboard/order/modal/fulfillment_tracking.html', ctx,
+        request, 'my_customs/merchant_dashboard/order/modal/fulfillment_tracking.html', ctx,
         status=status)
 
 

@@ -5,25 +5,25 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import npgettext_lazy, pgettext_lazy
 from django_prices.forms import MoneyField
 
-from ...account.i18n import (
+from ....account.i18n import (
     AddressForm as StorefrontAddressForm, PossiblePhoneNumberFormField)
-from ...account.models import User
-from ...checkout.forms import QuantityField
-from ...core.exceptions import InsufficientStock
-from ...core.utils.taxes import ZERO_TAXED_MONEY
-from ...discount.models import Voucher
-from ...discount.utils import decrease_voucher_usage, increase_voucher_usage
-from ...order import OrderStatus
-from ...order.models import Fulfillment, FulfillmentLine, Order, OrderLine
-from ...order.utils import (
+from ....account.models import User
+from ....checkout.forms import QuantityField
+from ....core.exceptions import InsufficientStock
+from ....core.utils.taxes import ZERO_TAXED_MONEY
+from ....discount.models import Voucher
+from ....discount.utils import decrease_voucher_usage, increase_voucher_usage
+from ....order import OrderStatus
+from ....order.models import Fulfillment, FulfillmentLine, Order, OrderLine
+from ....order.utils import (
     add_variant_to_order, cancel_fulfillment, cancel_order,
     change_order_line_quantity, recalculate_order)
-from ...payment import ChargeStatus, CustomPaymentChoices, PaymentError
-from ...payment.models import Payment
-from ...payment.utils import get_billing_data
-from ...product.models import Product, ProductVariant
-from ...product.utils import allocate_stock, deallocate_stock
-from ...shipping.models import ShippingMethod
+from ....payment import ChargeStatus, CustomPaymentChoices, PaymentError
+from ....payment.models import Payment
+from ....payment.utils import get_billing_data
+from ....product.models import Product, ProductVariant
+from ....product.utils import allocate_stock, deallocate_stock
+from ....shipping.models import ShippingMethod
 from ..forms import AjaxSelect2ChoiceField
 from ..widgets import PhonePrefixWidget
 from .utils import (

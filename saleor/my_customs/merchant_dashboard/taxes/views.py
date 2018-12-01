@@ -11,12 +11,12 @@ from django.utils.translation import pgettext_lazy
 from django_countries.fields import Country
 from django_prices_vatlayer.models import VAT
 
-from ...core import TaxRateType
-from ...core.utils import get_paginator_items
-from ...core.utils.taxes import get_taxes_for_country
-from ...dashboard.taxes.filters import TaxFilter
-from ...dashboard.taxes.forms import TaxesConfigurationForm
-from ...dashboard.views import staff_member_required
+from ....core import TaxRateType
+from ....core.utils import get_paginator_items
+from ....core.utils.taxes import get_taxes_for_country
+from ....dashboard.taxes.filters import TaxFilter
+from ....dashboard.taxes.forms import TaxesConfigurationForm
+from ....dashboard.views import staff_member_required
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def tax_list(request):
     ctx = {
         'taxes': taxes, 'filter_set': tax_filter,
         'is_empty': not tax_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/taxes/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/taxes/list.html', ctx)
 
 
 @staff_member_required
@@ -42,7 +42,7 @@ def tax_details(request, country_code):
         (translations.get(rate_name, rate_name), tax['value'])
         for rate_name, tax in tax_rates.items()]
     ctx = {'tax': tax, 'tax_rates': sorted(tax_rates)}
-    return TemplateResponse(request, 'dashboard/taxes/details.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/taxes/details.html', ctx)
 
 
 @staff_member_required
@@ -57,7 +57,7 @@ def configure_taxes(request):
         messages.success(request, msg)
         return redirect('dashboard:taxes')
     ctx = {'site': site_settings, 'taxes_form': taxes_form}
-    return TemplateResponse(request, 'dashboard/taxes/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/taxes/form.html', ctx)
 
 
 @staff_member_required

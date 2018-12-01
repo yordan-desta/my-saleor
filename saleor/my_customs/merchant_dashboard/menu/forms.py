@@ -2,10 +2,10 @@ from django import forms
 from django.urls import reverse_lazy
 from django.utils.translation import pgettext_lazy
 
-from ...menu.models import Menu, MenuItem
-from ...page.models import Page
-from ...product.models import Category, Collection
-from ...site.models import SiteSettings
+from ....menu.models import Menu, MenuItem
+from ....page.models import Page
+from ....product.models import Category, Collection
+from ....site.models import SiteSettings
 from ..forms import (
     AjaxSelect2CombinedChoiceField, OrderedModelMultipleChoiceField)
 from .utils import update_menu_item_linked_object

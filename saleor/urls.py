@@ -20,10 +20,13 @@ from .order.urls import urlpatterns as order_urls
 from .page.urls import urlpatterns as page_urls
 from .product.urls import urlpatterns as product_urls
 from .search.urls import urlpatterns as search_urls
+from .my_customs.merchant_dashboard.urls import urlpatterns as merchant_dashboard_url
 
 handler404 = 'saleor.core.views.handle_404'
 
 non_translatable_urlpatterns = [
+    url(r'^merchant/dashboard/',
+        include((merchant_dashboard_url, 'merchant_dashboard'), namespace='merchant_dashboard')),
     url(r'^dashboard/',
         include((dashboard_urls, 'dashboard'), namespace='dashboard')),
     url(r'^graphql/', csrf_exempt(GraphQLView.as_view(

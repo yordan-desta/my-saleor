@@ -3,8 +3,8 @@ from django.utils.translation import npgettext, pgettext_lazy
 from django_filters import ChoiceFilter, OrderingFilter
 from django_prices_vatlayer.models import VAT
 
-from ...core.filters import SortedFilterSet
-from ...core.utils import get_country_name_by_code
+from ....core.filters import SortedFilterSet
+from ....core.utils import get_country_name_by_code
 
 SORT_BY_FIELDS = {
     'country_code': pgettext_lazy(

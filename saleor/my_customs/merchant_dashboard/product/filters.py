@@ -4,8 +4,8 @@ from django_filters import (
     CharFilter, ChoiceFilter, ModelMultipleChoiceFilter, OrderingFilter,
     RangeFilter)
 
-from ...core.filters import SortedFilterSet
-from ...product.models import Attribute, Category, Product, ProductType
+from ....core.filters import SortedFilterSet
+from ....product.models import Attribute, Category, Product, ProductType
 from ..widgets import MoneyRangeWidget
 
 PRODUCT_SORT_BY_FIELDS = {

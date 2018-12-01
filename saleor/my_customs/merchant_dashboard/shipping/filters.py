@@ -2,9 +2,9 @@ from django.utils.translation import npgettext, pgettext_lazy
 from django_filters import (
     CharFilter, ChoiceFilter, OrderingFilter, RangeFilter)
 
-from ...core.filters import SortedFilterSet
-from ...core.i18n import COUNTRY_CODE_CHOICES
-from ...shipping.models import ShippingZone
+from ....core.filters import SortedFilterSet
+from ....core.i18n import COUNTRY_CODE_CHOICES
+from ....shipping.models import ShippingZone
 
 SORT_BY_FIELDS = {
     'name': pgettext_lazy('Group list sorting option', 'name')}

@@ -5,10 +5,10 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db.models import Q, Sum
 from django.template.response import TemplateResponse
 
-from ..order.models import Order
-from ..payment import ChargeStatus
-from ..payment.models import Payment
-from ..product.models import Product
+from ...order.models import Order
+from ...payment import ChargeStatus
+from ...payment.models import Payment
+from ...product.models import Product
 
 
 def staff_member_required(f):
@@ -44,12 +44,12 @@ def index(request):
     ctx = {'preauthorized_payments': payments[:paginate_by],
            'orders_to_ship': orders_to_ship[:paginate_by],
            'low_stock': low_stock[:paginate_by]}
-    return TemplateResponse(request, 'dashboard/index.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/index.html', ctx)
 
 
 @staff_member_required
 def styleguide(request):
-    return TemplateResponse(request, 'dashboard/styleguide/index.html', {})
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/styleguide/index.html', {})
 
 
 def get_low_stock_products():

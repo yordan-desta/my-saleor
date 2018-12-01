@@ -5,9 +5,9 @@ from django_filters import (
     CharFilter, ChoiceFilter, DateFromToRangeFilter, ModelMultipleChoiceFilter,
     OrderingFilter, RangeFilter)
 
-from ...core.filters import SortedFilterSet
-from ...discount.models import Sale, Voucher
-from ...product.models import Category
+from ....core.filters import SortedFilterSet
+from ....discount.models import Sale, Voucher
+from ....product.models import Category
 from ..widgets import DateRangeWidget
 
 SORT_BY_FIELDS_SALE = {

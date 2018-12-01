@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.translation import pgettext_lazy
 
-from ...account.models import User
-from ...core.utils import get_paginator_items
+from ....account.models import User
+from ....core.utils import get_paginator_items
 from ..emails import (
     send_promote_customer_to_staff_email, send_set_password_email)
 from ..views import staff_member_required
@@ -27,7 +27,7 @@ def staff_list(request):
     ctx = {
         'staff': staff_members, 'filter_set': staff_filter,
         'is_empty': not staff_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/staff/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/staff/list.html', ctx)
 
 
 @staff_member_required
@@ -44,7 +44,7 @@ def staff_details(request, pk):
         messages.success(request, msg)
         redirect('dashboard:staff-list')
     ctx = {'staff_member': staff_member, 'form': form}
-    return TemplateResponse(request, 'dashboard/staff/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/staff/detail.html', ctx)
 
 
 @staff_member_required
@@ -68,7 +68,7 @@ def staff_create(request):
             send_promote_customer_to_staff_email.delay(staff.pk)
         return redirect('dashboard:staff-list')
     ctx = {'form': form}
-    return TemplateResponse(request, 'dashboard/staff/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/staff/detail.html', ctx)
 
 
 @staff_member_required
@@ -84,4 +84,4 @@ def staff_delete(request, pk):
         return redirect('dashboard:staff-list')
     ctx = {'staff': staff, 'orders': staff.orders.count()}
     return TemplateResponse(
-        request, 'dashboard/staff/modal/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/staff/modal/confirm_delete.html', ctx)

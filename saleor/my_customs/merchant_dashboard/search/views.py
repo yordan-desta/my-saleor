@@ -44,4 +44,4 @@ def search(request):
         'orders': orders,
         'users': users,
         'query_string': '?q=%s' % query}
-    return render(request, 'dashboard/search/results.html', ctx)
+    return render(request, 'my_customs/merchant_dashboard/search/results.html', ctx)

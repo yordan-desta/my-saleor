@@ -1,8 +1,8 @@
 from django.utils.translation import npgettext, pgettext_lazy
 from django_filters import ModelMultipleChoiceFilter, OrderingFilter
 
-from ...account.models import User
-from ...core.permissions import get_permissions
+from ....account.models import User
+from ....core.permissions import get_permissions
 from ..customer.filters import UserFilter
 from ..forms import PermissionMultipleChoiceField
 

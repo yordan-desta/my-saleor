@@ -1,11 +1,11 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
-from ...account.i18n import COUNTRY_CHOICES
-from ...core.weight import WeightField
-from ...shipping import ShippingMethodType
-from ...shipping.models import ShippingMethod, ShippingZone
-from ...site.models import SiteSettings
+from ....account.i18n import COUNTRY_CHOICES
+from ....core.weight import WeightField
+from ....shipping import ShippingMethodType
+from ....shipping.models import ShippingMethod, ShippingZone
+from ....site.models import SiteSettings
 
 
 def currently_used_countries(zone_pk=None):

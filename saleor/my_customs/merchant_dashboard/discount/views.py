@@ -10,9 +10,9 @@ from django.template.response import TemplateResponse
 from django.utils.translation import pgettext_lazy
 
 from . import forms
-from ...core.utils import get_paginator_items
-from ...discount import VoucherType
-from ...discount.models import Sale, Voucher
+from ....core.utils import get_paginator_items
+from ....discount import VoucherType
+from ....discount.models import Sale, Voucher
 from ..views import staff_member_required
 from .filters import SaleFilter, VoucherFilter
 
@@ -43,7 +43,7 @@ def sale_list(request):
     ctx = {
         'sales': sales, 'filter_set': sale_filter,
         'is_empty': not sale_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/discount/sale/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/discount/sale/list.html', ctx)
 
 
 @staff_member_required
@@ -57,7 +57,7 @@ def sale_add(request):
         messages.success(request, msg)
         return redirect('dashboard:sale-update', pk=sale.pk)
     ctx = {'sale': sale, 'form': form}
-    return TemplateResponse(request, 'dashboard/discount/sale/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/discount/sale/form.html', ctx)
 
 
 @staff_member_required
@@ -71,7 +71,7 @@ def sale_edit(request, pk):
         messages.success(request, msg)
         return redirect('dashboard:sale-update', pk=sale.pk)
     ctx = {'sale': sale, 'form': form}
-    return TemplateResponse(request, 'dashboard/discount/sale/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/discount/sale/form.html', ctx)
 
 
 @staff_member_required
@@ -86,7 +86,7 @@ def sale_delete(request, pk):
         return redirect('dashboard:sale-list')
     ctx = {'sale': instance}
     return TemplateResponse(
-        request, 'dashboard/discount/sale/modal/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/discount/sale/modal/confirm_delete.html', ctx)
 
 
 @staff_member_required
@@ -102,7 +102,7 @@ def voucher_list(request):
         'vouchers': vouchers, 'filter_set': voucher_filter,
         'is_empty': not voucher_filter.queryset.exists()}
     return TemplateResponse(
-        request, 'dashboard/discount/voucher/list.html', ctx)
+        request, 'my_customs/merchant_dashboard/discount/voucher/list.html', ctx)
 
 
 @staff_member_required
@@ -128,7 +128,7 @@ def voucher_add(request):
         'voucher': voucher, 'default_currency': settings.DEFAULT_CURRENCY,
         'form': voucher_form, 'type_base_forms': type_base_forms}
     return TemplateResponse(
-        request, 'dashboard/discount/voucher/form.html', ctx)
+        request, 'my_customs/merchant_dashboard/discount/voucher/form.html', ctx)
 
 
 @staff_member_required
@@ -154,7 +154,7 @@ def voucher_edit(request, pk):
         'voucher': voucher, 'default_currency': settings.DEFAULT_CURRENCY,
         'form': voucher_form, 'type_base_forms': type_base_forms}
     return TemplateResponse(
-        request, 'dashboard/discount/voucher/form.html', ctx)
+        request, 'my_customs/merchant_dashboard/discount/voucher/form.html', ctx)
 
 
 @staff_member_required
@@ -169,7 +169,7 @@ def voucher_delete(request, pk):
         return redirect('dashboard:voucher-list')
     ctx = {'voucher': instance}
     return TemplateResponse(
-        request, 'dashboard/discount/voucher/modal/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/discount/voucher/modal/confirm_delete.html', ctx)
 
 
 @staff_member_required

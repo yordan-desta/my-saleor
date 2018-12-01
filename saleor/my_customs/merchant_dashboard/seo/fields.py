@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
-from ...seo.models import SeoModel
+from ....seo.models import SeoModel
 from ..widgets import CharsLeftWidget
 
 SEO_FIELD_HELP_TEXT = pgettext_lazy(

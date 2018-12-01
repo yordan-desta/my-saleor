@@ -239,7 +239,8 @@ INSTALLED_APPS = [
     'impersonate',
     'phonenumber_field',
     'captcha',
-    'saleor.my_customs.merchant']
+    'saleor.my_customs.merchant',
+    'saleor.my_customs.merchant_dashboard']
 
 if DEBUG:
     MIDDLEWARE.append(

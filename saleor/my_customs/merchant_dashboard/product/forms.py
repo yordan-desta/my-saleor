@@ -11,15 +11,15 @@ from django_prices_vatlayer.utils import get_tax_rate_types
 from mptt.forms import TreeNodeChoiceField
 
 from . import ProductBulkAction
-from ...core import TaxRateType
-from ...core.utils.taxes import DEFAULT_TAX_RATE_NAME, include_taxes_in_prices
-from ...core.weight import WeightField
-from ...product.models import (
+from ....core import TaxRateType
+from ....core.utils.taxes import DEFAULT_TAX_RATE_NAME, include_taxes_in_prices
+from ....core.weight import WeightField
+from ....product.models import (
     Attribute, AttributeValue, Category, Collection, Product, ProductImage,
     ProductType, ProductVariant, VariantImage)
-from ...product.tasks import update_variants_names
-from ...product.thumbnails import create_product_thumbnails
-from ...product.utils.attributes import get_name_from_attributes
+from ....product.tasks import update_variants_names
+from ....product.thumbnails import create_product_thumbnails
+from ....product.utils.attributes import get_name_from_attributes
 from ..forms import ModelChoiceOrCreationField, OrderedModelMultipleChoiceField
 from ..seo.fields import SeoDescriptionField, SeoTitleField
 from ..seo.utils import prepare_seo_description

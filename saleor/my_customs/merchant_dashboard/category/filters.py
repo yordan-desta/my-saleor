@@ -1,8 +1,8 @@
 from django.utils.translation import npgettext, pgettext_lazy
 from django_filters import CharFilter, OrderingFilter
 
-from ...core.filters import SortedFilterSet
-from ...product.models import Category
+from ....core.filters import SortedFilterSet
+from ....product.models import Category
 
 SORT_BY_FIELDS = {
     'name': pgettext_lazy('Category list sorting option', 'name'),

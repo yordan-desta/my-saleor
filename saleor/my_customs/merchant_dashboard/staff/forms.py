@@ -1,8 +1,8 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
-from ...account.models import User
-from ...core.permissions import get_permissions
+from ....account.models import User
+from ....core.permissions import get_permissions
 from ..forms import PermissionMultipleChoiceField
 
 

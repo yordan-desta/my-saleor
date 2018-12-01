@@ -7,8 +7,8 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from ...core.utils import get_paginator_items
-from ...product.models import Category
+from ....core.utils import get_paginator_items
+from ....product.models import Category
 from ..menu.utils import get_menus_that_needs_update, update_menus
 from ..views import staff_member_required
 from .filters import CategoryFilter
@@ -26,7 +26,7 @@ def category_list(request):
     ctx = {
         'categories': categories, 'filter_set': category_filter,
         'is_empty': not category_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/category/list.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/category/list.html', ctx)
 
 
 @staff_member_required
@@ -49,7 +49,7 @@ def category_create(request, root_pk=None):
             return redirect('dashboard:category-details', pk=root_pk)
         return redirect('dashboard:category-list')
     ctx = {'category': category, 'form': form, 'path': path}
-    return TemplateResponse(request, 'dashboard/category/form.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/category/form.html', ctx)
 
 
 @staff_member_required
@@ -76,7 +76,7 @@ def category_edit(request, root_pk=None):
     elif form.errors:
         status = 400
     ctx = {'category': category, 'form': form, 'status': status, 'path': path}
-    template = 'dashboard/category/form.html'
+    template = 'my_customs/merchant_dashboard/category/form.html'
     return TemplateResponse(request, template, ctx, status=status)
 
 
@@ -93,7 +93,7 @@ def category_details(request, pk):
     ctx = {'categories': categories, 'path': path, 'root': root,
            'filter_set': category_filter,
            'is_empty': not category_filter.queryset.exists()}
-    return TemplateResponse(request, 'dashboard/category/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/category/detail.html', ctx)
 
 
 @staff_member_required
@@ -128,4 +128,4 @@ def category_delete(request, pk):
            'descendants': list(category.get_descendants()),
            'products_count': len(category.products.all())}
     return TemplateResponse(
-        request, 'dashboard/category/modal/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/category/modal/confirm_delete.html', ctx)

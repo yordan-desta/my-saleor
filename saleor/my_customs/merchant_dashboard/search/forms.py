@@ -1,5 +1,5 @@
-from ...search.backends import picker
-from ...search.forms import SearchForm
+from ....search.backends import picker
+from ....search.forms import SearchForm
 
 
 class DashboardSearchForm(SearchForm):

@@ -2,9 +2,9 @@ from django.db.models import Q
 from django.utils.formats import localize
 from django.utils.translation import pgettext
 
-from ...menu.models import Menu, MenuItem
-from ...page.models import Page
-from ...product.models import Category, Collection
+from ....menu.models import Menu, MenuItem
+from ....page.models import Page
+from ....product.models import Category, Collection
 
 
 def update_menu_item_linked_object(menu_item, linked_object):

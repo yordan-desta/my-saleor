@@ -8,8 +8,8 @@ from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
-from ...core.utils import get_paginator_items
-from ...product.models import Collection
+from ....core.utils import get_paginator_items
+from ....product.models import Collection
 from ..menu.utils import get_menus_that_needs_update, update_menus
 from ..views import staff_member_required
 from .filters import CollectionFilter
@@ -38,7 +38,7 @@ def collection_list(request):
         'is_empty': not collection_filter.queryset.exists(),
         'assign_homepage_col_form': assign_homepage_col_form}
     return TemplateResponse(
-        request, 'dashboard/collection/list.html', ctx)
+        request, 'my_customs/merchant_dashboard/collection/list.html', ctx)
 
 
 @staff_member_required
@@ -53,7 +53,7 @@ def collection_create(request):
         messages.success(request, msg)
         return redirect('dashboard:collection-list')
     ctx = {'collection': collection, 'form': form}
-    return TemplateResponse(request, 'dashboard/collection/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/collection/detail.html', ctx)
 
 
 @staff_member_required
@@ -73,7 +73,7 @@ def collection_update(request, pk=None):
     ctx = {
         'collection': collection, 'form': form,
         'is_unpublish_restricted': is_unpublish_restricted}
-    return TemplateResponse(request, 'dashboard/collection/detail.html', ctx)
+    return TemplateResponse(request, 'my_customs/merchant_dashboard/collection/detail.html', ctx)
 
 
 @staff_member_required
@@ -93,7 +93,7 @@ def collection_delete(request, pk=None):
         return redirect('dashboard:collection-list')
     ctx = {'collection': collection}
     return TemplateResponse(
-        request, 'dashboard/collection/confirm_delete.html', ctx)
+        request, 'my_customs/merchant_dashboard/collection/confirm_delete.html', ctx)
 
 
 @require_POST
