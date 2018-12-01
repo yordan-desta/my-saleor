@@ -1,0 +1,145 @@
+{% extends "dashboard/base.html" %}
+{% load materializecss %}
+{% load i18n %}
+{% load mptt_tags %}
+{% load static %}
+
+{% block title %}
+  {% if merchant.pk %}
+    {% trans "Edit merchant" context "Merchant form page title" %} {{ merchant }}
+  {% else %}
+    {% trans "Add new merchant" context "Merchant detail page title" %}
+  {% endif %}
+  - {% trans "Merchants" context "Dashboard merchants list" %} - {{ block.super }}
+{% endblock %}
+
+{% block body_class %}body-merchants{% endblock %}
+
+{% block menu_merchants_class %}active{% endblock %}
+
+{% block page_title %}
+  {% if merchant.pk %}
+    {{ merchant }}
+  {% else %}
+    {% trans "Add new merchant" context "Merchant form page title" %}
+  {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <ul class="breadcrumbs breadcrumbs--history">
+    <li>
+      <a href="{% url 'dashboard:merchants' %}" class="breadcrumbs--ellipsed-item">
+        {% trans "Merchants" context "Dashboard merchants list" %}
+      </a>
+    </li>
+    <li class="back-mobile">
+      <a href="{% url 'dashboard:merchants' %}" class="breadcrumbs--ellipsed-item">
+        <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px"/>
+      </a>
+    </li>
+    {#    {% if path %}#}
+    {#      <li class="back-mobile">#}
+    {#        <a href="{% url 'dashboard:merchants' %}">#}
+    {#          <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px"/>#}
+    {#        </a>#}
+    {#      </li>#}
+    {#      {% for node in path %}#}
+    {#        {% if forloop.last %}#}
+    {#          {% if node.pk %}#}
+    {#            <li>#}
+    {#              <a href="{% url 'dashboard:merchant-details' pk=node.pk %}" class="breadcrumbs--ellipsed-item">{{ node }}</a>#}
+    {#            </li>#}
+    {#            {% if merchant.pk %}#}
+    {#              <li>#}
+    {#                <span class="breadcrumbs--ellipsed-item">#}
+    {#                  {% trans "Edit" context "Merchant form page title" %}#}
+    {#                </span>#}
+    {#              </li>#}
+    {#            {% else %}#}
+    {#              <li>#}
+    {#                <span class="breadcrumbs--ellipsed-item">#}
+    {#                  {% trans "Add new merchant" context "Merchant detail breadcrumbs" %}#}
+    {#                </span>#}
+    {#              </li>#}
+    {#            {% endif %}#}
+    {#          {% endif %}#}
+    {#        {% else %}#}
+    {#          <li class="hide-on-med-and-down">#}
+    {#            <a href="{% url 'dashboard:merchant-details' pk=node.pk %}" title="{{ node.name }}" class="breadcrumbs--ellipsed-item">#}
+    {#              {{ node.name }}#}
+    {#            </a>#}
+    {#          </li>#}
+    {#        {% endif %}#}
+    {#      {% endfor %}#}
+    {#    {% else %}#}
+    {#      <li>#}
+    {#        <span class="breadcrumbs--ellipsed-item">#}
+    {#          {% trans "Add new merchant" context "Merchant detail breadcrumbs" %}#}
+    {#        </span>#}
+    {#      </li>#}
+    {#    {% endif %}#}
+  </ul>
+{% endblock %}
+
+{% block menu_catalogue_class %} active{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col m12 l9">
+      <div class="card">
+        <form method="post" id="form-merchant" enctype="multipart/form-data" novalidate>
+          <div class="card-content">
+            {% csrf_token %}
+            <div class="row">
+              {{ form.user|materializecss }}
+            </div>
+
+            <div class="row">
+              {{ form.company_name|materializecss }}
+            </div>
+            <div class="row">
+              <div class="col s12">
+                <div class="row">
+                  {{ form.company_desc|materializecss }}
+                </div>
+              </div>
+
+              <div class="col s12">
+                <div class="row">
+                  {{ form.status|materializecss }}
+                </div>
+              </div>
+              <div class="col s12">
+                <div class="row">
+                  {{ form.company_phone|materializecss }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-action right-align">
+            {% if path %}
+              <a href="{% url 'dashboard:merchant-details' pk=path.last.pk %}" class="btn btn-flat">
+                {% trans "Cancel" context "Dashboard cancel action" %}
+              </a>
+            {% else %}
+              <a href="{% url 'dashboard:merchants' %}" class="btn btn-flat">
+                {% trans "Cancel" context "Dashboard cancel action" %}
+              </a>
+            {% endif %}
+            {% if merchant.pk %}
+              <button type="submit" class="btn waves-effect">
+                {% trans "Update" context "Dashboard update action" %}
+              </button>
+            {% else %}
+              <button type="submit" class="btn waves-effect">
+                {% trans "Create" context "Dashboard create action" %}
+              </button>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col m12 l3 help-box"></div>
+  </div>
+{% endblock %}
+

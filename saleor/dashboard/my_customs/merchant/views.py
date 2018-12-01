@@ -1,11 +1,18 @@
 from django.conf import settings
 from django.contrib.auth.decorators import permission_required
+from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
+from django.utils.translation import pgettext_lazy
+from django.views.decorators.http import require_POST
 
+from saleor.dashboard.my_customs.merchant.forms import MerchantForm
 from ....core.utils import get_paginator_items
 from ....my_customs.merchant.models import Merchant
 from ...views import staff_member_required
 from .filters import MerchantFilter
+from django.contrib import messages
+
+from . import forms
 
 
 @staff_member_required
@@ -21,8 +28,23 @@ def merchant_list(request):
         'is_empty': not merchant_filter.queryset.exists()}
     return TemplateResponse(request, 'dashboard/my_customs/merchant/list.html', ctx)
 
+
+@staff_member_required
+@permission_required('account.manage_merchants')
 def merchant_create(request):
-    return None
+    merchant = Merchant()
+    form = MerchantForm(
+        request.POST or None)
+    if form.is_valid():
+        merchant = form.save()
+        messages.success(
+            request,
+            pgettext_lazy(
+                'Dashboard message', 'Added merchant %s') % merchant)
+        return redirect('dashboard:merchants')
+    ctx = {'merchant': merchant, 'form': form}
+    return TemplateResponse(request, 'dashboard/my_customs/merchant/form.html', ctx)
+
 
 
 def create_merchant_from_draft(merchant_pk, request):
