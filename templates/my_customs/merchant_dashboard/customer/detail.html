@@ -14,19 +14,19 @@
 {% block menu_customers_class %}active{% endblock %}
 
 {% block header_menu %}
-  {% url "dashboard:customers" as url %}
+  {% url "merchant_dashboard:customers" as url %}
   {% include "dashboard/includes/_back_link.html" with url=url %}
 {% endblock %}
 
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url "dashboard:customers" %}">
+      <a href="{% url "merchant_dashboard:customers" %}">
         {% trans "Customers" context "Dashboard customers list" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url "dashboard:customers" %}">
+      <a href="{% url "merchant_dashboard:customers" %}">
         <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
@@ -70,10 +70,10 @@
           {% endif %}
         </div>
         <div class="card-action">
-          <a href="{% url 'dashboard:customer-update' customer.pk %}" class="btn-flat waves-effect">
+          <a href="{% url 'merchant_dashboard:customer-update' customer.pk %}" class="btn-flat waves-effect">
             {% trans "Edit customer" context "Customer action" %}
           </a>
-          <a href="#base-modal" data-href="{% url 'dashboard:customer-delete' pk=customer.pk %}" class="modal-trigger-custom btn-flat waves-effect">
+          <a href="#base-modal" data-href="{% url 'merchant_dashboard:customer-delete' pk=customer.pk %}" class="modal-trigger-custom btn-flat waves-effect">
             {% trans "Remove customer" context "Customer action" %}
           </a>
           {% if perms.account.impersonate_users %}
@@ -111,7 +111,7 @@
               </thead>
               <tbody>
                 {% for order in customer_orders %}
-                  <tr data-action-go="{% if perms.order.manage_orders %}{% url 'dashboard:order-details' order_pk=order.pk %}{% endif %}">
+                  <tr data-action-go="{% if perms.order.manage_orders %}{% url 'merchant_dashboard:order-details' order_pk=order.pk %}{% endif %}">
                     <td>
                       {{ order }}
                     </td>
@@ -159,7 +159,7 @@
           {% endif %}
         </div>
         <div class="card-action">
-          <a data-href="{% url "dashboard:customer-add-note" customer_pk=customer.pk %}" class="modal-trigger-custom btn-flat waves-effect" href="#base-modal">
+          <a data-href="{% url "merchant_dashboard:customer-add-note" customer_pk=customer.pk %}" class="modal-trigger-custom btn-flat waves-effect" href="#base-modal">
             {% trans "Add note" context "Customer notes card action" %}
           </a>
         </div>

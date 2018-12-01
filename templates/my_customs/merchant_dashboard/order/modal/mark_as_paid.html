@@ -5,7 +5,7 @@
 {% load price from taxed_prices %}
 
 {% block action_url %}
-{% url 'dashboard:order-mark-as-paid' order_pk=order.pk %}
+{% url 'merchant_dashboard:order-mark-as-paid' order_pk=order.pk %}
 {% endblock %}
 
 {% block title %}

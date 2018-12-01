@@ -36,7 +36,7 @@
               </thead>
               <tbody>
                 {% for tax in taxes %}
-                  <tr data-action-go="{% url 'dashboard:tax-details' country_code=tax.country_code %}">
+                  <tr data-action-go="{% url 'merchant_dashboard:tax-details' country_code=tax.country_code %}">
                     <td>
                       {{ tax.country_code }}
                     </td>
@@ -118,10 +118,10 @@
           </div>
         </div>
         <div class="card-action">
-          <a class="btn-flat waves-effect" href="{% url 'dashboard:configure-taxes' %}">
+          <a class="btn-flat waves-effect" href="{% url 'merchant_dashboard:configure-taxes' %}">
             {% trans "Configure taxes" context "Site settings configure taxes action" %}
           </a>
-          <a class="btn-flat waves-effect load-action" href="{% url 'dashboard:fetch-tax-rates' %}">
+          <a class="btn-flat waves-effect load-action" href="{% url 'merchant_dashboard:fetch-tax-rates' %}">
             {% trans "Fetch tax rates" context "Site settings fetch tax rates action" %}
           </a>
         </div>

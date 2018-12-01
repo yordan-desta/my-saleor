@@ -4,7 +4,7 @@
 {% load materializecss %}
 
 {% block action_url %}
-{% url 'dashboard:create-order-from-draft' order_pk=order.pk %}
+{% url 'merchant_dashboard:create-order-from-draft' order_pk=order.pk %}
 {% endblock %}
 
 {% block title %}

@@ -14,7 +14,7 @@
 
 {% block header_extra %}
   <div class="btn-fab-fixed">
-    <form method="POST" action="{% url "dashboard:order-create" %}">
+    <form method="POST" action="{% url "merchant_dashboard:order-create" %}">
     {% csrf_token %}
       <label class="btn-fab-default waves-effect waves-light svg-submit-btn" title="{% trans "Add order" context "Order list add button text" %}">
         <input type="submit" />
@@ -58,7 +58,7 @@
               </thead>
               <tbody>
                 {% for order in orders %}
-                  <tr data-action-go="{% url 'dashboard:order-details' order_pk=order.pk %}">
+                  <tr data-action-go="{% url 'merchant_dashboard:order-details' order_pk=order.pk %}">
                     <td>
                       #{{ order.id }}
                     </td>

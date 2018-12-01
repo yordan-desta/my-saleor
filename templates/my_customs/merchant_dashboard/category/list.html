@@ -19,7 +19,7 @@
 
 {% block header_extra %}
   <div class="btn-fab-fixed">
-    <a href="{% url 'dashboard:category-add' %}" class="btn-fab-default waves-effect waves-light" title="{% trans 'Add category' context 'Category list add button text' %}">
+    <a href="{% url 'merchant_dashboard:category-add' %}" class="btn-fab-default waves-effect waves-light" title="{% trans 'Add category' context 'Category list add button text' %}">
       <svg data-src="{% static 'dashboard/images/add.svg' %}"/>
     </a>
   </div>
@@ -55,7 +55,7 @@
               </thead>
               <tbody>
                 {% for node in categories %}
-                  <tr data-action-go="{% url 'dashboard:category-details' pk=node.pk %}">
+                  <tr data-action-go="{% url 'merchant_dashboard:category-details' pk=node.pk %}">
                     <td>
                       {{ node.name }}
                     </td>

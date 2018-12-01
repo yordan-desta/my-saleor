@@ -26,7 +26,7 @@
         <ul class="collection list card">
           {% for product in products %}
             <li class="collection-item avatar list-item">
-              <a href="{% url 'dashboard:product-details' pk=product.pk %}">
+              <a href="{% url 'merchant_dashboard:product-details' pk=product.pk %}">
                 <img src="{% get_thumbnail product.get_first_image size=60 method="thumbnail" %}"
                      srcset="{% get_thumbnail product.get_first_image size=60 method="thumbnail" %} 1x, {% get_thumbnail product.get_first_image size=120 method="thumbnail" %} 2x"
                      class="circle" alt="{{ product.name }}">
@@ -48,7 +48,7 @@
         <ul class="collection list card">
           {% for order in orders %}
             <li class="collection-item avatar list-item">
-              <a href="{% url 'dashboard:order-details' order_pk=order.pk %}">
+              <a href="{% url 'merchant_dashboard:order-details' order_pk=order.pk %}">
                 <i class="small material-icons circle">payment</i>
                 <span class="list-item-name">
                   {% blocktrans trimmed with order_number=order.pk context "Dashboard order" %}
@@ -77,7 +77,7 @@
         <ul class="collection list card">
           {% for user in users %}
             <li class="collection-item avatar list-item">
-              <a href="{% url 'dashboard:customer-details' pk=user.pk %}">
+              <a href="{% url 'merchant_dashboard:customer-details' pk=user.pk %}">
                 <i class="small material-icons circle">perm_identity</i>
                 <span class="list-item-name">
                   {% blocktrans trimmed with full_name=user.get_full_name context "Dashboard user" %}

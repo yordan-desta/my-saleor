@@ -43,7 +43,7 @@
                 </a>
               </li>
               <li>
-                <a href="{% url "dashboard:styleguide" %}" target="_blank" class="waves-effect">
+                <a href="{% url "merchant_dashboard:styleguide" %}" target="_blank" class="waves-effect">
                   {% trans "Style guide" context "Dashboard top navigation action" %}
                 </a>
               </li>
@@ -75,7 +75,7 @@
             </li>
             <li class="search">
               {% if SEARCH_IS_ENABLED %}
-                <form method="get" action="{% url "dashboard:search" %}">
+                <form method="get" action="{% url "merchant_dashboard:search" %}">
                   <a class="hide-on-med-and-up" id="btn-search-close"></a>
                   <div class="input-field d-inline">
                     <input id="search" type="search" placeholder="{% trans "Search" context "Dashboard search" %}" name="q" required value="{% if query %}{{ query }}{% endif %}">
@@ -83,7 +83,7 @@
                       <svg data-src="{% static "dashboard/images/search.svg" %}" width="24" height="24" fill="#fff" />
                     </label>
                   </div>
-                  <a href="{% url "dashboard:search" %}" class="hide-on-med-and-up" id="btn-search-submit">
+                  <a href="{% url "merchant_dashboard:search" %}" class="hide-on-med-and-up" id="btn-search-submit">
                     <svg data-src="{% static "dashboard/images/search.svg" %}" width="24" height="24" fill="#fff" />
                   </a>
                 </form>

@@ -16,24 +16,24 @@
 {% block menu_orders_class %}active{% endblock %}
 
 {% block header_menu %}
-  {% url "dashboard:orders" as url %}
+  {% url "merchant_dashboard:orders" as url %}
   {% include "my_customs/merchant_dashboard/includes/_back_link.html" with url=url %}
 {% endblock %}
 
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url "dashboard:orders" %}">
+      <a href="{% url "merchant_dashboard:orders" %}">
         {% trans "Orders" context "Dashboard orders list" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url "dashboard:orders" %}">
+      <a href="{% url "merchant_dashboard:orders" %}">
         <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
     <li>
-      <a href="{% url 'dashboard:order-details' order_pk=order.pk %}" class="breadcrumbs--ellipsed-item">
+      <a href="{% url 'merchant_dashboard:order-details' order_pk=order.pk %}" class="breadcrumbs--ellipsed-item">
         {{ order }}
       </a>
     </li>
@@ -76,7 +76,7 @@
                 <tr>
                   <td>
                     {% if line.variant %}
-                      <a href="{% url 'dashboard:variant-details' product_pk=line.variant.product.pk variant_pk=line.variant.pk %}">{{ line.product_name }}</a>
+                      <a href="{% url 'merchant_dashboard:variant-details' product_pk=line.variant.product.pk variant_pk=line.variant.pk %}">{{ line.product_name }}</a>
                     {% else %}
                       {{ line.product_name }}
                     {% endif %}
@@ -129,7 +129,7 @@
           {% endif %}
         </div>
         <div class="data-table-action right-align">
-          <a href="{% url 'dashboard:order-details' order.pk %}" class="btn-flat waves-effect">
+          <a href="{% url 'merchant_dashboard:order-details' order.pk %}" class="btn-flat waves-effect">
             {% trans "Cancel" context "Dashboard cancel action" %}
           </a>
           <button type="submit" class="btn waves-effect">

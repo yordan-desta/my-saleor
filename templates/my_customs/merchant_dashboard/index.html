@@ -37,7 +37,7 @@
               </thead>
               <tbody>
                 {% for payment in preauthorized_payments %}
-                  <tr data-action-go="{% url "dashboard:order-details" order_pk=payment.order.pk %}">
+                  <tr data-action-go="{% url "merchant_dashboard:order-details" order_pk=payment.order.pk %}">
                     <td>
                       {{ payment.order }}
                     </td>
@@ -149,7 +149,7 @@
               </thead>
               <tbody>
                 {% for product in low_stock %}
-                  <tr data-action-go="{% url "dashboard:product-details" pk=product.pk %}">
+                  <tr data-action-go="{% url "merchant_dashboard:product-details" pk=product.pk %}">
                     <td>
                       {{ product }}
                     </td>

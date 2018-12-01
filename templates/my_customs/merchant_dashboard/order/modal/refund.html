@@ -7,7 +7,7 @@
 
 
 {% block action_url %}
-{% url 'dashboard:refund-payment' order_pk=order.pk payment_pk=payment.pk %}
+{% url 'merchant_dashboard:refund-payment' order_pk=order.pk payment_pk=payment.pk %}
 {% endblock %}
 
 {% block title %}

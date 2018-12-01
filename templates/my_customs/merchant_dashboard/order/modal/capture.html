@@ -6,7 +6,7 @@
 {% load price from taxed_prices %}
 
 {% block action_url %}
-{% url 'dashboard:capture-payment' order_pk=order.pk payment_pk=payment.pk %}
+{% url 'merchant_dashboard:capture-payment' order_pk=order.pk payment_pk=payment.pk %}
 {% endblock %}
 
 {% block title %}

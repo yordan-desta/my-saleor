@@ -22,7 +22,7 @@
 
 {% block header_extra %}
   <div class="btn-fab-fixed">
-    <a href="{% url 'dashboard:collection-add' %}" class="btn-fab-default waves-effect waves-light" title="{% trans "Add collection" context 'Collections list add button text' %}">
+    <a href="{% url 'merchant_dashboard:collection-add' %}" class="btn-fab-default waves-effect waves-light" title="{% trans "Add collection" context 'Collections list add button text' %}">
       <svg data-src="{% static 'dashboard/images/add.svg' %}"/>
     </a>
   </div>
@@ -49,7 +49,7 @@
               </thead>
               {% for node in collections %}
                 <tbody>
-                  <tr data-action-go="{% url 'dashboard:collection-update' node.pk %}">
+                  <tr data-action-go="{% url 'merchant_dashboard:collection-update' node.pk %}">
                     <td>
                       {{ node.name }}
                     </td>

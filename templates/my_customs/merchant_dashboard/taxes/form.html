@@ -19,7 +19,7 @@
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url 'dashboard:taxes' %}" class="breadcrumbs--ellipsed-item">
+      <a href="{% url 'merchant_dashboard:taxes' %}" class="breadcrumbs--ellipsed-item">
         {% trans "Taxes" context "Dashboard taxes list" %}
       </a>
     </li>
@@ -96,7 +96,7 @@
             </div>
           </div>
           <div class="card-action right-align">
-            <a class="btn-flat waves-effect" href="{% url 'dashboard:taxes' %}">
+            <a class="btn-flat waves-effect" href="{% url 'merchant_dashboard:taxes' %}">
               {% trans "Cancel" context "Dashboard cancel action" %}
             </a>
             <button type="submit" class="btn waves-effect">

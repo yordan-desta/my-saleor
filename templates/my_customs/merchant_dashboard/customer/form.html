@@ -17,19 +17,19 @@
 {% block menu_customers_class %}active{% endblock %}
 
 {% block header_menu %}
-  {% url "dashboard:customers" as url %}
+  {% url "merchant_dashboard:customers" as url %}
   {% include "dashboard/includes/_back-link.html" with url=url %}
 {% endblock %}
 
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url "dashboard:customers" %}">
+      <a href="{% url "merchant_dashboard:customers" %}">
         {% trans "Customers" context "Dashboard customers list" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url "dashboard:customers" %}">
+      <a href="{% url "merchant_dashboard:customers" %}">
         <svg data-src="{% static "dashboard/images/arrow_left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
@@ -55,14 +55,14 @@
           </div>
           <div class="card-action right-align">
             {% if customer.pk %}
-              <a href="{% url 'dashboard:customer-details' pk=customer.pk %}" class="btn-flat waves-effect">
+              <a href="{% url 'merchant_dashboard:customer-details' pk=customer.pk %}" class="btn-flat waves-effect">
                 {% trans "Cancel" context "Dashboard cancel action" %}
               </a>
               <button type="submit" class="btn waves-effect">
                 {% trans 'Update' context 'Dashboard update action' %}
               </button>
             {% else %}
-              <a href="{% url 'dashboard:customers' %}" class="btn-flat waves-effect">
+              <a href="{% url 'merchant_dashboard:customers' %}" class="btn-flat waves-effect">
                 {% trans "Cancel" context "Dashboard cancel action" %}
               </a>
               <button type="submit" class="btn waves-effect">

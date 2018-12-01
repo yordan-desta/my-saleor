@@ -25,7 +25,7 @@
 
 {% block header_extra %}
   <div class="btn-fab-fixed">
-    <a href="{% url 'dashboard:voucher-add' %}" class="btn-fab-default waves-effect waves-light" title="{% trans "Add voucher" context "Voucher list add button text" %}">
+    <a href="{% url 'merchant_dashboard:voucher-add' %}" class="btn-fab-default waves-effect waves-light" title="{% trans "Add voucher" context "Voucher list add button text" %}">
       <svg data-src="{% static "dashboard/images/add.svg" %}" />
     </a>
   </div>
@@ -61,7 +61,7 @@
               </thead>
               {% for voucher in vouchers %}
                 <tbody>
-                  <tr data-action-go="{% url 'dashboard:voucher-update' pk=voucher.pk %}">
+                  <tr data-action-go="{% url 'merchant_dashboard:voucher-update' pk=voucher.pk %}">
                     <td>
                       {{ voucher }}
                     </td>

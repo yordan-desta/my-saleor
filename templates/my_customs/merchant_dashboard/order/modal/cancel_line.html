@@ -5,7 +5,7 @@
 {% load price from taxed_prices %}
 
 {% block action_url %}
-{% url 'dashboard:orderline-cancel' order_pk=order.pk line_pk=item.pk %}
+{% url 'merchant_dashboard:orderline-cancel' order_pk=order.pk line_pk=item.pk %}
 {% endblock %}
 
 {% block title %}

@@ -19,7 +19,7 @@
 {% block menu_shipping_class %}active{% endblock %}
 
 {% block header_menu %}
-  {% url "dashboard:shipping-zone-list" as url %}
+  {% url "merchant_dashboard:shipping-zone-list" as url %}
   {% include "my_customs/merchant_dashboard/includes/_back_link.html" with url=url %}
 {% endblock %}
 
@@ -27,18 +27,18 @@
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url 'dashboard:shipping-zone-list' %}" class="breadcrumbs--ellipsed-item">
+      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}" class="breadcrumbs--ellipsed-item">
         {% trans "Shipping zones" context "Dashboard attributes list" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url 'dashboard:shipping-zone-list' %}">
+      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}">
         <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
     {% if shipping_zone.pk %}
     <li>
-      <a href="{% url 'dashboard:shipping-zone-details' shipping_zone.pk %}" class="breadcrumbs--ellipsed-item">
+      <a href="{% url 'merchant_dashboard:shipping-zone-details' shipping_zone.pk %}" class="breadcrumbs--ellipsed-item">
         {{ shipping_zone }}
       </a>
     </li>
@@ -76,7 +76,7 @@
             </div>
           </div>
           <div class="card-action right-align">
-            <a href="{% url 'dashboard:shipping-zone-details' pk=shipping_zone.pk %}" class="btn-flat waves-effect">
+            <a href="{% url 'merchant_dashboard:shipping-zone-details' pk=shipping_zone.pk %}" class="btn-flat waves-effect">
               {% trans "Cancel" context "Dashboard cancel action" %}
             </a>
             {% if shipping_method.pk %}

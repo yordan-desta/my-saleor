@@ -23,7 +23,7 @@
 
 {% block header_extra %}
   <div class="btn-fab-fixed">
-    <a href="{% url 'dashboard:sale-add' %}" class="btn-fab-default waves-effect waves-light"
+    <a href="{% url 'merchant_dashboard:sale-add' %}" class="btn-fab-default waves-effect waves-light"
         title="{% trans "Add sale" context "Sale (discount) list add button text" %}">
       <svg data-src="{% static "dashboard/images/add.svg" %}" />
     </a>
@@ -54,7 +54,7 @@
               </thead>
               <tbody>
                 {% for sale in sales %}
-                  <tr data-action-go="{% url 'dashboard:sale-update' pk=sale.pk %}">
+                  <tr data-action-go="{% url 'merchant_dashboard:sale-update' pk=sale.pk %}">
                     <td>
                       {{ sale }}
                     </td>

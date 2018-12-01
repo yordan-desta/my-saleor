@@ -15,12 +15,12 @@
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url 'dashboard:shipping-zone-list' %}">
+      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}">
         {% trans "Shipping zones" context "Shipping zone form breadcrumbs" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url 'dashboard:shipping-zone-list' %}"><i class="material-icons">arrow_back</i></a>
+      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}"><i class="material-icons">arrow_back</i></a>
     </li>
     <li>
       <span class="breadcrumbs--elipsed-item">
@@ -42,10 +42,10 @@
           </span>
         </div>
         <div class="card-action">
-          <a class="btn-flat waves-effect" href="{% url 'dashboard:shipping-zone-update' shipping_zone.pk %}">
+          <a class="btn-flat waves-effect" href="{% url 'merchant_dashboard:shipping-zone-update' shipping_zone.pk %}">
             {% trans "Edit shipping zone" context "Shipping zone action" %}
           </a>
-          <a class="btn-flat waves-effect modal-trigger-custom" href="#base-modal" data-href="{% url 'dashboard:shipping-zone-delete' shipping_zone.pk %}">
+          <a class="btn-flat waves-effect modal-trigger-custom" href="#base-modal" data-href="{% url 'merchant_dashboard:shipping-zone-delete' shipping_zone.pk %}">
             {% trans "Remove shipping zone" context "Shipping zone action" %}
           </a>
         </div>

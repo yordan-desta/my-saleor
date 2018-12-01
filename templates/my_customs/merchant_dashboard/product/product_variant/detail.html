@@ -16,17 +16,17 @@
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url "dashboard:product-list" %}" class="breadcrumb">
+      <a href="{% url "merchant_dashboard:product-list" %}" class="breadcrumb">
         {% trans "Products" context "Product form breadcrumbs" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url "dashboard:product-list" %}">
+      <a href="{% url "merchant_dashboard:product-list" %}">
         <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
     <li class="hide-on-med-and-down">
-      <a href="{% url "dashboard:product-details" pk=product.pk %}" class="breadcrumbs--ellipsed-item">
+      <a href="{% url "merchant_dashboard:product-details" pk=product.pk %}" class="breadcrumbs--ellipsed-item">
         {{ product }}
       </a>
     </li>
@@ -58,10 +58,10 @@
           </div>
         </div>
         <div class="card-action">
-          <a class="btn-flat waves-effect" href="{% url 'dashboard:variant-update' product_pk=product.pk variant_pk=variant.pk %}">
+          <a class="btn-flat waves-effect" href="{% url 'merchant_dashboard:variant-update' product_pk=product.pk variant_pk=variant.pk %}">
             {% trans "Edit variant" context "Dashboard action" %}
           </a>
-          <a href="#base-modal" class="btn-flat waves-effect modal-trigger-custom" data-href="{% url 'dashboard:variant-delete' product_pk=product.pk variant_pk=variant.pk %}">
+          <a href="#base-modal" class="btn-flat waves-effect modal-trigger-custom" data-href="{% url 'merchant_dashboard:variant-delete' product_pk=product.pk variant_pk=variant.pk %}">
             {% trans "Remove variant" context "Dashboard action" %}
           </a>
         </div>
@@ -186,7 +186,7 @@
               </div>
             </div>
             <div class="card-action">
-              <a class="btn-flat waves-effect modal-trigger-custom" href="#base-modal" data-href="{% url 'dashboard:variant-images' product_pk=product.pk variant_pk=variant.pk %}">
+              <a class="btn-flat waves-effect modal-trigger-custom" href="#base-modal" data-href="{% url 'merchant_dashboard:variant-images' product_pk=product.pk variant_pk=variant.pk %}">
                 {% trans "Select images" context "Dashboard action" %}
               </a>
             </div>

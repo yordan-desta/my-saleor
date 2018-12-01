@@ -17,7 +17,7 @@
 {% block menu_vouchers_class %}active{% endblock %}
 
 {% block header_menu %}
-  {% url "dashboard:voucher-list" as url %}
+  {% url "merchant_dashboard:voucher-list" as url %}
   {% include "my_customs/merchant_dashboard/includes/_back_link.html" with url=url %}
 {% endblock %}
 
@@ -28,7 +28,7 @@
     </a>
     <ul id="voucher-delete" class="dropdown-content">
       <li>
-        <a class="modal-trigger-custom" href="#base-modal" data-href="{% url 'dashboard:voucher-delete' pk=voucher.pk %}">
+        <a class="modal-trigger-custom" href="#base-modal" data-href="{% url 'merchant_dashboard:voucher-delete' pk=voucher.pk %}">
           {% trans "Remove voucher" context "Voucher action" %}
         </a>
       </li>
@@ -39,12 +39,12 @@
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url 'dashboard:voucher-list' %}">
+      <a href="{% url 'merchant_dashboard:voucher-list' %}">
         {% trans "Vouchers" context "Dashboard vouchers list" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url 'dashboard:voucher-list' %}">
+      <a href="{% url 'merchant_dashboard:voucher-list' %}">
         <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
@@ -121,7 +121,7 @@
             </div>
           </div>
           <div class="card-action right-align">
-            <a href="{% url 'dashboard:voucher-list' %}" class="btn-flat waves-effect">
+            <a href="{% url 'merchant_dashboard:voucher-list' %}" class="btn-flat waves-effect">
               {% trans "Cancel" context "Dashboard cancel action" %}
             </a>
             {% if voucher.pk %}

@@ -28,18 +28,18 @@
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url 'dashboard:shipping-zone-list' %}">
+      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}">
         {% trans "Shipping zones" context "Dashboard shipping zone" %}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url 'dashboard:shipping-zone-list' %}">
+      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}">
         <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
     {% if shipping_zone.pk %}
     <li>
-      <a href="{% url 'dashboard:shipping-zone-details' shipping_zone.pk %}" class="breadcrumbs--ellipsed-item">
+      <a href="{% url 'merchant_dashboard:shipping-zone-details' shipping_zone.pk %}" class="breadcrumbs--ellipsed-item">
         {{ shipping_zone }}
       </a>
     </li>
@@ -73,14 +73,14 @@
           </div>
           <div class="card-action right-align">
             {% if shipping_zone.pk %}
-              <a href="{% url 'dashboard:shipping-zone-details' shipping_zone.pk %}" class="btn-flat waves-effect">
+              <a href="{% url 'merchant_dashboard:shipping-zone-details' shipping_zone.pk %}" class="btn-flat waves-effect">
                 {% trans "Cancel" context "Dashboard cancel action" %}
               </a>
               <button type="submit" class="btn waves-effect">
                 {% trans "Save" context "Dashboard update action" %}
               </button>
             {% else %}
-              <a href="{% url 'dashboard:shipping-zone-list' %}" class="btn-flat waves-effect">
+              <a href="{% url 'merchant_dashboard:shipping-zone-list' %}" class="btn-flat waves-effect">
                 {% trans "Cancel" context "Dashboard cancel action" %}
               </a>
               <button type="submit" class="btn waves-effect">

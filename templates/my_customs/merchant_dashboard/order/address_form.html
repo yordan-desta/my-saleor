@@ -12,24 +12,24 @@
 {% block menu_orders_class %}active{% endblock %}
 
 {% block header_menu %}
-  {% url "dashboard:orders" as url %}
+  {% url "merchant_dashboard:orders" as url %}
   {% include "my_customs/merchant_dashboard/includes/_back_link.html" with url=url %}
 {% endblock %}
 
 {% block breadcrumbs %}
   <ul class="breadcrumbs breadcrumbs--history">
     <li>
-      <a href="{% url "dashboard:orders" %}">
+      <a href="{% url "merchant_dashboard:orders" %}">
         {% trans "Orders" context "Dashboard orders list" %}
       </a>
     </li>
     <li class="hide-on-med-and-down">
-      <a href="{% url "dashboard:order-details" order_pk=order.pk %}">
+      <a href="{% url "merchant_dashboard:order-details" order_pk=order.pk %}">
         #{{ order.pk }}
       </a>
     </li>
     <li class="back-mobile">
-      <a href="{% url "dashboard:order-details" order_pk=order.pk %}">
+      <a href="{% url "merchant_dashboard:order-details" order_pk=order.pk %}">
         <svg data-src="{% static "dashboard/images/arrow-left.svg" %}" fill="#fff" width="20px" height="20px" />
       </a>
     </li>
@@ -57,7 +57,7 @@
             </div>
           </div>
           <div class="card-action right-align">
-            <a href="{% url "dashboard:order-details" order_pk=order.pk %}" class="btn-flat waves-effect">
+            <a href="{% url "merchant_dashboard:order-details" order_pk=order.pk %}" class="btn-flat waves-effect">
               {% trans "Cancel" context "Dashboard cancel action" %}
             </a>
             <button type="submit" class="btn waves-effect">
