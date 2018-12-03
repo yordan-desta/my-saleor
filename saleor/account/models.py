@@ -121,7 +121,7 @@ class User(PermissionsMixin, AbstractBaseUser):
         Address, related_name='+', null=True, blank=True,
         on_delete=models.SET_NULL)
     merchant = models.ForeignKey('merchant.Merchant', on_delete=models.PROTECT, related_name='users', null= True, blank= True)
-
+    is_merchant = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
 
     objects = UserManager()

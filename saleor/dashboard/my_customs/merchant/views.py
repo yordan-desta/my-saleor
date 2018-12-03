@@ -5,6 +5,7 @@ from django.template.response import TemplateResponse
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
+from saleor.account.models import User
 from saleor.dashboard.my_customs.merchant.forms import MerchantForm
 from ....core.utils import get_paginator_items
 from ....my_customs.merchant.models import Merchant
@@ -37,6 +38,10 @@ def merchant_create(request):
         request.POST or None)
     if form.is_valid():
         merchant = form.save()
+        user = form.cleaned_data.get('user')
+        user.merchant = merchant
+        user.is_merchant = True
+        User.save(user)
         messages.success(
             request,
             pgettext_lazy(

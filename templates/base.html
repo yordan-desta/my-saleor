@@ -79,6 +79,13 @@
                   </a>
                 </li>
               {% endif %}
+                  {% if user.merchant or request.impersonator.merchant %}
+                <li>
+                  <a href="{% url "merchant_dashboard:index" %}" target="_blank" rel="noopener">
+                    {% trans "Merchant Dashboard" context "Main navigation item" %}
+                  </a>
+                </li>
+              {% endif %}
               <li>
                 <a href="{% url "account:details" %}">
                   {% trans "Your account" context "Main navigation item" %}</a>
@@ -256,27 +263,27 @@
           <a target="_blank" rel="noopener" class="social-footer" href="https://www.facebook.com/mirumeelabs/">
             <svg data-src="{% static "images/facebook-logo.svg" %}" width="45px" height="45px"/>
           </a>
-          <a target="_blank" rel="noopener" class="social-footer" href="https://github.com/mirumee/saleor">
-            <svg data-src="{% static "images/github-logo.svg" %}" width="45px" height="45px"/>
-          </a>
-          <a target="_blank" rel="noopener" class="social-footer" href="https://twitter.com/getsaleor">
+{#          <a target="_blank" rel="noopener" class="social-footer" href="https://github.com/mirumee/saleor">#}
+{#            <svg data-src="{% static "images/github-logo.svg" %}" width="45px" height="45px"/>#}
+{#          </a>#}
+          <a target="_blank" rel="noopener" class="social-footer" href="https://twitter.com/">
             <svg data-src="{% static "images/twitter-logo.svg" %}" width="45px" height="45px"/>
           </a>
-          <a target="_blank" rel="noopener" class="social-footer" href="https://plus.google.com/+Mirumee">
+          <a target="_blank" rel="noopener" class="social-footer" href="https://plus.google.com/">
             <svg data-src="{% static "images/google-logo.svg" %}" width="45px" height="45px"/>
           </a>
-          <a target="_blank" rel="noopener" class="social-footer" href="https://www.meetup.com/Mirumee-Talks/">
-            <svg data-src="{% static "images/meetup-logo.svg" %}" width="45px" height="45px"/>
-          </a>
-          <a target="_blank" rel="noopener" class="social-footer" href="https://linkedin.com/company/mirumee-software">
-            <svg data-src="{% static "images/linkedin-logo.svg" %}" width="45px" height="45px"/>
-          </a>
-          <a target="_blank" rel="noopener" class="social-footer" href="https://dribbble.com/mirumee">
-            <svg data-src="{% static "images/dribbble-logo.svg" %}" width="45px" height="45px"/>
-          </a>
-          <a target="_blank" rel="noopener" class="social-footer" href="https://www.instagram.com/explore/tags/mirumee/">
-            <svg data-src="{% static "images/instagram-logo.svg" %}" width="45px" height="45px"/>
-          </a>
+{#          <a target="_blank" rel="noopener" class="social-footer" href="https://www.meetup.com/">#}
+{#            <svg data-src="{% static "images/meetup-logo.svg" %}" width="45px" height="45px"/>#}
+{#          </a>#}
+{#          <a target="_blank" rel="noopener" class="social-footer" href="https://linkedin.com/">#}
+{#            <svg data-src="{% static "images/linkedin-logo.svg" %}" width="45px" height="45px"/>#}
+{#          </a>#}
+{#          <a target="_blank" rel="noopener" class="social-footer" href="https://dribbble.com/">#}
+{#            <svg data-src="{% static "images/dribbble-logo.svg" %}" width="45px" height="45px"/>#}
+{#          </a>#}
+{#          <a target="_blank" rel="noopener" class="social-footer" href="https://www.instagram.com/">#}
+{#            <svg data-src="{% static "images/instagram-logo.svg" %}" width="45px" height="45px"/>#}
+{#          </a>#}
         </div>
       </div>
     </div>
