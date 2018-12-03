@@ -35,6 +35,8 @@ class VoucherQueryset(models.QuerySet):
             Q(end_date__isnull=True) | Q(end_date__gte=date),
             start_date__lte=date)
 
+    def get_by_merchant(self, merchant):
+        return self.filter(merchant = merchant)
 
 class Voucher(models.Model):
     type = models.CharField(
@@ -63,6 +65,7 @@ class Voucher(models.Model):
     products = models.ManyToManyField('product.Product', blank=True)
     collections = models.ManyToManyField('product.Collection', blank=True)
     categories = models.ManyToManyField('product.Category', blank=True)
+    merchant = models.ForeignKey('merchant.Merchant', blank= True, null=True, related_name='vouchers', on_delete= models.CASCADE)
 
     objects = VoucherQueryset.as_manager()
     translated = TranslationProxy()
@@ -144,6 +147,9 @@ class SaleQueryset(models.QuerySet):
         return self.filter(
             end_date__gte=date, start_date__lte=date)
 
+    def get_by_merchant(self, merchant):
+        return self.filter(merchant = merchant)
+
 
 class VoucherTranslation(models.Model):
     language_code = models.CharField(max_length=10)
@@ -169,7 +175,7 @@ class Sale(models.Model):
     collections = models.ManyToManyField('product.Collection', blank=True)
     start_date = models.DateField(default=date.today)
     end_date = models.DateField(null=True, blank=True)
-
+    merchant = models.ForeignKey('merchant.Merchant', blank= True, null=True, related_name='sales', on_delete= models.CASCADE)
     objects = SaleQueryset.as_manager()
 
     class Meta:

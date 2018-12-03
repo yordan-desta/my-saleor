@@ -25,7 +25,7 @@ MinAmountSpent = MoneyField(
 class SaleForm(forms.ModelForm):
     products = AjaxSelect2MultipleChoiceField(
         queryset=Product.objects.all(),
-        fetch_data_url=reverse_lazy('dashboard:ajax-products'),
+        fetch_data_url=reverse_lazy('merchant_dashboard:ajax-products'),
         required=False,
         label=pgettext_lazy('Discounted products', 'Discounted products'))
 
@@ -56,6 +56,8 @@ class SaleForm(forms.ModelForm):
                 'Discounted collections')}
 
     def __init__(self, *args, **kwargs):
+        self.merchant = kwargs.pop('merchant')
+
         super().__init__(*args, **kwargs)
         if self.instance.pk:
             self.fields['products'].set_initial(self.instance.products.all())
@@ -78,6 +80,9 @@ class SaleForm(forms.ModelForm):
                 'and/or category.'))
         return cleaned_data
 
+    def save(self, commit = True):
+        self.instance.merchant = self.merchant
+        return super().save(commit)
 
 class VoucherForm(forms.ModelForm):
 
@@ -113,6 +118,7 @@ class VoucherForm(forms.ModelForm):
                 'Discount value')}
 
     def __init__(self, *args, **kwargs):
+        self.merchant = kwargs.pop('merchant')
         initial = kwargs.get('initial', {})
         instance = kwargs.get('instance')
         if instance and instance.id is None and not initial.get('code'):
@@ -126,6 +132,9 @@ class VoucherForm(forms.ModelForm):
             if not Voucher.objects.filter(code=code).exists():
                 return code
 
+    def save(self, commit=True):
+        self.instance.merchant = self.merchant
+        super().save(commit)
 
 class ShippingVoucherForm(forms.ModelForm):
     min_amount_spent = MinAmountSpent
@@ -140,6 +149,13 @@ class ShippingVoucherForm(forms.ModelForm):
         model = Voucher
         fields = ['countries', 'min_amount_spent']
 
+    # def __init__(self, *args, **kwargs):
+    #     self.merchant = kwargs.pop('merchant')
+    #     super().__init__(*args, **kwargs)
+    #
+    # def save(self, commit=True):
+    #     self.instance.merchant = self.merchant
+    #     super().save(commit)
 
 class ValueVoucherForm(forms.ModelForm):
     min_amount_spent = MinAmountSpent
@@ -172,7 +188,7 @@ class CommonVoucherForm(forms.ModelForm):
 class ProductVoucherForm(CommonVoucherForm):
     products = AjaxSelect2MultipleChoiceField(
         queryset=Product.objects.all(),
-        fetch_data_url=reverse_lazy('dashboard:ajax-products'),
+        fetch_data_url=reverse_lazy('merchant_dashboard:ajax-products'),
         required=True,
         label=pgettext_lazy('Product', 'Products'))
 
