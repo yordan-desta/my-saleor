@@ -107,11 +107,11 @@
                       {% trans "Products" context "Dashboard products list" %}
                     </a>
                   </li>
-                  <li class="{% block menu_categories_class %}{% endblock %}">
-                    <a href="{% url 'merchant_dashboard:category-list' %}">
-                      {% trans "Categories" context "Dashboard categories list" %}
-                    </a>
-                  </li>
+{#                  <li class="{% block menu_categories_class %}{% endblock %}">#}
+{#                    <a href="{% url 'merchant_dashboard:category-list' %}">#}
+{#                      {% trans "Categories" context "Dashboard categories list" %}#}
+{#                    </a>#}
+{#                  </li>#}
                 <li class="{% block menu_collections_class %}{% endblock %}">
                   <a href="{% url 'merchant_dashboard:collection-list' %}">
                     {% trans "Collections" context "Dashboard side navigation link" %}
@@ -154,61 +154,61 @@
                   </li>
                 {% endif %}
                 {% if perms.account.manage_users %}
-                  <li class="{% block menu_customers_class %}{% endblock %}">
-                    <a href="{% url 'merchant_dashboard:customers' %}">
-                      {% trans "Customers" context "Dashboard customers list" %}
-                    </a>
-                  </li>
+{#                  <li class="{% block menu_customers_class %}{% endblock %}">#}
+{#                    <a href="{% url 'merchant_dashboard:customers' %}">#}
+{#                      {% trans "Customers" context "Dashboard customers list" %}#}
+{#                    </a>#}
+{#                  </li>#}
                 {% endif %}
               </ul>
             </li>
             {% endif %}
-            {% if perms.account.manage_staff %}
-              <li class="side-nav-section">
-                <p>
-                  {% trans "Staff management" context "Management section" %}
-                </p>
-                <ul>
-                  <li class="{% block menu_staff_class %}{% endblock %}">
-                    <a href="{% url 'merchant_dashboard:staff-list' %}">
-                      {% trans "Staff members" context "Dashboard staff members list" %}
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            {% endif %}
-            {% if perms.site.manage_settings or perms.shipping.manage_shipping or perms.product.manage_products or perms.page.manage_pages %}
-              <li class="side-nav-section">
-                <p>
-                  {% trans "Configuration"  context "Dashboard configuration" %}
-                </p>
-                <ul>
-                  {% if perms.product.manage_products %}
-                    <li class="{% block menu_product_types_class %}{% endblock %}">
-                      <a href="{% url 'merchant_dashboard:product-type-list' %}">
-                        {% trans "Product types" context "Dashboard product types list" %}
-                      </a>
-                    </li>
-                    <li class="{% block menu_attributes_class %}{% endblock %}">
-                      <a href="{% url 'merchant_dashboard:attributes' %}">
-                        {% trans "Attributes" context "Dashboard attributes list" %}
-                      </a>
-                    </li>
-                  {% endif %}
-                  {% if perms.shipping.manage_shipping %}
-                    <li class="{% block menu_delivery_class %}{% endblock %}">
-                      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}">
-                        {% trans "Shipping" context "Dashboard shipping zones list" %}
-                      </a>
-                    </li>
-                  {% endif %}
-                  {% if perms.menu.manage_menus %}
-                    <li class="{% block menu_menus_class %}{% endblock %}">
-                      <a href="{% url 'merchant_dashboard:menu-list' %}">
-                        {% trans "Navigation" context "Dashboard menus list" %}
-                      </a>
-                    </li>
-                  {% endif %}
+{#            {% if perms.account.manage_staff %}#}
+{#              <li class="side-nav-section">#}
+{#                <p>#}
+{#                  {% trans "Staff management" context "Management section" %}#}
+{#                </p>#}
+{#                <ul>#}
+{#                  <li class="{% block menu_staff_class %}{% endblock %}">#}
+{#                    <a href="{% url 'merchant_dashboard:staff-list' %}">#}
+{#                      {% trans "Staff members" context "Dashboard staff members list" %}#}
+{#                    </a>#}
+{#                  </li>#}
+{#                </ul>#}
+{#              </li>#}
+{#            {% endif %}#}
+{#            {% if perms.site.manage_settings or perms.shipping.manage_shipping or perms.product.manage_products or perms.page.manage_pages %}#}
+{#              <li class="side-nav-section">#}
+{#                <p>#}
+{#                  {% trans "Configuration"  context "Dashboard configuration" %}#}
+{#                </p>#}
+{#                <ul>#}
+{#                  {% if perms.product.manage_products %}#}
+{#                    <li class="{% block menu_product_types_class %}{% endblock %}">#}
+{#                      <a href="{% url 'merchant_dashboard:product-type-list' %}">#}
+{#                        {% trans "Product types" context "Dashboard product types list" %}#}
+{#                      </a>#}
+{#                    </li>#}
+{#                    <li class="{% block menu_attributes_class %}{% endblock %}">#}
+{#                      <a href="{% url 'merchant_dashboard:attributes' %}">#}
+{#                        {% trans "Attributes" context "Dashboard attributes list" %}#}
+{#                      </a>#}
+{#                    </li>#}
+{#                  {% endif %}#}
+{#                  {% if perms.shipping.manage_shipping %}#}
+{#                    <li class="{% block menu_delivery_class %}{% endblock %}">#}
+{#                      <a href="{% url 'merchant_dashboard:shipping-zone-list' %}">#}
+{#                        {% trans "Shipping" context "Dashboard shipping zones list" %}#}
+{#                      </a>#}
+{#                    </li>#}
+{#                  {% endif %}#}
+{#                  {% if perms.menu.manage_menus %}#}
+{#                    <li class="{% block menu_menus_class %}{% endblock %}">#}
+{#                      <a href="{% url 'merchant_dashboard:menu-list' %}">#}
+{#                        {% trans "Navigation" context "Dashboard menus list" %}#}
+{#                      </a>#}
+{#                    </li>#}
+{#                  {% endif %}#}
 {#                  {% if perms.site.manage_settings %}#}
 {#                    <li class="{% block menu_settings_class %}{% endblock %}">#}
 {#                      <a href="{% url 'merchant_dashboard:site-index' %}">#}
@@ -216,25 +216,25 @@
 {#                      </a>#}
 {#                    </li>#}
 {#                  {% endif %}#}
-                  <li class="{% block menu_taxes_class %}{% endblock %}">
-                    <a href="{% url 'merchant_dashboard:taxes' %}">
-                      {% trans "Taxes" context "Dashboard taxes" %}
-                    </a>
-                  </li>
-                  {% if perms.page.manage_pages %}
-                    <li class="{% block menu_pages_class %}{% endblock %}">
-                        {% trans "Pages" context "Dashboard static pages" %}
-                      </a>
-                    </li>
-                  {% endif %}
-                </ul>
-              </li>
-              <li class="side-nav-section" id="version-indicator">
-                <p>
-                  {% trans "Void:" context "Dashboard software version" %} {% version %}
-                </p>
-              </li>
-            {% endif %}
+{#                  <li class="{% block menu_taxes_class %}{% endblock %}">#}
+{#                    <a href="{% url 'merchant_dashboard:taxes' %}">#}
+{#                      {% trans "Taxes" context "Dashboard taxes" %}#}
+{#                    </a>#}
+{#                  </li>#}
+{#                  {% if perms.page.manage_pages %}#}
+{#                    <li class="{% block menu_pages_class %}{% endblock %}">#}
+{#                        {% trans "Pages" context "Dashboard static pages" %}#}
+{#                      </a>#}
+{#                    </li>#}
+{#                  {% endif %}#}
+{#                </ul>#}
+{#              </li>#}
+{#              <li class="side-nav-section" id="version-indicator">#}
+{#                <p>#}
+{#                  {% trans "Void:" context "Dashboard software version" %} {% version %}#}
+{#                </p>#}
+{#              </li>#}
+{#            {% endif %}#}
           </ul>
         </div>
       </nav>
