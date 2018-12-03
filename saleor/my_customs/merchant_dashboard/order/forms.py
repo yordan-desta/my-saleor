@@ -44,6 +44,7 @@ class CreateOrderFromDraftForm(forms.ModelForm):
         fields = []
 
     def __init__(self, *args, **kwargs):
+        self.merchant = kwargs.pop('merchant')
         super().__init__(*args, **kwargs)
         if not self.instance.get_user_current_email():
             self.fields.pop('notify_customer')
@@ -80,6 +81,8 @@ class CreateOrderFromDraftForm(forms.ModelForm):
             self.instance.shipping_price = ZERO_TAXED_MONEY
             if self.instance.shipping_address:
                 remove_shipping_address = True
+        if not self.instance.merchant:
+            self.instance.merchant = self.merchant
         super().save()
         if remove_shipping_address:
             self.instance.shipping_address.delete()
@@ -536,22 +539,25 @@ class PaymentFilterForm(forms.Form):
 class AddVariantToOrderForm(forms.Form):
     """Allow adding lines with given quantity to an order."""
 
-    variant = AjaxSelect2ChoiceField(
-        queryset=ProductVariant.objects.filter(
-            product__in=Product.objects.available_products()),
-        fetch_data_url=reverse_lazy('dashboard:ajax-available-variants'),
-        label=pgettext_lazy(
-            'Order form: subform to add variant to order form: variant field',
-            'Variant'))
     quantity = QuantityField(
         label=pgettext_lazy(
             'Add variant to order form label', 'Quantity'),
         validators=[MinValueValidator(1)])
 
+    variant = AjaxSelect2ChoiceField(
+        queryset=ProductVariant.objects.filter(
+            product__in=Product.objects.available_products()),
+        fetch_data_url=reverse_lazy('merchant_dashboard:ajax-available-variants'),
+        label=pgettext_lazy(
+            'Order form: subform to add variant to order form: variant field',
+            'Variant'))
+
     def __init__(self, *args, **kwargs):
         self.order = kwargs.pop('order')
         self.discounts = kwargs.pop('discounts')
         self.taxes = kwargs.pop('taxes')
+        self.merchant = kwargs.pop('merchant')
+
         super().__init__(*args, **kwargs)
 
     def clean(self):
@@ -580,7 +586,7 @@ class AddVariantToOrderForm(forms.Form):
         variant = self.cleaned_data.get('variant')
         quantity = self.cleaned_data.get('quantity')
         add_variant_to_order(
-            self.order, variant, quantity, self.discounts, self.taxes)
+            self.order, variant, quantity, self.discounts, self.taxes, self.merchant)
         recalculate_order(self.order)
 
 

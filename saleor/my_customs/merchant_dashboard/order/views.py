@@ -12,6 +12,7 @@ from django.utils.translation import npgettext_lazy, pgettext_lazy
 from django.views.decorators.http import require_POST
 from django_prices.templatetags import prices_i18n
 
+from saleor.my_customs.merchant.models import Merchant
 from ....core.exceptions import InsufficientStock
 from ....core.utils import get_paginator_items
 from ....core.utils.taxes import get_taxes_for_address
@@ -41,7 +42,14 @@ from .utils import (
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_list(request):
-    orders = Order.objects.prefetch_related('payments', 'lines', 'user')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.prefetch_related('payments', 'lines', 'user').get_by_merchant(merchant)
     order_filter = OrderFilter(request.GET, queryset=orders)
     orders = get_paginator_items(
         order_filter.qs, settings.DASHBOARD_PAGINATE_BY,
@@ -56,22 +64,36 @@ def order_list(request):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_create(request):
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     display_gross_prices = request.site.settings.display_gross_prices
     order = Order.objects.create(
-        status=OrderStatus.DRAFT, display_gross_prices=display_gross_prices)
+        status=OrderStatus.DRAFT, display_gross_prices=display_gross_prices, merchant= merchant)
     msg = pgettext_lazy(
         'Dashboard message related to an order',
         'Draft order created')
     messages.success(request, msg)
-    return redirect('dashboard:order-details', order_pk=order.pk)
+    return redirect('merchant_dashboard:order-details', order_pk=order.pk)
 
 
 @staff_member_required
 @permission_required('order.manage_orders')
 def create_order_from_draft(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     status = 200
-    form = CreateOrderFromDraftForm(request.POST or None, instance=order)
+    form = CreateOrderFromDraftForm(request.POST or None, instance=order, merchant= merchant)
     if form.is_valid():
         form.save()
         msg = pgettext_lazy(
@@ -88,7 +110,7 @@ def create_order_from_draft(request, order_pk):
                     'email': order.get_user_current_email(),
                     'email_type': OrderEventsEmails.ORDER.value},
                 type=OrderEvents.EMAIL_SENT.value)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
     template = 'my_customs/merchant_dashboard/order/modal/create_order.html'
@@ -99,13 +121,20 @@ def create_order_from_draft(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def remove_draft_order(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     if request.method == 'POST':
         order.delete()
         msg = pgettext_lazy(
             'Dashboard message', 'Draft order successfully removed')
         messages.success(request, msg)
-        return redirect('dashboard:orders')
+        return redirect('merchant_dashboard:orders')
     template = 'my_customs/merchant_dashboard/order/modal/remove_order.html'
     ctx = {'order': order}
     return TemplateResponse(request, template, ctx)
@@ -114,7 +143,14 @@ def remove_draft_order(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_details(request, order_pk):
-    qs = Order.objects.select_related(
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    qs = Order.objects.get_by_merchant(merchant).select_related(
         'user', 'shipping_address', 'billing_address').prefetch_related(
         'payments', 'events__user', 'lines__variant__product',
         'fulfillments__lines__order_line')
@@ -132,7 +168,15 @@ def order_details(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_add_note(request, order_pk):
-    order = get_object_or_404(Order, pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    qs = Order.objects.get_by_merchant(merchant)
+    order = get_object_or_404(qs, pk=order_pk)
     form = OrderNoteForm(request.POST or None)
     status = 200
     if form.is_valid():
@@ -155,7 +199,14 @@ def order_add_note(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def capture_payment(request, order_pk, payment_pk):
-    orders = Order.objects.confirmed().prefetch_related('payments')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.confirmed().prefetch_related('payments').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     payment = get_object_or_404(order.payments, pk=payment_pk)
     amount = order.total.gross
@@ -171,7 +222,7 @@ def capture_payment(request, order_pk, payment_pk):
             user=request.user,
             type=OrderEvents.PAYMENT_CAPTURED.value)
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     status = 400 if form.errors else 200
     ctx = {
         'captured': amount,
@@ -185,7 +236,14 @@ def capture_payment(request, order_pk, payment_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def refund_payment(request, order_pk, payment_pk):
-    orders = Order.objects.confirmed().prefetch_related('payments')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.confirmed().prefetch_related('payments').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     payment = get_object_or_404(order.payments, pk=payment_pk)
     amount = payment.captured_amount
@@ -202,7 +260,7 @@ def refund_payment(request, order_pk, payment_pk):
             user=request.user,
             type=OrderEvents.PAYMENT_REFUNDED.value)
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     status = 400 if form.errors else 200
     ctx = {
         'captured': payment.get_captured_amount(),
@@ -216,7 +274,14 @@ def refund_payment(request, order_pk, payment_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def void_payment(request, order_pk, payment_pk):
-    orders = Order.objects.confirmed().prefetch_related('payments')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.confirmed().prefetch_related('payments').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     payment = get_object_or_404(order.payments, pk=payment_pk)
     form = VoidPaymentForm(request.POST or None, payment=payment)
@@ -226,7 +291,7 @@ def void_payment(request, order_pk, payment_pk):
             user=request.user,
             type=OrderEvents.PAYMENT_VOIDED.value)
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     status = 400 if form.errors else 200
     ctx = {
         'form': form, 'order': order, 'payment': payment}
@@ -237,7 +302,14 @@ def void_payment(request, order_pk, payment_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def orderline_change_quantity(request, order_pk, line_pk):
-    orders = Order.objects.drafts().prefetch_related('lines')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.drafts().prefetch_related('lines').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     line = get_object_or_404(order.lines, pk=line_pk)
     form = ChangeQuantityForm(request.POST or None, instance=line)
@@ -253,7 +325,7 @@ def orderline_change_quantity(request, order_pk, line_pk):
         with transaction.atomic():
             form.save()
             messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
     ctx = {'order': order, 'object': line, 'form': form}
@@ -264,7 +336,14 @@ def orderline_change_quantity(request, order_pk, line_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def orderline_cancel(request, order_pk, line_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     line = get_object_or_404(order.lines, pk=line_pk)
     form = CancelOrderLineForm(data=request.POST or None, line=line)
     status = 200
@@ -275,7 +354,7 @@ def orderline_cancel(request, order_pk, line_pk):
         with transaction.atomic():
             form.cancel_line()
             messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
     ctx = {'order': order, 'item': line, 'form': form}
@@ -288,11 +367,18 @@ def orderline_cancel(request, order_pk, line_pk):
 @permission_required('order.manage_orders')
 def add_variant_to_order(request, order_pk):
     """Add variant in given quantity to an order."""
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     taxes = get_taxes_for_address(order.shipping_address)
     form = AddVariantToOrderForm(
         request.POST or None, order=order, discounts=request.discounts,
-        taxes=taxes)
+        taxes=taxes, merchant= merchant)
     status = 200
     if form.is_valid():
         msg_dict = {
@@ -311,7 +397,7 @@ def add_variant_to_order(request, order_pk):
                 'Insufficient stock: could not add %(quantity)d x %(variant)s'
             ) % msg_dict
             messages.warning(request, msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
     elif form.errors:
         status = 400
     ctx = {'order': order, 'form': form}
@@ -322,7 +408,15 @@ def add_variant_to_order(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_address(request, order_pk, address_type):
-    order = get_object_or_404(Order, pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    qs = Order.objects.get_by_merchant(merchant)
+    order = get_object_or_404(qs, pk=order_pk)
     update_prices = False
     if address_type == 'shipping':
         address = order.shipping_address
@@ -347,7 +441,7 @@ def order_address(request, order_pk, address_type):
                 user=request.user,
                 type=OrderEvents.UPDATED.value)
         messages.success(request, success_msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
     ctx = {'order': order, 'address_type': address_type, 'form': form}
     return TemplateResponse(request, 'my_customs/merchant_dashboard/order/address_form.html', ctx)
 
@@ -355,7 +449,14 @@ def order_address(request, order_pk, address_type):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_customer_edit(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     form = OrderCustomerForm(request.POST or None, instance=order)
     status = 200
     if form.is_valid():
@@ -376,7 +477,7 @@ def order_customer_edit(request, order_pk):
                 'Dashboard message',
                 'Guest user assigned to an order')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
     elif form.errors:
         status = 400
     ctx = {'order': order, 'form': form}
@@ -388,7 +489,14 @@ def order_customer_edit(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_customer_remove(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     form = OrderRemoveCustomerForm(request.POST or None, instance=order)
     if form.is_valid():
         form.save()
@@ -397,14 +505,21 @@ def order_customer_remove(request, order_pk):
             'Dashboard message',
             'Customer removed from an order')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
-    return redirect('dashboard:order-customer-edit', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
+    return redirect('merchant_dashboard:order-customer-edit', order_pk=order.pk)
 
 
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_shipping_edit(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     taxes = get_taxes_for_address(order.shipping_address)
     form = OrderShippingForm(request.POST or None, instance=order, taxes=taxes)
     status = 200
@@ -412,7 +527,7 @@ def order_shipping_edit(request, order_pk):
         form.save()
         msg = pgettext_lazy('Dashboard message', 'Shipping updated')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
     elif form.errors:
         status = 400
     ctx = {'order': order, 'form': form}
@@ -424,27 +539,41 @@ def order_shipping_edit(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_shipping_remove(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     form = OrderRemoveShippingForm(request.POST or None, instance=order)
     if form.is_valid():
         form.save()
         msg = pgettext_lazy('Dashboard message', 'Shipping removed')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
-    return redirect('dashboard:order-shipping-edit', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
+    return redirect('merchant_dashboard:order-shipping-edit', order_pk=order.pk)
 
 
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_discount_edit(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     form = OrderEditDiscountForm(request.POST or None, instance=order)
     status = 200
     if form.is_valid():
         form.save()
         msg = pgettext_lazy('Dashboard message', 'Discount updated')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
     elif form.errors:
         status = 400
     ctx = {'order': order, 'form': form}
@@ -456,14 +585,21 @@ def order_discount_edit(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_voucher_edit(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     form = OrderEditVoucherForm(request.POST or None, instance=order)
     status = 200
     if form.is_valid():
         form.save()
         msg = pgettext_lazy('Dashboard message', 'Voucher updated')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order_pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order_pk)
     elif form.errors:
         status = 400
     ctx = {'order': order, 'form': form}
@@ -475,7 +611,14 @@ def order_voucher_edit(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def cancel_order(request, order_pk):
-    order = get_object_or_404(Order.objects.confirmed(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.confirmed().get_by_merchant(merchant), pk=order_pk)
     status = 200
     form = CancelOrderForm(request.POST or None, order=order)
     if form.is_valid():
@@ -490,7 +633,7 @@ def cancel_order(request, order_pk):
                 user=request.user,
                 type=OrderEvents.CANCELED.value)
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
         # TODO: send status confirmation email
     elif form.errors:
         status = 400
@@ -503,22 +646,36 @@ def cancel_order(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_voucher_remove(request, order_pk):
-    order = get_object_or_404(Order.objects.drafts(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.drafts().get_by_merchant(merchant), pk=order_pk)
     form = OrderRemoveVoucherForm(request.POST or None, instance=order)
     if form.is_valid():
         msg = pgettext_lazy('Dashboard message', 'Removed voucher from order')
         with transaction.atomic():
             form.remove_voucher()
             messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
-    return redirect('dashboard:order-voucher-edit', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
+    return redirect('merchant_dashboard:order-voucher-edit', order_pk=order.pk)
 
 
 @staff_member_required
 @permission_required('order.manage_orders')
 def order_invoice(request, order_pk):
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     orders = Order.objects.confirmed().prefetch_related(
-        'user', 'shipping_address', 'billing_address', 'voucher')
+        'user', 'shipping_address', 'billing_address', 'voucher').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     absolute_url = get_statics_absolute_url(request)
     pdf_file, order = create_invoice_pdf(order, absolute_url)
@@ -531,7 +688,14 @@ def order_invoice(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def mark_order_as_paid(request, order_pk):
-    order = get_object_or_404(Order.objects.confirmed(), pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    order = get_object_or_404(Order.objects.confirmed().get_by_merchant(merchant), pk=order_pk)
     status = 200
     form = OrderMarkAsPaidForm(request.POST or None, order=order)
     if form.is_valid():
@@ -544,7 +708,7 @@ def mark_order_as_paid(request, order_pk):
             'Dashboard message',
             'Order manually marked as paid')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
     ctx = {'form': form, 'order': order}
@@ -556,8 +720,15 @@ def mark_order_as_paid(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def fulfillment_packing_slips(request, order_pk, fulfillment_pk):
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     orders = Order.objects.confirmed().prefetch_related(
-        'user', 'shipping_address', 'billing_address')
+        'user', 'shipping_address', 'billing_address').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     fulfillments = order.fulfillments.prefetch_related(
         'lines', 'lines__order_line')
@@ -573,7 +744,14 @@ def fulfillment_packing_slips(request, order_pk, fulfillment_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def fulfill_order_lines(request, order_pk):
-    orders = Order.objects.confirmed().prefetch_related('lines')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.confirmed().prefetch_related('lines').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     unfulfilled_lines = order.lines.filter(
         quantity_fulfilled__lt=F('quantity'))
@@ -627,7 +805,7 @@ def fulfill_order_lines(request, order_pk):
             msg = pgettext_lazy(
                 'Dashboard message related to an order', 'No items fulfilled')
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
     ctx = {
@@ -640,7 +818,14 @@ def fulfill_order_lines(request, order_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def cancel_fulfillment(request, order_pk, fulfillment_pk):
-    orders = Order.objects.confirmed().prefetch_related('fulfillments')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.confirmed().prefetch_related('fulfillments').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     fulfillment = get_object_or_404(order.fulfillments, pk=fulfillment_pk)
     status = 200
@@ -661,7 +846,7 @@ def cancel_fulfillment(request, order_pk, fulfillment_pk):
                 parameters={'composed_id': fulfillment.composed_id},
                 type=OrderEvents.FULFILLMENT_CANCELED.value)
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
     ctx = {'form': form, 'order': order, 'fulfillment': fulfillment}
@@ -673,7 +858,14 @@ def cancel_fulfillment(request, order_pk, fulfillment_pk):
 @staff_member_required
 @permission_required('order.manage_orders')
 def change_fulfillment_tracking(request, order_pk, fulfillment_pk):
-    orders = Order.objects.confirmed().prefetch_related('fulfillments')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    orders = Order.objects.confirmed().prefetch_related('fulfillments').get_by_merchant(merchant)
     order = get_object_or_404(orders, pk=order_pk)
     fulfillment = get_object_or_404(order.fulfillments, pk=fulfillment_pk)
     status = 200
@@ -696,7 +888,7 @@ def change_fulfillment_tracking(request, order_pk, fulfillment_pk):
             'Fulfillment #%(fulfillment)s tracking number updated') % {
                 'fulfillment': fulfillment.composed_id}
         messages.success(request, msg)
-        return redirect('dashboard:order-details', order_pk=order.pk)
+        return redirect('merchant_dashboard:order-details', order_pk=order.pk)
     elif form.errors:
         status = 400
     ctx = {'form': form, 'order': order, 'fulfillment': fulfillment}
@@ -707,7 +899,15 @@ def change_fulfillment_tracking(request, order_pk, fulfillment_pk):
 
 @staff_member_required
 def ajax_order_shipping_methods_list(request, order_pk):
-    order = get_object_or_404(Order, pk=order_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    qs = Order.objects.get_by_merchant(merchant)
+    order = get_object_or_404(qs, pk=order_pk)
     queryset = ShippingMethod.objects.prefetch_related(
         'shipping_zone').order_by('name', 'price')
 

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import ExpressionWrapper, F, Max, Sum
+from django.db.models import ExpressionWrapper, F, Max, Sum, Q
 from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import pgettext_lazy
@@ -56,6 +56,9 @@ class OrderQueryset(models.QuerySet):
                 ChargeStatus.NOT_CHARGED, ChargeStatus.CHARGED])
         qs = qs.exclude(status={OrderStatus.DRAFT, OrderStatus.CANCELED})
         return qs.distinct()
+
+    def get_by_merchant(self, merchant):
+        return self.filter(Q(merchant=merchant))
 
 
 class Order(models.Model):

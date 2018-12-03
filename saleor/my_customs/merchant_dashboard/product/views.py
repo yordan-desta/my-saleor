@@ -386,8 +386,15 @@ def variant_details(request, product_pk, variant_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def variant_create(request, product_pk):
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     track_inventory = request.site.settings.track_inventory_by_default
-    product = get_object_or_404(Product.objects.all(), pk=product_pk)
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     variant = ProductVariant(product=product, track_inventory=track_inventory)
     form = forms.ProductVariantForm(
         request.POST or None,
@@ -410,7 +417,14 @@ def variant_create(request, product_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def variant_edit(request, product_pk, variant_pk):
-    product = get_object_or_404(Product.objects.all(), pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     variant = get_object_or_404(product.variants.all(), pk=variant_pk)
     form = forms.ProductVariantForm(request.POST or None, instance=variant)
     if form.is_valid():
@@ -431,7 +445,14 @@ def variant_edit(request, product_pk, variant_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def variant_delete(request, product_pk, variant_pk):
-    product = get_object_or_404(Product, pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     variant = get_object_or_404(product.variants, pk=variant_pk)
     if request.method == 'POST':
         variant.delete()
@@ -451,7 +472,14 @@ def variant_delete(request, product_pk, variant_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def variant_images(request, product_pk, variant_pk):
-    product = get_object_or_404(Product, pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     qs = product.variants.prefetch_related('images')
     variant = get_object_or_404(qs, pk=variant_pk)
     form = forms.VariantImagesSelectForm(request.POST or None, variant=variant)
@@ -473,7 +501,14 @@ def ajax_available_variants_list(request):
 
     Response format is that of a Select2 JS widget.
     """
-    available_products = Product.objects.available_products().prefetch_related(
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    available_products = Product.objects.available_products().get_by_merchant(merchant).prefetch_related(
         'category',
         'product_type__product_attributes')
     queryset = ProductVariant.objects.filter(
@@ -516,7 +551,14 @@ def product_images(request, product_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_image_create(request, product_pk):
-    product = get_object_or_404(Product, pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     product_image = ProductImage(product=product)
     form = forms.ProductImageForm(
         request.POST or None, request.FILES or None, instance=product_image)
@@ -537,7 +579,14 @@ def product_image_create(request, product_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_image_edit(request, product_pk, img_pk):
-    product = get_object_or_404(Product, pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     product_image = get_object_or_404(product.images, pk=img_pk)
     form = forms.ProductImageForm(
         request.POST or None, request.FILES or None, instance=product_image)
@@ -558,7 +607,14 @@ def product_image_edit(request, product_pk, img_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_image_delete(request, product_pk, img_pk):
-    product = get_object_or_404(Product, pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     image = get_object_or_404(product.images, pk=img_pk)
     if request.method == 'POST':
         image.delete()
@@ -575,7 +631,14 @@ def product_image_delete(request, product_pk, img_pk):
 @require_POST
 @staff_member_required
 def ajax_reorder_product_images(request, product_pk):
-    product = get_object_or_404(Product, pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     form = forms.ReorderProductImagesForm(request.POST, instance=product)
     status = 200
     ctx = {}
@@ -590,7 +653,14 @@ def ajax_reorder_product_images(request, product_pk):
 @require_POST
 @staff_member_required
 def ajax_upload_image(request, product_pk):
-    product = get_object_or_404(Product, pk=product_pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = get_object_or_404(Product.objects.get_by_merchant(merchant), pk=product_pk)
     form = forms.UploadImageForm(
         request.POST or None, request.FILES or None, product=product)
     ctx = {}
