@@ -448,6 +448,9 @@ class CollectionQuerySet(models.QuerySet):
             return self.all()
         return self.public()
 
+    def get_by_merchant(self, merchant):
+        return self.filter(Q(merchant=merchant))
+
 
 class Collection(SeoModel):
     name = models.CharField(max_length=128, unique=True)
@@ -458,6 +461,7 @@ class Collection(SeoModel):
         upload_to='collection-backgrounds', blank=True, null=True)
     is_published = models.BooleanField(default=False)
     description = models.TextField(blank=True)
+    merchant = models.ForeignKey('merchant.Merchant', on_delete=models.PROTECT, related_name='collections', null= True, blank= True)
 
     objects = CollectionQuerySet.as_manager()
     translated = TranslationProxy()
