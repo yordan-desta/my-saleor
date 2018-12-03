@@ -14,7 +14,7 @@ from ..seo.fields import SeoDescriptionField, SeoTitleField
 class CollectionForm(forms.ModelForm):
     products = AjaxSelect2MultipleChoiceField(
         queryset=Product.objects.all(),
-        fetch_data_url=reverse_lazy('dashboard:ajax-products'), required=False,
+        fetch_data_url=reverse_lazy('merchant_dashboard:ajax-products'), required=False,
         label=pgettext_lazy('Products selection', 'Products'))
 
     class Meta:
@@ -33,6 +33,7 @@ class CollectionForm(forms.ModelForm):
                 'Description')}
 
     def __init__(self, *args, **kwargs):
+        self.merchant = kwargs.pop('merchant')
         super().__init__(*args, **kwargs)
         if self.instance.pk:
             self.fields['products'].set_initial(self.instance.products.all())
@@ -43,6 +44,7 @@ class CollectionForm(forms.ModelForm):
 
     def save(self, commit=True):
         self.instance.slug = slugify(unidecode(self.instance.name))
+        self.instance.merchant = self.merchant
         instance = super().save(commit=commit)
 
         if instance.pk and 'background_image' in self.changed_data:
