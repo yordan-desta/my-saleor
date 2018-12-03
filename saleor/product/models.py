@@ -110,6 +110,9 @@ class ProductQuerySet(models.QuerySet):
             return self.all()
         return self.available_products()
 
+    def get_by_merchant(self, merchant):
+        return self.filter(Q(merchant=merchant))
+
 
 class Product(SeoModel):
     product_type = models.ForeignKey(

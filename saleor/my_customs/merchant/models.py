@@ -1,15 +1,22 @@
+import uuid
+
 from django.db import models
-from django.utils.translation import pgettext_lazy
 
 from ...shipping import models as ship
-
-import uuid
+from django.db.models import Q
 
 ACTIVE = 'A'
 PENDING = 'P'
 SUSPENDED = 'S'
 CLOSED = 'C'
 MERCHANT_ACCOUNT_STATUS = ((PENDING, "Pending"), (ACTIVE, "Active"), (SUSPENDED, "Suspended"), (CLOSED, "Closed"))
+
+
+class MerchantManager(models.Manager):
+
+    def get_merchant_of_user(self, user):
+        return self.get_queryset().filter(
+            Q(users__id=user.id)).first()
 
 
 class Merchant(models.Model):
@@ -26,6 +33,8 @@ class Merchant(models.Model):
     company_image = models.ImageField(verbose_name="company image")
     company_email = models.EmailField()
     company_phone = models.CharField(max_length=12)
+
+    objects = MerchantManager()
 
     def is_active(self):
         return self.status == ACTIVE

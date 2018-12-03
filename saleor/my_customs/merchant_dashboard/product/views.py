@@ -10,7 +10,10 @@ from django.template.response import TemplateResponse
 from django.utils.translation import npgettext_lazy, pgettext_lazy
 from django.views.decorators.http import require_POST
 
+from saleor.my_customs.merchant.models import Merchant
 from . import forms
+from .filters import AttributeFilter, ProductFilter, ProductTypeFilter
+from ..views import staff_member_required
 from ....core.utils import get_paginator_items
 from ....discount.models import Sale
 from ....product.models import (
@@ -19,14 +22,22 @@ from ....product.models import (
 from ....product.utils.availability import get_availability
 from ....product.utils.costs import (
     get_margin_for_variant, get_product_costs_data)
-from ..views import staff_member_required
-from .filters import AttributeFilter, ProductFilter, ProductTypeFilter
 
 
 @staff_member_required
 @permission_required('product.manage_products')
 def product_list(request):
-    products = Product.objects.prefetch_related('images')
+    user = request.user
+
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+
+    merchant = Merchant.objects.get_merchant_of_user(user)
+
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    products = Product.objects.prefetch_related('images').get_by_merchant(merchant)
     products = products.order_by('name')
     product_types = ProductType.objects.all()
     product_filter = ProductFilter(request.GET, queryset=products)
@@ -44,7 +55,14 @@ def product_list(request):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_details(request, pk):
-    products = Product.objects.prefetch_related('variants', 'images').all()
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    products = Product.objects.prefetch_related('variants', 'images').get_by_merchant(merchant)
     product = get_object_or_404(products, pk=pk)
     variants = product.variants.all()
     images = product.images.all()
@@ -72,6 +90,13 @@ def product_details(request, pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_toggle_is_published(request, pk):
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     product = get_object_or_404(Product, pk=pk)
     product.is_published = not product.is_published
     product.save(update_fields=['is_published'])
@@ -87,7 +112,7 @@ def product_select_type(request):
     status = 200
     if form.is_valid():
         redirect_url = reverse(
-            'dashboard:product-add',
+            'merchant_dashboard:product-add',
             kwargs={'type_pk': form.cleaned_data.get('product_type').pk})
         return (
             JsonResponse({'redirectUrl': redirect_url})
@@ -102,6 +127,13 @@ def product_select_type(request):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_create(request, type_pk):
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     track_inventory = request.site.settings.track_inventory_by_default
     product_type = get_object_or_404(ProductType, pk=type_pk)
     create_variant = not product_type.has_variants
@@ -121,13 +153,17 @@ def product_create(request, type_pk):
 
     if product_form.is_valid() and not variant_errors:
         product = product_form.save()
+        if not product.merchant:
+            product.merchant = merchant
+            Product.save(product)
+
         if create_variant:
             variant.product = product
             variant_form.save()
         msg = pgettext_lazy(
             'Dashboard message', 'Added product %s') % (product,)
         messages.success(request, msg)
-        return redirect('dashboard:product-details', pk=product.pk)
+        return redirect('merchant_dashboard:product-details', pk=product.pk)
     ctx = {
         'product_form': product_form, 'variant_form': variant_form,
         'product': product}
@@ -137,8 +173,15 @@ def product_create(request, type_pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_edit(request, pk):
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     product = get_object_or_404(
-        Product.objects.prefetch_related('variants'), pk=pk)
+        Product.objects.prefetch_related('variants').get_by_merchant(merchant), pk=pk)
     form = forms.ProductForm(request.POST or None, instance=product)
 
     edit_variant = not product.product_type.has_variants
@@ -153,12 +196,16 @@ def product_edit(request, pk):
 
     if form.is_valid() and not variant_errors:
         product = form.save()
+        if not product.merchant:
+            product.merchant = merchant
+            Product.save(product)
+
         if edit_variant:
             variant_form.save()
         msg = pgettext_lazy(
             'Dashboard message', 'Updated product %s') % (product,)
         messages.success(request, msg)
-        return redirect('dashboard:product-details', pk=product.pk)
+        return redirect('merchant_dashboard:product-details', pk=product.pk)
     ctx = {
         'product': product, 'product_form': form, 'variant_form': variant_form}
     return TemplateResponse(request, 'my_customs/merchant_dashboard/product/form.html', ctx)
@@ -167,13 +214,20 @@ def product_edit(request, pk):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_delete(request, pk):
-    product = get_object_or_404(Product, pk=pk)
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    product = Product.objects.get_by_merchant(merchant).get(pk=pk)
     if request.method == 'POST':
         product.delete()
         msg = pgettext_lazy(
             'Dashboard message', 'Removed product %s') % (product,)
         messages.success(request, msg)
-        return redirect('dashboard:product-list')
+        return redirect('merchant_dashboard:product-list')
     return TemplateResponse(
         request,
         'my_customs/merchant_dashboard/product/modal/confirm_delete.html',
@@ -194,7 +248,7 @@ def product_bulk_update(request):
             '%(count)d products have been updated',
             number=count) % {'count': count}
         messages.success(request, msg)
-    return redirect('dashboard:product-list')
+    return redirect('merchant_dashboard:product-list')
 
 
 @staff_member_required
@@ -203,8 +257,15 @@ def ajax_products_list(request):
 
     Response format is that of a Select2 JS widget.
     """
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
     queryset = (
-        Product.objects.all()
+        Product.objects.get_by_merchant(merchant)
         if request.user.has_perm('product.manage_products')
         else Product.objects.available_products())
     search_query = request.GET.get('q', '')
@@ -218,7 +279,14 @@ def ajax_products_list(request):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_type_list(request):
-    types = ProductType.objects.all().prefetch_related(
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    types = ProductType.objects.get_by_merchant(merchant).prefetch_related(
         'product_attributes', 'variant_attributes').order_by('name')
     type_filter = ProductTypeFilter(request.GET, queryset=types)
     types = get_paginator_items(
@@ -246,7 +314,7 @@ def product_type_create(request):
         msg = pgettext_lazy(
             'Dashboard message', 'Added product type %s') % (product_type,)
         messages.success(request, msg)
-        return redirect('dashboard:product-type-list')
+        return redirect('merchant_dashboard:product-type-list')
     ctx = {'form': form, 'product_type': product_type}
     return TemplateResponse(
         request,
@@ -264,7 +332,7 @@ def product_type_edit(request, pk):
         msg = pgettext_lazy(
             'Dashboard message', 'Updated product type %s') % (product_type,)
         messages.success(request, msg)
-        return redirect('dashboard:product-type-update', pk=pk)
+        return redirect('merchant_dashboard:product-type-update', pk=pk)
     ctx = {'form': form, 'product_type': product_type}
     return TemplateResponse(
         request,
@@ -281,7 +349,7 @@ def product_type_delete(request, pk):
         msg = pgettext_lazy(
             'Dashboard message', 'Removed product type %s') % (product_type,)
         messages.success(request, msg)
-        return redirect('dashboard:product-type-list')
+        return redirect('merchant_dashboard:product-type-list')
     ctx = {
         'product_type': product_type,
         'products': product_type.products.all()}
@@ -300,7 +368,7 @@ def variant_details(request, product_pk, variant_pk):
     # If the product type of this product assumes no variants, redirect to
     # product details page that has special UI for products without variants.
     if not product.product_type.has_variants:
-        return redirect('dashboard:product-details', pk=product.pk)
+        return redirect('merchant_dashboard:product-details', pk=product.pk)
 
     images = variant.images.all()
     margin = get_margin_for_variant(variant)
@@ -330,7 +398,7 @@ def variant_create(request, product_pk):
             'Dashboard message', 'Saved variant %s') % (variant.name,)
         messages.success(request, msg)
         return redirect(
-            'dashboard:variant-details', product_pk=product.pk,
+            'merchant_dashboard:variant-details', product_pk=product.pk,
             variant_pk=variant.pk)
     ctx = {'form': form, 'product': product, 'variant': variant}
     return TemplateResponse(
@@ -351,7 +419,7 @@ def variant_edit(request, product_pk, variant_pk):
             'Dashboard message', 'Saved variant %s') % (variant.name,)
         messages.success(request, msg)
         return redirect(
-            'dashboard:variant-details', product_pk=product.pk,
+            'merchant_dashboard:variant-details', product_pk=product.pk,
             variant_pk=variant.pk)
     ctx = {'form': form, 'product': product, 'variant': variant}
     return TemplateResponse(
@@ -370,7 +438,7 @@ def variant_delete(request, product_pk, variant_pk):
         msg = pgettext_lazy(
             'Dashboard message', 'Removed variant %s') % (variant.name,)
         messages.success(request, msg)
-        return redirect('dashboard:product-details', pk=product.pk)
+        return redirect('merchant_dashboard:product-details', pk=product.pk)
     ctx = {
         'is_only_variant': product.variants.count() == 1, 'product': product,
         'variant': variant}
@@ -390,7 +458,7 @@ def variant_images(request, product_pk, variant_pk):
     if form.is_valid():
         form.save()
         return redirect(
-            'dashboard:variant-details', product_pk=product.pk,
+            'merchant_dashboard:variant-details', product_pk=product.pk,
             variant_pk=variant.pk)
     ctx = {'form': form, 'product': product, 'variant': variant}
     return TemplateResponse(
@@ -410,8 +478,8 @@ def ajax_available_variants_list(request):
         'product_type__product_attributes')
     queryset = ProductVariant.objects.filter(
         product__in=available_products).prefetch_related(
-            'product__category',
-            'product__product_type__product_attributes')
+        'product__category',
+        'product__product_type__product_attributes')
 
     search_query = request.GET.get('q', '')
     if search_query:
@@ -429,7 +497,14 @@ def ajax_available_variants_list(request):
 @staff_member_required
 @permission_required('product.manage_products')
 def product_images(request, product_pk):
-    products = Product.objects.prefetch_related('images')
+    user = request.user
+    if not user.is_authenticated:
+        return  # todo: return unauthorized page
+    merchant = Merchant.objects.get_merchant_of_user(user)
+    if not merchant:
+        return TemplateResponse(request, 'my_customs/merchant_dashboard/not_registered.html')
+
+    products = Product.objects.prefetch_related('images').get_by_merchant(merchant)
     product = get_object_or_404(products, pk=product_pk)
     images = product.images.all()
     ctx = {
@@ -451,7 +526,7 @@ def product_image_create(request, product_pk):
             'Dashboard message',
             'Added image %s') % (product_image.image.name,)
         messages.success(request, msg)
-        return redirect('dashboard:product-image-list', product_pk=product.pk)
+        return redirect('merchant_dashboard:product-image-list', product_pk=product.pk)
     ctx = {'form': form, 'product': product, 'product_image': product_image}
     return TemplateResponse(
         request,
@@ -472,7 +547,7 @@ def product_image_edit(request, product_pk, img_pk):
             'Dashboard message',
             'Updated image %s') % (product_image.image.name,)
         messages.success(request, msg)
-        return redirect('dashboard:product-image-list', product_pk=product.pk)
+        return redirect('merchant_dashboard:product-image-list', product_pk=product.pk)
     ctx = {'form': form, 'product': product, 'product_image': product_image}
     return TemplateResponse(
         request,
@@ -490,7 +565,7 @@ def product_image_delete(request, product_pk, img_pk):
         msg = pgettext_lazy(
             'Dashboard message', 'Removed image %s') % (image.image.name,)
         messages.success(request, msg)
-        return redirect('dashboard:product-image-list', product_pk=product.pk)
+        return redirect('merchant_dashboard:product-image-list', product_pk=product.pk)
     return TemplateResponse(
         request,
         'my_customs/merchant_dashboard/product/product_image/modal/confirm_delete.html',
@@ -573,7 +648,7 @@ def attribute_create(request):
         attribute = form.save()
         msg = pgettext_lazy('Dashboard message', 'Added attribute')
         messages.success(request, msg)
-        return redirect('dashboard:attribute-details', pk=attribute.pk)
+        return redirect('merchant_dashboard:attribute-details', pk=attribute.pk)
     ctx = {'attribute': attribute, 'form': form}
     return TemplateResponse(
         request,
@@ -590,7 +665,7 @@ def attribute_edit(request, pk):
         attribute = form.save()
         msg = pgettext_lazy('Dashboard message', 'Updated attribute')
         messages.success(request, msg)
-        return redirect('dashboard:attribute-details', pk=attribute.pk)
+        return redirect('merchant_dashboard:attribute-details', pk=attribute.pk)
     ctx = {'attribute': attribute, 'form': form}
     return TemplateResponse(
         request,
@@ -607,7 +682,7 @@ def attribute_delete(request, pk):
         msg = pgettext_lazy(
             'Dashboard message', 'Removed attribute %s') % (attribute.name,)
         messages.success(request, msg)
-        return redirect('dashboard:attributes')
+        return redirect('merchant_dashboard:attributes')
     return TemplateResponse(
         request,
         'my_customs/merchant_dashboard/product/attribute/modal/'
@@ -626,7 +701,7 @@ def attribute_value_create(request, attribute_pk):
         msg = pgettext_lazy(
             'Dashboard message', 'Added attribute\'s value')
         messages.success(request, msg)
-        return redirect('dashboard:attribute-details', pk=attribute_pk)
+        return redirect('merchant_dashboard:attribute-details', pk=attribute_pk)
     ctx = {'attribute': attribute, 'value': value, 'form': form}
     return TemplateResponse(
         request,
@@ -645,7 +720,7 @@ def attribute_value_edit(request, attribute_pk, value_pk):
         msg = pgettext_lazy(
             'Dashboard message', 'Updated attribute\'s value')
         messages.success(request, msg)
-        return redirect('dashboard:attribute-details', pk=attribute_pk)
+        return redirect('merchant_dashboard:attribute-details', pk=attribute_pk)
     ctx = {'attribute': attribute, 'value': value, 'form': form}
     return TemplateResponse(
         request,
@@ -663,7 +738,7 @@ def attribute_value_delete(request, attribute_pk, value_pk):
             'Dashboard message',
             'Removed attribute\'s value %s') % (value.name,)
         messages.success(request, msg)
-        return redirect('dashboard:attribute-details', pk=attribute_pk)
+        return redirect('merchant_dashboard:attribute-details', pk=attribute_pk)
     return TemplateResponse(
         request,
         'my_customs/merchant_dashboard/product/attribute/values/modal/confirm_delete.html',
