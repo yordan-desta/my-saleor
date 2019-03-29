@@ -1,20 +1,66 @@
 import Button from "@material-ui/core/Button";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import gray from "@material-ui/core/colors/grey";
-import { withStyles } from "@material-ui/core/styles";
-import CheckIcon from "@material-ui/icons/Check";
+import Portal from "@material-ui/core/Portal";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
+import classNames from "classnames";
 import * as React from "react";
-import i18n from "../../i18n";
 
-export type SaveButtonBarState =
-  | "loading"
-  | "success"
-  | "error"
-  | "default"
-  | string;
-interface SaveButtonBarProps {
-  disabled?: boolean;
-  state?: SaveButtonBarState;
+import useScroll from "../../hooks/useScroll";
+import i18n from "../../i18n";
+import { maybe } from "../../misc";
+import AppActionContext from "../AppLayout/AppActionContext";
+import ConfirmButton, {
+  ConfirmButtonTransitionState
+} from "../ConfirmButton/ConfirmButton";
+import Container from "../Container";
+
+const styles = (theme: Theme) =>
+  createStyles({
+    button: {
+      marginRight: theme.spacing.unit
+    },
+    cancelButton: {
+      marginRight: theme.spacing.unit * 2
+    },
+    container: {
+      display: "flex",
+      paddingBottom: theme.spacing.unit * 2,
+      paddingTop: theme.spacing.unit * 2,
+      [theme.breakpoints.down("sm")]: {
+        marginTop: theme.spacing.unit
+      }
+    },
+    deleteButton: {
+      "&:hover": {
+        backgroundColor: theme.palette.error.dark
+      },
+      backgroundColor: theme.palette.error.main,
+      color: theme.palette.error.contrastText
+    },
+    root: {
+      background: theme.palette.background.default,
+      borderTop: "1px solid transparent",
+      boxShadow: `0 -5px 5px 0 ${theme.overrides.MuiCard.root.borderColor}`,
+      transition: theme.transitions.duration.standard + "ms"
+    },
+    spacer: {
+      flex: "1"
+    },
+    stop: {
+      "&$root": {
+        borderTopColor: theme.overrides.MuiCard.root.borderColor,
+        boxShadow: `0 0 0 0 ${theme.overrides.MuiCard.root.borderColor}`
+      }
+    }
+  });
+
+interface SaveButtonBarProps extends WithStyles<typeof styles> {
+  disabled: boolean;
+  state: ConfirmButtonTransitionState;
   labels?: {
     cancel?: string;
     delete?: string;
@@ -25,66 +71,7 @@ interface SaveButtonBarProps {
   onSave(event: any);
 }
 
-const decorate = withStyles(theme => ({
-  button: {
-    marginRight: theme.spacing.unit
-  },
-  buttonProgress: {
-    "& svg": {
-      margin: 0
-    },
-    color: theme.palette.primary.main,
-    marginBottom: -theme.spacing.unit * 1.5,
-    marginLeft: -theme.spacing.unit * 0.5,
-    marginRight: theme.spacing.unit * 0.5,
-    marginTop: -theme.spacing.unit * 1.5,
-    position: "relative" as "relative"
-  },
-  cancelButton: {
-    marginRight: theme.spacing.unit * 2
-  },
-  deleteButton: {
-    "&:hover": {
-      backgroundColor: theme.palette.error.dark
-    },
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.error.contrastText
-  },
-  error: {
-    "&:hover": {
-      backgroundColor: theme.palette.error.main
-    },
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.error.contrastText
-  },
-  icon: {
-    marginBottom: -theme.spacing.unit * 1.5,
-    marginRight: theme.spacing.unit * 0.5,
-    marginTop: -theme.spacing.unit * 1.5,
-    position: "relative" as "relative"
-  },
-  root: {
-    borderTop: `1px ${gray[300]} solid`,
-    display: "flex",
-    marginBottom: theme.spacing.unit * 2,
-    marginTop: theme.spacing.unit * 2,
-    paddingTop: theme.spacing.unit * 2,
-    [theme.breakpoints.down("sm")]: {
-      marginTop: theme.spacing.unit
-    }
-  },
-  spacer: {
-    flex: "1"
-  },
-  success: {
-    "&:hover": {
-      backgroundColor: theme.palette.primary.main
-    },
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText
-  }
-}));
-export const SaveButtonBar = decorate<SaveButtonBarProps>(
+export const SaveButtonBar = withStyles(styles, { name: "SaveButtonBar" })(
   ({
     classes,
     disabled,
@@ -94,64 +81,65 @@ export const SaveButtonBar = decorate<SaveButtonBarProps>(
     onDelete,
     onSave,
     ...props
-  }) => {
-    let buttonClassName;
-    let buttonLabel;
-    switch (state) {
-      case "success":
-        buttonClassName = classes.success;
-        buttonLabel = i18n.t("Saved");
-        break;
-      case "error":
-        buttonClassName = classes.error;
-        buttonLabel = i18n.t("Error");
-        break;
-      case "loading":
-        buttonClassName = "";
-        buttonLabel = i18n.t("Saving");
-        break;
-      default:
-        buttonClassName = "";
-        buttonLabel = labels && labels.save ? labels.save : i18n.t("Save");
-        break;
-    }
+  }: SaveButtonBarProps) => {
+    const scrollPosition = useScroll();
+    const scrolledToBottom =
+      scrollPosition.y + window.innerHeight >= document.body.scrollHeight;
+
     return (
-      <div className={classes.root} {...props}>
-        {!!onDelete && (
-          <Button
-            variant="contained"
-            onClick={onDelete}
-            className={classes.deleteButton}
-          >
-            {labels && labels.delete ? labels.delete : i18n.t("Remove")}
-          </Button>
-        )}
-        <div className={classes.spacer} />
-        <Button
-          className={classes.cancelButton}
-          variant="flat"
-          onClick={onCancel}
-        >
-          {labels && labels.cancel ? labels.cancel : i18n.t("Cancel")}
-        </Button>
-        <Button
-          variant="contained"
-          onClick={onSave}
-          color="secondary"
-          disabled={disabled || state === "loading"}
-          className={buttonClassName}
-        >
-          {state === "loading" && (
-            <CircularProgress
-              size={24}
-              color="secondary"
-              className={classes.buttonProgress}
-            />
-          )}
-          {state === "success" && <CheckIcon className={classes.icon} />}
-          {buttonLabel}
-        </Button>
-      </div>
+      <AppActionContext.Consumer>
+        {anchor =>
+          anchor ? (
+            <Portal container={anchor.current}>
+              <div
+                className={classNames(classes.root, {
+                  [classes.stop]: scrolledToBottom
+                })}
+                {...props}
+              >
+                <Container className={classes.container}>
+                  {!!onDelete && (
+                    <Button
+                      variant="contained"
+                      onClick={onDelete}
+                      className={classes.deleteButton}
+                    >
+                      {labels && labels.delete
+                        ? labels.delete
+                        : i18n.t("Remove")}
+                    </Button>
+                  )}
+                  <div className={classes.spacer} />
+                  <Button
+                    className={classes.cancelButton}
+                    variant="text"
+                    onClick={onCancel}
+                  >
+                    {maybe(
+                      () => labels.cancel,
+                      i18n.t("Cancel", {
+                        context: "button"
+                      })
+                    )}
+                  </Button>
+                  <ConfirmButton
+                    disabled={disabled}
+                    onClick={onSave}
+                    transitionState={state}
+                  >
+                    {maybe(
+                      () => labels.save,
+                      i18n.t("Save", {
+                        context: "button"
+                      })
+                    )}
+                  </ConfirmButton>
+                </Container>
+              </div>
+            </Portal>
+          ) : null
+        }
+      </AppActionContext.Consumer>
     );
   }
 );

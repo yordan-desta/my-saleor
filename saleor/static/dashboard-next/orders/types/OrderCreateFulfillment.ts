@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { FulfillmentCreateInput, OrderEventsEmails, OrderEvents, FulfillmentStatus, PaymentChargeStatusEnum, OrderStatus, OrderAction } from "./../../types/globalTypes";
@@ -37,6 +38,7 @@ export interface OrderCreateFulfillment_orderFulfillmentCreate_order_billingAddr
 
 export interface OrderCreateFulfillment_orderFulfillmentCreate_order_events_user {
   __typename: "User";
+  id: string;
   email: string;
 }
 
@@ -74,6 +76,7 @@ export interface OrderCreateFulfillment_orderFulfillmentCreate_order_fulfillment
 export interface OrderCreateFulfillment_orderFulfillmentCreate_order_fulfillments_lines_orderLine {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -119,6 +122,7 @@ export interface OrderCreateFulfillment_orderFulfillmentCreate_order_lines_unitP
 export interface OrderCreateFulfillment_orderFulfillmentCreate_order_lines {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -229,7 +233,9 @@ export interface OrderCreateFulfillment_orderFulfillmentCreate_order {
   __typename: "Order";
   id: string;
   billingAddress: OrderCreateFulfillment_orderFulfillmentCreate_order_billingAddress | null;
+  canFinalize: boolean;
   created: any;
+  customerNote: string;
   events: (OrderCreateFulfillment_orderFulfillmentCreate_order_events | null)[] | null;
   fulfillments: (OrderCreateFulfillment_orderFulfillmentCreate_order_fulfillments | null)[];
   lines: (OrderCreateFulfillment_orderFulfillmentCreate_order_lines | null)[];
@@ -252,7 +258,7 @@ export interface OrderCreateFulfillment_orderFulfillmentCreate_order {
 
 export interface OrderCreateFulfillment_orderFulfillmentCreate {
   __typename: "FulfillmentCreate";
-  errors: (OrderCreateFulfillment_orderFulfillmentCreate_errors | null)[] | null;
+  errors: OrderCreateFulfillment_orderFulfillmentCreate_errors[] | null;
   order: OrderCreateFulfillment_orderFulfillmentCreate_order | null;
 }
 

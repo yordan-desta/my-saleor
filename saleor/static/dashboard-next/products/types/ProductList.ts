@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { StockAvailability } from "./../../types/globalTypes";
@@ -6,6 +7,11 @@ import { StockAvailability } from "./../../types/globalTypes";
 // ====================================================
 // GraphQL query operation: ProductList
 // ====================================================
+
+export interface ProductList_products_edges_node_thumbnail {
+  __typename: "Image";
+  url: string;
+}
 
 export interface ProductList_products_edges_node_availability {
   __typename: "ProductAvailability";
@@ -28,7 +34,7 @@ export interface ProductList_products_edges_node {
   __typename: "Product";
   id: string;
   name: string;
-  thumbnailUrl: string | null;
+  thumbnail: ProductList_products_edges_node_thumbnail | null;
   availability: ProductList_products_edges_node_availability | null;
   price: ProductList_products_edges_node_price | null;
   productType: ProductList_products_edges_node_productType;

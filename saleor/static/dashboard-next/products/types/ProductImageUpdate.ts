@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -134,8 +135,10 @@ export interface ProductImageUpdate_productImageUpdate_product_variants {
   sku: string;
   name: string;
   priceOverride: ProductImageUpdate_productImageUpdate_product_variants_priceOverride | null;
-  stockQuantity: number;
   margin: number | null;
+  quantity: number;
+  quantityAllocated: number;
+  stockQuantity: number;
 }
 
 export interface ProductImageUpdate_productImageUpdate_product_productType {
@@ -149,7 +152,7 @@ export interface ProductImageUpdate_productImageUpdate_product {
   __typename: "Product";
   id: string;
   name: string;
-  description: string;
+  descriptionJson: any;
   seoTitle: string | null;
   seoDescription: string | null;
   category: ProductImageUpdate_productImageUpdate_product_category;
@@ -159,7 +162,7 @@ export interface ProductImageUpdate_productImageUpdate_product {
   purchaseCost: ProductImageUpdate_productImageUpdate_product_purchaseCost | null;
   isPublished: boolean;
   chargeTaxes: boolean;
-  availableOn: any | null;
+  publicationDate: any | null;
   attributes: ProductImageUpdate_productImageUpdate_product_attributes[];
   availability: ProductImageUpdate_productImageUpdate_product_availability | null;
   images: (ProductImageUpdate_productImageUpdate_product_images | null)[] | null;
@@ -170,7 +173,7 @@ export interface ProductImageUpdate_productImageUpdate_product {
 
 export interface ProductImageUpdate_productImageUpdate {
   __typename: "ProductImageUpdate";
-  errors: (ProductImageUpdate_productImageUpdate_errors | null)[] | null;
+  errors: ProductImageUpdate_productImageUpdate_errors[] | null;
   product: ProductImageUpdate_productImageUpdate_product | null;
 }
 

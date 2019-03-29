@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { TaxRateType } from "./../../types/globalTypes";
@@ -63,7 +64,7 @@ export interface AttributeDelete_attributeDelete_productType {
 
 export interface AttributeDelete_attributeDelete {
   __typename: "AttributeDelete";
-  errors: (AttributeDelete_attributeDelete_errors | null)[] | null;
+  errors: AttributeDelete_attributeDelete_errors[] | null;
   productType: AttributeDelete_attributeDelete_productType | null;
 }
 

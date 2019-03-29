@@ -17,10 +17,7 @@ export const CustomerCreate: React.StatelessComponent<{}> = () => (
       <Messages>
         {pushMessage => {
           const handleCreateCustomerSuccess = (data: CreateCustomer) => {
-            if (
-              data.customerCreate.errors === null ||
-              data.customerCreate.errors.length === 0
-            ) {
+            if (data.customerCreate.errors.length === 0) {
               pushMessage({
                 text: i18n.t("Customer created", {
                   context: "notification"
@@ -41,10 +38,18 @@ export const CustomerCreate: React.StatelessComponent<{}> = () => (
                       <CustomerCreatePage
                         countries={maybe(() => data.shop.countries, [])}
                         disabled={loading || createCustomerOpts.loading}
-                        errors={maybe(
-                          () => createCustomerOpts.data.customerCreate.errors,
-                          []
-                        )}
+                        errors={maybe(() => {
+                          const errs =
+                            createCustomerOpts.data.customerCreate.errors;
+                          return errs.map(err =>
+                            err.field.split(":").length > 1
+                              ? {
+                                  ...err,
+                                  field: err.field.split(":")[1]
+                                }
+                              : err
+                          );
+                        }, [])}
                         saveButtonBar={
                           createCustomerOpts.loading ? "loading" : "default"
                         }
@@ -66,9 +71,17 @@ export const CustomerCreate: React.StatelessComponent<{}> = () => (
                           createCustomer({
                             variables: {
                               input: {
-                                defaultBillingAddress: address,
-                                defaultShippingAddress: address,
+                                defaultBillingAddress: {
+                                  ...address,
+                                  country: address.country.value
+                                },
+                                defaultShippingAddress: {
+                                  ...address,
+                                  country: address.country.value
+                                },
                                 email: formData.email,
+                                firstName: formData.customerFirstName,
+                                lastName: formData.customerLastName,
                                 note: formData.note,
                                 sendPasswordEmail: true
                               }

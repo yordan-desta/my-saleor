@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.checks import Warning, register
 from django.utils.translation import pgettext_lazy
-from prices import Money
 
 TOKEN_PATTERN = ('(?P<token>[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}'
                  '-[0-9a-z]{12})')
@@ -84,4 +83,5 @@ class TaxRateType:
         (RESTAURANTS, pgettext_lazy('VAT rate type', 'restaurants')),
         (SOCIAL_HOUSING, pgettext_lazy('VAT rate type', 'social housing')),
         (STANDARD, pgettext_lazy('VAT rate type', 'standard')),
-        (WATER, pgettext_lazy('VAT rate type', 'water')))
+        (WATER, pgettext_lazy('VAT rate type', 'water')),
+        (WINE, pgettext_lazy('VAT rate type', 'wine')))

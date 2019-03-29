@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import ExpressionWrapper, F, Max, Sum
+from django.db.models import F, Max, Sum
 from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import pgettext_lazy
@@ -15,7 +15,6 @@ from django_prices.models import MoneyField, TaxedMoneyField
 from measurement.measures import Weight
 from prices import Money
 
-from . import FulfillmentStatus, OrderEvents, OrderStatus, display_order_event
 from ..account.models import Address
 from ..core.utils.json_serializer import CustomJsonEncoder
 from ..core.utils.taxes import ZERO_TAXED_MONEY, zero_money
@@ -23,6 +22,7 @@ from ..core.weight import WeightUnits, zero_weight
 from ..discount.models import Voucher
 from ..payment import ChargeStatus, TransactionKind
 from ..shipping.models import ShippingMethod
+from . import FulfillmentStatus, OrderEvents, OrderStatus, display_order_event
 
 
 class OrderQueryset(models.QuerySet):
@@ -49,11 +49,12 @@ class OrderQueryset(models.QuerySet):
         """Return orders with payments to capture.
 
         Orders ready to capture are those which are not draft or canceled and
-        have a preauthorized payment.
+        have a preauthorized payment. The preauthorized payment can not
+        already be partially or fully captured.
         """
         qs = self.filter(
-            payments__is_active=True, payments__charge_status__in=[
-                ChargeStatus.NOT_CHARGED, ChargeStatus.CHARGED])
+            payments__is_active=True,
+            payments__charge_status=ChargeStatus.NOT_CHARGED)
         qs = qs.exclude(status={OrderStatus.DRAFT, OrderStatus.CANCELED})
         return qs.distinct()
 
@@ -96,6 +97,8 @@ class Order(models.Model):
     shipping_method_name = models.CharField(
         max_length=255, null=True, default=None, blank=True, editable=False)
     token = models.CharField(max_length=36, unique=True, blank=True)
+    # Token of a checkout instance that this order was created from
+    checkout_token = models.CharField(max_length=36, blank=True)
     total_net = MoneyField(
         currency=settings.DEFAULT_CURRENCY,
         max_digits=settings.DEFAULT_MAX_DIGITS,
@@ -126,7 +129,7 @@ class Order(models.Model):
     objects = OrderQueryset.as_manager()
 
     class Meta:
-        ordering = ('-pk',)
+        ordering = ('-pk', )
         permissions = ((
             'manage_orders',
             pgettext_lazy('Permission description', 'Manage orders.')),)
@@ -137,15 +140,28 @@ class Order(models.Model):
         return super().save(*args, **kwargs)
 
     def is_fully_paid(self):
-        payments = self.payments.filter(
-            charge_status=ChargeStatus.CHARGED)
-        total_captured = [
-            payment.get_captured_amount() for payment in payments]
-        total_paid = sum(total_captured, ZERO_TAXED_MONEY)
+        total_paid = self._total_paid()
         return total_paid.gross >= self.total.gross
+
+    def is_partly_paid(self):
+        total_paid = self._total_paid()
+        return total_paid.gross.amount > 0
 
     def get_user_current_email(self):
         return self.user.email if self.user else self.user_email
+
+    def _total_paid(self):
+        # Get total paid amount from partially charged,
+        # fully charged and partially refunded payments
+        payments = self.payments.filter(
+            charge_status__in=[
+                ChargeStatus.PARTIALLY_CHARGED,
+                ChargeStatus.FULLY_CHARGED,
+                ChargeStatus.PARTIALLY_REFUNDED])
+        total_captured = [
+            payment.get_captured_amount() for payment in payments]
+        total_paid = sum(total_captured, ZERO_TAXED_MONEY)
+        return total_paid
 
     def _index_billing_phone(self):
         return self.billing_address.phone
@@ -168,22 +184,23 @@ class Order(models.Model):
     def get_last_payment(self):
         return max(self.payments.all(), default=None, key=attrgetter('pk'))
 
-    def get_last_payment_status(self):
+    def get_payment_status(self):
         last_payment = self.get_last_payment()
         if last_payment:
             return last_payment.charge_status
-        return None
+        return ChargeStatus.NOT_CHARGED
 
-    def get_last_payment_status_display(self):
+    def get_payment_status_display(self):
         last_payment = self.get_last_payment()
         if last_payment:
             return last_payment.get_charge_status_display()
-        return None
+        return dict(ChargeStatus.CHOICES).get(ChargeStatus.NOT_CHARGED)
 
     def is_pre_authorized(self):
         return self.payments.filter(
             is_active=True,
-            transactions__kind=TransactionKind.AUTH).exists()
+            transactions__kind=TransactionKind.AUTH).filter(
+                transactions__is_success=True).exists()
 
     @property
     def quantity_fulfilled(self):
@@ -218,6 +235,15 @@ class Order(models.Model):
             OrderStatus.DRAFT, OrderStatus.CANCELED}
         return payment.can_capture() and order_status_ok
 
+    def can_charge(self, payment=None):
+        if not payment:
+            payment = self.get_last_payment()
+        if not payment:
+            return False
+        order_status_ok = self.status not in {
+            OrderStatus.DRAFT, OrderStatus.CANCELED}
+        return payment.can_charge() and order_status_ok
+
     def can_void(self, payment=None):
         if not payment:
             payment = self.get_last_payment()
@@ -239,13 +265,16 @@ class Order(models.Model):
     def total_authorized(self):
         payment = self.get_last_payment()
         if payment:
-            return Money(payment.total, payment.currency)
+            return payment.get_authorized_amount()
         return zero_money()
 
     @property
     def total_captured(self):
         payment = self.get_last_payment()
-        if payment and payment.charge_status == ChargeStatus.CHARGED:
+        if payment and payment.charge_status in (
+                ChargeStatus.PARTIALLY_CHARGED,
+                ChargeStatus.FULLY_CHARGED,
+                ChargeStatus.PARTIALLY_REFUNDED):
             return Money(payment.captured_amount, payment.currency)
         return zero_money()
 
@@ -254,11 +283,7 @@ class Order(models.Model):
         return self.total_captured - self.total.gross
 
     def get_total_weight(self):
-        # Cannot use `sum` as it parses an empty Weight to an int
-        weights = Weight(kg=0)
-        for line in self:
-            weights += line.variant.get_weight() * line.quantity
-        return weights
+        return self.weight
 
 
 class OrderLine(models.Model):
@@ -290,7 +315,7 @@ class OrderLine(models.Model):
         max_digits=5, decimal_places=2, default=Decimal('0.0'))
 
     class Meta:
-        ordering = ('pk',)
+        ordering = ('pk', )
 
     def __str__(self):
         return self.product_name
@@ -347,7 +372,7 @@ class FulfillmentLine(models.Model):
         OrderLine, related_name='+', on_delete=models.CASCADE)
     fulfillment = models.ForeignKey(
         Fulfillment, related_name='lines', on_delete=models.CASCADE)
-    quantity = models.IntegerField(validators=[MinValueValidator(1)])
+    quantity = models.PositiveIntegerField()
 
 
 class OrderEvent(models.Model):

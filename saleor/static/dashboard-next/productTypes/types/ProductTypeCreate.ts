@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { ProductTypeInput, TaxRateType } from "./../../types/globalTypes";
@@ -63,7 +64,7 @@ export interface ProductTypeCreate_productTypeCreate_productType {
 
 export interface ProductTypeCreate_productTypeCreate {
   __typename: "ProductTypeCreate";
-  errors: (ProductTypeCreate_productTypeCreate_errors | null)[] | null;
+  errors: ProductTypeCreate_productTypeCreate_errors[] | null;
   productType: ProductTypeCreate_productTypeCreate_productType | null;
 }
 

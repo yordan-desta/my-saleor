@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { AttributeUpdateInput } from "./../../types/globalTypes";
@@ -30,7 +31,7 @@ export interface AttributeUpdate_attributeUpdate_attribute {
 
 export interface AttributeUpdate_attributeUpdate {
   __typename: "AttributeUpdate";
-  errors: (AttributeUpdate_attributeUpdate_errors | null)[] | null;
+  errors: AttributeUpdate_attributeUpdate_errors[] | null;
   attribute: AttributeUpdate_attributeUpdate_attribute | null;
 }
 

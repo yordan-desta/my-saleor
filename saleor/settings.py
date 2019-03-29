@@ -59,16 +59,21 @@ TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en'
 LANGUAGES = [
     ('ar', _('Arabic')),
+    ('az', _('Azerbaijani')),
     ('bg', _('Bulgarian')),
     ('bn', _('Bengali')),
+    ('ca', _('Catalan')),
     ('cs', _('Czech')),
     ('da', _('Danish')),
     ('de', _('German')),
     ('en', _('English')),
     ('es', _('Spanish')),
+    ('et', _('Estonian')),
     ('fa', _('Persian')),
     ('fr', _('French')),
+    ('hi', _('Hindi')),
     ('hu', _('Hungarian')),
+    ('id', _('Indonesian')),
     ('it', _('Italian')),
     ('ja', _('Japanese')),
     ('ko', _('Korean')),
@@ -80,7 +85,10 @@ LANGUAGES = [
     ('ro', _('Romanian')),
     ('ru', _('Russian')),
     ('sk', _('Slovak')),
+    ('sr', _('Serbian')),
+    ('sw', _('Swahili')),
     ('sv', _('Swedish')),
+    ('th', _('Thai')),
     ('tr', _('Turkish')),
     ('uk', _('Ukrainian')),
     ('vi', _('Vietnamese')),
@@ -554,9 +562,11 @@ SERIALIZATION_MODULES = {
 
 DUMMY = 'dummy'
 BRAINTREE = 'braintree'
+RAZORPAY = 'razorpay'
+STRIPE = 'stripe'
+
 CHECKOUT_PAYMENT_GATEWAYS = {
-    DUMMY: pgettext_lazy('Payment method name', 'Dummy gateway')
-}
+    DUMMY: pgettext_lazy('Payment method name', 'Dummy gateway')}
 
 PAYMENT_GATEWAYS = {
     DUMMY: {
@@ -570,5 +580,37 @@ PAYMENT_GATEWAYS = {
             'public_key': os.environ.get('BRAINTREE_PUBLIC_KEY'),
             'private_key': os.environ.get('BRAINTREE_PRIVATE_KEY')
         }
+    },
+    RAZORPAY: {
+        'module': 'saleor.payment.gateways.razorpay',
+        'connection_params': {
+            'public_key': os.environ.get('RAZORPAY_PUBLIC_KEY'),
+            'secret_key': os.environ.get('RAZORPAY_SECRET_KEY'),
+            'prefill': get_bool_from_env('RAZORPAY_PREFILL', True),
+            'store_name': os.environ.get('RAZORPAY_STORE_NAME'),
+            'store_image': os.environ.get('RAZORPAY_STORE_IMAGE')
+        }
+    },
+    STRIPE: {
+        'module': 'saleor.payment.gateways.stripe',
+        'connection_params': {
+            'public_key': os.environ.get('STRIPE_PUBLIC_KEY'),
+            'secret_key': os.environ.get('STRIPE_SECRET_KEY'),
+            'store_name': os.environ.get(
+                'STRIPE_STORE_NAME', 'Saleor'),
+            'store_image': os.environ.get('STRIPE_STORE_IMAGE', None),
+            'prefill': get_bool_from_env('STRIPE_PREFILL', True),
+            'remember_me': os.environ.get('STRIPE_REMEMBER_ME', True),
+            'locale': os.environ.get('STRIPE_LOCALE', 'auto'),
+            'enable_billing_address': os.environ.get(
+                'STRIPE_ENABLE_BILLING_ADDRESS', False),
+            'enable_shipping_address': os.environ.get(
+                'STRIPE_ENABLE_SHIPPING_ADDRESS', False)
+        }
     }
+}
+
+GRAPHENE = {
+    'RELAY_CONNECTION_ENFORCE_FIRST_OR_LAST': True,
+    'RELAY_CONNECTION_MAX_LIMIT': 100
 }

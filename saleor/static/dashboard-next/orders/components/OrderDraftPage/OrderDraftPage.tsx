@@ -1,16 +1,23 @@
-import { withStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import * as React from "react";
 
-import { CardMenu } from "../../../components/CardMenu/CardMenu";
+import AppHeader from "../../../components/AppHeader";
+import CardMenu from "../../../components/CardMenu";
+import { ConfirmButtonTransitionState } from "../../../components/ConfirmButton/ConfirmButton";
 import { Container } from "../../../components/Container";
-import DateFormatter from "../../../components/DateFormatter";
+import { DateTime } from "../../../components/Date";
+import Grid from "../../../components/Grid";
 import PageHeader from "../../../components/PageHeader";
 import SaveButtonBar from "../../../components/SaveButtonBar";
 import Skeleton from "../../../components/Skeleton";
 import i18n from "../../../i18n";
 import { maybe } from "../../../misc";
-import { UserError } from "../../../types";
 import { DraftOrderInput } from "../../../types/globalTypes";
 import { OrderDetails_order } from "../../types/OrderDetails";
 import { UserSearch_customers_edges_node } from "../../types/UserSearch";
@@ -19,7 +26,18 @@ import OrderDraftDetails from "../OrderDraftDetails/OrderDraftDetails";
 import { FormData as OrderDraftDetailsProductsFormData } from "../OrderDraftDetailsProducts";
 import OrderHistory, { FormData as HistoryFormData } from "../OrderHistory";
 
-export interface OrderDraftPageProps {
+const styles = (theme: Theme) =>
+  createStyles({
+    date: {
+      marginBottom: theme.spacing.unit * 3,
+      marginLeft: theme.spacing.unit * 7
+    },
+    header: {
+      marginBottom: 0
+    }
+  });
+
+export interface OrderDraftPageProps extends WithStyles<typeof styles> {
   disabled: boolean;
   order: OrderDetails_order;
   users: UserSearch_customers_edges_node[];
@@ -28,15 +46,7 @@ export interface OrderDraftPageProps {
     code: string;
     label: string;
   }>;
-  variants: Array<{
-    id: string;
-    name: string;
-    sku: string;
-    stockQuantity: number;
-  }>;
-  variantsLoading: boolean;
-  errors: UserError[];
-  fetchVariants: (value: string) => void;
+  saveButtonBarState: ConfirmButtonTransitionState;
   fetchUsers: (query: string) => void;
   onBack: () => void;
   onBillingAddressEdit: () => void;
@@ -55,28 +65,12 @@ export interface OrderDraftPageProps {
   onShippingMethodEdit: () => void;
 }
 
-const decorate = withStyles(theme => ({
-  date: {
-    marginBottom: theme.spacing.unit * 3,
-    marginLeft: theme.spacing.unit * 7
-  },
-  header: {
-    marginBottom: 0
-  },
-  menu: {
-    marginRight: -theme.spacing.unit
-  },
-  root: {
-    display: "grid",
-    gridColumnGap: theme.spacing.unit * 2 + "px",
-    gridTemplateColumns: "9fr 4fr"
-  }
-}));
-const OrderDraftPage = decorate<OrderDraftPageProps>(
+const OrderDraftPage = withStyles(styles, { name: "OrderDraftPage" })(
   ({
     classes,
     disabled,
     fetchUsers,
+    saveButtonBarState,
     onBack,
     onBillingAddressEdit,
     onCustomerEdit,
@@ -91,15 +85,14 @@ const OrderDraftPage = decorate<OrderDraftPageProps>(
     order,
     users,
     usersLoading
-  }) => (
-    <Container width="md">
+  }: OrderDraftPageProps) => (
+    <Container>
+      <AppHeader onBack={onBack}>{i18n.t("Orders")}</AppHeader>
       <PageHeader
         className={classes.header}
         title={maybe(() => order.number) ? "#" + order.number : undefined}
-        onBack={onBack}
       >
         <CardMenu
-          className={classes.menu}
           menuItems={[
             {
               label: i18n.t("Cancel order", { context: "button" }),
@@ -111,13 +104,13 @@ const OrderDraftPage = decorate<OrderDraftPageProps>(
       <div className={classes.date}>
         {order && order.created ? (
           <Typography variant="caption">
-            <DateFormatter date={order.created} />
+            <DateTime date={order.created} />
           </Typography>
         ) : (
           <Skeleton style={{ width: "10em" }} />
         )}
       </div>
-      <div className={classes.root}>
+      <Grid>
         <div>
           <OrderDraftDetails
             order={order}
@@ -144,9 +137,10 @@ const OrderDraftPage = decorate<OrderDraftPageProps>(
             onShippingAddressEdit={onShippingAddressEdit}
           />
         </div>
-      </div>
+      </Grid>
       <SaveButtonBar
-        disabled={disabled || maybe(() => order.lines.length === 0)}
+        state={saveButtonBarState}
+        disabled={disabled || !maybe(() => order.canFinalize)}
         onCancel={onBack}
         onSave={onDraftFinalize}
         labels={{ save: i18n.t("Finalize", { context: "button" }) }}

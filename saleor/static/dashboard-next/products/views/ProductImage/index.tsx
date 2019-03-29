@@ -6,7 +6,7 @@ import ActionDialog from "../../../components/ActionDialog";
 import Messages from "../../../components/messages";
 import Navigator from "../../../components/Navigator";
 import i18n from "../../../i18n";
-import { maybe } from "../../../misc";
+import { getMutationState, maybe } from "../../../misc";
 import ProductImagePage from "../../components/ProductImagePage";
 import {
   TypedProductImageDeleteMutation,
@@ -15,7 +15,7 @@ import {
 import { TypedProductImageQuery } from "../../queries";
 import { ProductImageUpdate } from "../../types/ProductImageUpdate";
 import { productImageUrl, productUrl } from "../../urls";
-import { productImageRemoveUrl } from "./urls";
+import { productImageRemovePath, productImageRemoveUrl } from "./urls";
 
 interface ProductImageProps {
   imageId: string;
@@ -30,13 +30,9 @@ export const ProductImage: React.StatelessComponent<ProductImageProps> = ({
     {pushMessage => (
       <Navigator>
         {navigate => {
-          const handleBack = () =>
-            navigate(productUrl(encodeURIComponent(productId)));
+          const handleBack = () => navigate(productUrl(productId));
           const handleUpdateSuccess = (data: ProductImageUpdate) => {
-            if (
-              data.productImageUpdate &&
-              data.productImageUpdate.errors.length === 0
-            ) {
+            if (data.productImageUpdate.errors.length === 0) {
               pushMessage({ text: "Saved changes" });
             }
           };
@@ -47,24 +43,20 @@ export const ProductImage: React.StatelessComponent<ProductImageProps> = ({
                 imageId,
                 productId
               }}
+              require={["product"]}
             >
               {({ data, loading }) => {
                 return (
                   <TypedProductImageUpdateMutation
                     onCompleted={handleUpdateSuccess}
                   >
-                    {updateImage => (
+                    {(updateImage, updateResult) => (
                       <TypedProductImageDeleteMutation onCompleted={handleBack}>
-                        {deleteImage => {
+                        {(deleteImage, deleteResult) => {
                           const handleDelete = () =>
                             deleteImage({ variables: { id: imageId } });
                           const handleImageClick = (id: string) => () =>
-                            navigate(
-                              productImageUrl(
-                                encodeURIComponent(productId),
-                                encodeURIComponent(id)
-                              )
-                            );
+                            navigate(productImageUrl(productId, id));
                           const handleUpdate = (formData: {
                             description: string;
                           }) => {
@@ -77,26 +69,38 @@ export const ProductImage: React.StatelessComponent<ProductImageProps> = ({
                           };
                           const image =
                             data && data.product && data.product.mainImage;
+
+                          const formTransitionState = getMutationState(
+                            updateResult.called,
+                            updateResult.loading,
+                            maybe(
+                              () => updateResult.data.productImageUpdate.errors
+                            )
+                          );
+                          const deleteTransitionState = getMutationState(
+                            deleteResult.called,
+                            deleteResult.loading,
+                            []
+                          );
                           return (
                             <>
                               <ProductImagePage
                                 disabled={loading}
+                                product={maybe(() => data.product.name)}
                                 image={image || null}
                                 images={maybe(() => data.product.images)}
                                 onBack={handleBack}
                                 onDelete={() =>
                                   navigate(
-                                    productImageRemoveUrl(
-                                      encodeURIComponent(productId),
-                                      encodeURIComponent(imageId)
-                                    )
+                                    productImageRemoveUrl(productId, imageId)
                                   )
                                 }
                                 onRowClick={handleImageClick}
                                 onSubmit={handleUpdate}
+                                saveButtonBarState={formTransitionState}
                               />
                               <Route
-                                path={productImageRemoveUrl(
+                                path={productImageRemovePath(
                                   ":productId",
                                   ":imageId"
                                 )}
@@ -113,10 +117,11 @@ export const ProductImage: React.StatelessComponent<ProductImageProps> = ({
                                       context: "modal title"
                                     })}
                                     variant="delete"
+                                    confirmButtonState={deleteTransitionState}
                                   >
                                     <DialogContentText>
                                       {i18n.t(
-                                        "Are you sure you want o remove this image?",
+                                        "Are you sure you want to remove this image?",
                                         {
                                           context: "modal content"
                                         }

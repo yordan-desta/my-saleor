@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -27,7 +28,7 @@ export interface ProductImageReorder_productImageReorder_product {
 
 export interface ProductImageReorder_productImageReorder {
   __typename: "ProductImageReorder";
-  errors: (ProductImageReorder_productImageReorder_errors | null)[] | null;
+  errors: ProductImageReorder_productImageReorder_errors[] | null;
   product: ProductImageReorder_productImageReorder_product | null;
 }
 

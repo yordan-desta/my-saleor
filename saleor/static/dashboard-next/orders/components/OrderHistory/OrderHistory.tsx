@@ -1,8 +1,14 @@
-import { withStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
 import * as React from "react";
 
 import Form from "../../../components/Form";
-import PageHeader from "../../../components/PageHeader";
+import Hr from "../../../components/Hr";
 import Skeleton from "../../../components/Skeleton";
 import {
   Timeline,
@@ -103,35 +109,33 @@ const getEventMessage = (event: OrderDetails_order_events) => {
   }
 };
 
-interface OrderHistoryProps {
+const styles = (theme: Theme) =>
+  createStyles({
+    header: {
+      fontWeight: 500,
+      marginBottom: theme.spacing.unit
+    },
+    root: { marginTop: theme.spacing.unit * 4 },
+    user: {
+      marginBottom: theme.spacing.unit
+    }
+  });
+
+interface OrderHistoryProps extends WithStyles<typeof styles> {
   history: OrderDetails_order_events[];
   onNoteAdd: (data: FormData) => void;
 }
 
-const decorate = withStyles(
-  theme => ({
-    root: { marginTop: theme.spacing.unit * 2 },
-    user: {
-      marginBottom: theme.spacing.unit
-    }
-  }),
-  { name: "OrderHistory" }
-);
-const OrderHistory = decorate<OrderHistoryProps>(
-  ({ classes, history, onNoteAdd }) => (
+const OrderHistory = withStyles(styles, { name: "OrderHistory" })(
+  ({ classes, history, onNoteAdd }: OrderHistoryProps) => (
     <div className={classes.root}>
-      <PageHeader
-        title={i18n.t("Order timeline", {
-          context: "section name"
-        })}
-      />
+      <Typography className={classes.header} color="textSecondary">
+        {i18n.t("Order History")}
+      </Typography>
+      <Hr />
       {history ? (
         <Timeline>
-          <Form
-            initial={{ message: "" }}
-            onSubmit={onNoteAdd}
-            key={JSON.stringify(history)}
-          >
+          <Form initial={{ message: "" }} onSubmit={onNoteAdd} resetOnSubmit>
             {({ change, data, submit }) => (
               <TimelineAddNote
                 message={data.message}

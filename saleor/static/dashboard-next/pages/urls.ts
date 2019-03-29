@@ -1,6 +1,16 @@
 import * as urlJoin from "url-join";
 
-const pageSectionUrl = "/pages/";
-export const pageListUrl = pageSectionUrl;
-export const pageUrl = (id: string) => urlJoin(pageSectionUrl, id);
-export const pageAddUrl = urlJoin(pageSectionUrl, "add");
+export const pagesSection = "/pages/";
+
+export const pageListPath = pagesSection;
+export const pageListUrl = pageListPath;
+
+export const pagePath = (id: string) => urlJoin(pagesSection, id);
+export const pageUrl = (id: string) => pagePath(encodeURIComponent(id));
+
+export const pageCreatePath = urlJoin(pagesSection, "add");
+export const pageCreateUrl = pageCreatePath;
+
+export const pageRemovePath = (id: string) => urlJoin(pagePath(id), "remove");
+export const pageRemoveUrl = (id: string) =>
+  pageRemovePath(encodeURIComponent(id));

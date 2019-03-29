@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { AttributeValueInput } from "./../../types/globalTypes";
@@ -67,6 +68,11 @@ export interface VariantCreate_productVariantCreate_productVariant_product_image
   url: string;
 }
 
+export interface VariantCreate_productVariantCreate_productVariant_product_thumbnail {
+  __typename: "Image";
+  url: string;
+}
+
 export interface VariantCreate_productVariantCreate_productVariant_product_variants_images {
   __typename: "ProductImage";
   id: string;
@@ -86,7 +92,7 @@ export interface VariantCreate_productVariantCreate_productVariant_product {
   id: string;
   images: (VariantCreate_productVariantCreate_productVariant_product_images | null)[] | null;
   name: string;
-  thumbnailUrl: string | null;
+  thumbnail: VariantCreate_productVariantCreate_productVariant_product_thumbnail | null;
   variants: (VariantCreate_productVariantCreate_productVariant_product_variants | null)[] | null;
 }
 
@@ -106,7 +112,7 @@ export interface VariantCreate_productVariantCreate_productVariant {
 
 export interface VariantCreate_productVariantCreate {
   __typename: "ProductVariantCreate";
-  errors: (VariantCreate_productVariantCreate_errors | null)[] | null;
+  errors: VariantCreate_productVariantCreate_errors[] | null;
   productVariant: VariantCreate_productVariantCreate_productVariant | null;
 }
 

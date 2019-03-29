@@ -1,33 +1,48 @@
-import { withStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import * as React from "react";
 
 import { AddressTypeInput } from "../../customers/types";
 import i18n from "../../i18n";
 import { maybe } from "../../misc";
+import { FormErrors } from "../../types";
 import FormSpacer from "../FormSpacer";
-import SingleSelectField from "../SingleSelectField";
+import SingleAutocompleteSelectField from "../SingleAutocompleteSelectField";
 
-interface AddressEditProps {
+const styles = (theme: Theme) =>
+  createStyles({
+    root: {
+      display: "grid",
+      gridColumnGap: `${theme.spacing.unit * 2}px`,
+      gridTemplateColumns: "1fr 1fr"
+    }
+  });
+
+interface AddressEditProps extends WithStyles<typeof styles> {
   countries?: Array<{
     code: string;
     label: string;
   }>;
   data: AddressTypeInput;
   disabled?: boolean;
-  errors: { [T in keyof AddressTypeInput]?: string };
+  errors: FormErrors<keyof AddressTypeInput>;
   onChange(event: React.ChangeEvent<any>);
 }
 
-const decorate = withStyles(theme => ({
-  root: {
-    display: "grid",
-    gridColumnGap: `${theme.spacing.unit * 2}px`,
-    gridTemplateColumns: "1fr 1fr"
-  }
-}));
-const AddressEdit = decorate<AddressEditProps>(
-  ({ classes, countries, data, disabled, errors, onChange }) => (
+const AddressEdit = withStyles(styles, { name: "AddressEdit" })(
+  ({
+    classes,
+    countries,
+    data,
+    disabled,
+    errors,
+    onChange
+  }: AddressEditProps) => (
     <>
       <div className={classes.root}>
         <div>
@@ -135,10 +150,10 @@ const AddressEdit = decorate<AddressEditProps>(
       <FormSpacer />
       <div className={classes.root}>
         <div>
-          <SingleSelectField
+          <SingleAutocompleteSelectField
             disabled={disabled}
             error={!!errors.country}
-            hint={errors.country}
+            helperText={errors.country}
             label={i18n.t("Country")}
             name="country"
             onChange={onChange}
@@ -147,6 +162,9 @@ const AddressEdit = decorate<AddressEditProps>(
               () => countries.map(c => ({ ...c, value: c.code })),
               []
             )}
+            InputProps={{
+              autoComplete: "off"
+            }}
           />
         </div>
         <div>

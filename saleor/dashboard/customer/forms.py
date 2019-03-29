@@ -4,6 +4,13 @@ from django.utils.translation import pgettext_lazy
 from ...account.models import CustomerNote, User
 
 
+def get_name_placeholder(name):
+    return pgettext_lazy(
+        'Customer form: Name field placeholder',
+        '%(name)s (Inherit from default billing address)') % {
+            'name': name}
+
+
 class CustomerDeleteForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
@@ -35,23 +42,39 @@ class CustomerDeleteForm(forms.Form):
 
 class CustomerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
+        # The user argument is required
+        self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
-        # disable 'is_active' checkbox if user edits his own account
+
+        # Disable editing following fields if user edits his own account
         if self.user == self.instance:
-            self.fields['is_active'].disabled = True
             self.fields['note'].disabled = True
+            self.fields['is_active'].disabled = True
+
+        address = self.instance.default_billing_address
+        if not address:
+            return
+        if address.first_name:
+            placeholder = get_name_placeholder(address.first_name)
+            self.fields['first_name'].widget.attrs['placeholder'] = placeholder
+        if address.last_name:
+            placeholder = get_name_placeholder(address.last_name)
+            self.fields['last_name'].widget.attrs['placeholder'] = placeholder
 
     class Meta:
         model = User
-        fields = ['email', 'is_active', 'note']
+        fields = ['first_name', 'last_name', 'email', 'note', 'is_active']
         labels = {
+            'first_name': pgettext_lazy(
+                'Customer form: Given name field', 'Given name'),
+            'last_name': pgettext_lazy(
+                'Customer form: Family name field', 'Family name'),
             'email': pgettext_lazy(
                 'Customer form: email address field', 'Email'),
-            'is_active': pgettext_lazy(
-                'Customer form: is active toggle', 'User is active'),
             'note': pgettext_lazy(
-                'Customer form: customer note field', 'Notes')}
+                'Customer form: customer note field', 'Notes'),
+            'is_active': pgettext_lazy(
+                'Customer form: is active toggle', 'User is active')}
 
 
 class CustomerNoteForm(forms.ModelForm):

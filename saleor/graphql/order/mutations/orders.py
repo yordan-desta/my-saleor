@@ -5,13 +5,15 @@ from ....account.models import User
 from ....core.utils.taxes import ZERO_TAXED_MONEY
 from ....order import OrderEvents, models
 from ....order.utils import cancel_order
-from ....payment import ChargeStatus, CustomPaymentChoices, PaymentError
-from ....payment.models import Payment
-from ....payment.utils import get_billing_data
+from ....payment import CustomPaymentChoices, PaymentError
+from ....payment.utils import (
+    clean_mark_order_as_paid, gateway_capture, gateway_refund, gateway_void,
+    mark_order_as_paid)
 from ....shipping.models import ShippingMethod as ShippingMethodModel
 from ...account.types import AddressInput
 from ...core.mutations import BaseMutation
-from ...core.types.common import Decimal, Error
+from ...core.scalars import Decimal
+from ...core.types.common import Error
 from ...order.mutations.draft_orders import DraftOrderUpdate
 from ...order.types import Order, OrderEvent
 from ...shipping.types import ShippingMethod
@@ -42,29 +44,12 @@ def clean_order_update_shipping(order, method, errors):
     return errors
 
 
-def try_payment_action(action, amount, errors):
-    try:
-        action(amount)
-    except (PaymentError, ValueError) as e:
-        errors.append(Error(field='payment', message=str(e)))
-
-
 def clean_order_cancel(order, errors):
     if order and not order.can_cancel():
         errors.append(
             Error(
                 field='order',
                 message='This order can\'t be canceled.'))
-    return errors
-
-
-def clean_order_mark_as_paid(order, errors):
-    if order and order.payments.exists():
-        errors.append(
-            Error(
-                field='payment',
-                message='Orders with payments can not be manually '
-                        'marked as paid.'))
     return errors
 
 
@@ -90,7 +75,7 @@ def clean_void_payment(payment, errors):
             Error(field='payment',
                   message='Only pre-authorized payments can be voided'))
     try:
-        payment.void()
+        gateway_void(payment)
     except (PaymentError, ValueError) as e:
         errors.append(Error(field='payment', message=str(e)))
     return errors
@@ -123,16 +108,6 @@ class OrderUpdate(DraftOrderUpdate):
     class Meta:
         description = 'Updates an order.'
         model = models.Order
-
-    @classmethod
-    def clean_input(cls, info, instance, input, errors):
-        cleaned_input = super().clean_input(info, instance, input, errors)
-        if not instance.user and not cleaned_input.get('user_email'):
-            cls.add_error(
-                errors, field='user_email',
-                message='User_email field is null while order was created by '
-                        'anonymous user')
-        return cleaned_input
 
     @classmethod
     def save(cls, info, instance, cleaned_input):
@@ -171,7 +146,7 @@ class OrderUpdateShipping(BaseMutation):
         order = cls.get_node_or_error(info, id, errors, 'id', Order)
 
         if not input['shipping_method']:
-            if order.is_shipping_required():
+            if not order.is_draft() and order.is_shipping_required():
                 cls.add_error(
                     errors, 'shippingMethod',
                     'Shipping method is required for this order.')
@@ -268,7 +243,6 @@ class OrderCancel(BaseMutation):
         else:
             order.events.create(
                 type=OrderEvents.CANCELED.value, user=info.context.user)
-        # FIXME all payments should be voided/refunded at this point
         return OrderCancel(order=order)
 
 
@@ -287,22 +261,14 @@ class OrderMarkAsPaid(BaseMutation):
     def mutate(cls, root, info, id):
         errors = []
         order = cls.get_node_or_error(info, id, errors, 'id', Order)
-        clean_order_mark_as_paid(order, errors)
+        if order is not None:
+            try:
+                clean_mark_order_as_paid(order)
+            except PaymentError as e:
+                errors.append(Error(field='payment', message=str(e)))
         if errors:
             return OrderMarkAsPaid(errors=errors)
-        defaults = {
-            'total': order.total.gross.amount,
-            'captured_amount': order.total.gross.amount,
-            'currency': order.total.gross.currency,
-            **get_billing_data(order)}
-        Payment.objects.get_or_create(
-            gateway=CustomPaymentChoices.MANUAL,
-            charge_status=ChargeStatus.CHARGED, order=order,
-            defaults=defaults)
-
-        order.events.create(
-            type=OrderEvents.ORDER_MARKED_AS_PAID.value,
-            user=info.context.user)
+        mark_order_as_paid(order, info.context.user)
         return OrderMarkAsPaid(order=order)
 
 
@@ -323,14 +289,19 @@ class OrderCapture(BaseMutation):
     def mutate(cls, root, info, id, amount):
         errors = []
         if amount <= 0:
-            cls.add_error('Amount should be a positive number.')
+            cls.add_error(
+                errors, 'amount', 'Amount should be a positive number.')
             return OrderCapture(errors=errors)
 
         order = cls.get_node_or_error(info, id, errors, 'id', Order)
-        # FIXME adjust to multiple payments in the future
         payment = order.get_last_payment()
         clean_order_capture(payment, amount, errors)
-        try_payment_action(payment.capture, amount, errors)
+
+        try:
+            gateway_capture(payment, amount)
+        except PaymentError as e:
+            errors.append(Error(field='payment', message=str(e)))
+
         if errors:
             return OrderCapture(errors=errors)
 
@@ -385,14 +356,19 @@ class OrderRefund(BaseMutation):
     def mutate(cls, root, info, id, amount):
         errors = []
         if amount <= 0:
-            cls.add_error('Amount should be a positive number.')
+            cls.add_error(
+                errors, 'amount', 'Amount should be a positive number.')
             return OrderRefund(errors=errors)
 
         order = cls.get_node_or_error(info, id, errors, 'id', Order)
         if order:
             payment = order.get_last_payment()
             clean_refund_payment(payment, amount, errors)
-            try_payment_action(payment.refund, amount, errors)
+            try:
+                gateway_refund(payment, amount)
+            except PaymentError as e:
+                errors.append(Error(field='payment', message=str(e)))
+
         if errors:
             return OrderRefund(errors=errors)
 

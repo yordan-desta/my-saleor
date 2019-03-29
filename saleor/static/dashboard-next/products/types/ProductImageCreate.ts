@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -134,8 +135,10 @@ export interface ProductImageCreate_productImageCreate_product_variants {
   sku: string;
   name: string;
   priceOverride: ProductImageCreate_productImageCreate_product_variants_priceOverride | null;
-  stockQuantity: number;
   margin: number | null;
+  quantity: number;
+  quantityAllocated: number;
+  stockQuantity: number;
 }
 
 export interface ProductImageCreate_productImageCreate_product_productType {
@@ -149,7 +152,7 @@ export interface ProductImageCreate_productImageCreate_product {
   __typename: "Product";
   id: string;
   name: string;
-  description: string;
+  descriptionJson: any;
   seoTitle: string | null;
   seoDescription: string | null;
   category: ProductImageCreate_productImageCreate_product_category;
@@ -159,7 +162,7 @@ export interface ProductImageCreate_productImageCreate_product {
   purchaseCost: ProductImageCreate_productImageCreate_product_purchaseCost | null;
   isPublished: boolean;
   chargeTaxes: boolean;
-  availableOn: any | null;
+  publicationDate: any | null;
   attributes: ProductImageCreate_productImageCreate_product_attributes[];
   availability: ProductImageCreate_productImageCreate_product_availability | null;
   images: (ProductImageCreate_productImageCreate_product_images | null)[] | null;
@@ -170,7 +173,7 @@ export interface ProductImageCreate_productImageCreate_product {
 
 export interface ProductImageCreate_productImageCreate {
   __typename: "ProductImageCreate";
-  errors: (ProductImageCreate_productImageCreate_errors | null)[] | null;
+  errors: ProductImageCreate_productImageCreate_errors[] | null;
   product: ProductImageCreate_productImageCreate_product | null;
 }
 

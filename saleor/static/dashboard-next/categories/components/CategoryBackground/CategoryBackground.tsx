@@ -1,66 +1,59 @@
-import { withStyles, WithStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
 import * as React from "react";
 
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import AddPhotoIcon from "@material-ui/icons/AddAPhoto";
-
 import CardTitle from "../../../components/CardTitle";
+import Hr from "../../../components/Hr";
 import ImageTile from "../../../components/ImageTile";
+import ImageUpload from "../../../components/ImageUpload";
+import Skeleton from "../../../components/Skeleton";
 import i18n from "../../../i18n";
+import { CategoryDetails_category_backgroundImage } from "../../types/CategoryDetails";
+import { FormData } from "../CategoryUpdatePage";
 
-interface CategoryBackgroundProps {
+const styles = (theme: Theme) =>
+  createStyles({
+    fileField: {
+      display: "none"
+    },
+    image: {
+      height: "100%",
+      objectFit: "contain",
+      userSelect: "none",
+      width: "100%"
+    },
+    imageContainer: {
+      background: "#ffffff",
+      border: "1px solid #eaeaea",
+      borderRadius: theme.spacing.unit,
+      height: 148,
+      justifySelf: "start",
+      overflow: "hidden",
+      padding: theme.spacing.unit * 2,
+      position: "relative",
+      width: 148
+    }
+  });
+
+export interface CategoryBackgroundProps extends WithStyles<typeof styles> {
+  data: FormData;
+  image: CategoryDetails_category_backgroundImage;
+  onChange: (event: React.ChangeEvent<any>) => void;
   onImageDelete: () => void;
-  placeholderImage: string;
-  backgroundImage: {
-    url: string;
-  };
-  onImageUpload(event: React.ChangeEvent<any>);
+  onImageUpload: (file: File) => void;
 }
 
-const decorate = withStyles(theme => ({
-  PhotosIcon: {
-    height: 64,
-    margin: "0 auto",
-    width: 64
-  },
-  PhotosIconContainer: {
-    margin: `${theme.spacing.unit * 5}px 0`,
-    textAlign: "center" as "center"
-  },
-  fileField: {
-    display: "none"
-  },
-  image: {
-    height: "100%",
-    objectFit: "contain" as "contain",
-    userSelect: "none" as "none",
-    width: "100%"
-  },
-  imageContainer: {
-    background: "#ffffff",
-    border: "1px solid #eaeaea",
-    borderRadius: theme.spacing.unit,
-    height: 148,
-    justifySelf: "start",
-    overflow: "hidden" as "hidden",
-    padding: theme.spacing.unit * 2,
-    position: "relative" as "relative",
-    width: 148
-  }
-}));
-
-export const CategoryBackground = decorate(
+export const CategoryBackground = withStyles(styles)(
   class CategoryBackgroundComponent extends React.Component<
-    CategoryBackgroundProps &
-      WithStyles<
-        | "PhotosIcon"
-        | "PhotosIconContainer"
-        | "fileField"
-        | "image"
-        | "imageContainer"
-      >,
+    CategoryBackgroundProps,
     {}
   > {
     imgInputAnchor = React.createRef<HTMLInputElement>();
@@ -70,9 +63,10 @@ export const CategoryBackground = decorate(
     render() {
       const {
         classes,
+        data,
         onImageUpload,
-        backgroundImage,
-        placeholderImage,
+        image,
+        onChange,
         onImageDelete
       } = this.props;
       return (
@@ -82,7 +76,7 @@ export const CategoryBackground = decorate(
             toolbar={
               <>
                 <Button
-                  variant="flat"
+                  variant="text"
                   color="secondary"
                   onClick={this.clickImgInput}
                 >
@@ -91,31 +85,45 @@ export const CategoryBackground = decorate(
                 <input
                   className={classes.fileField}
                   id="fileUpload"
-                  onChange={onImageUpload}
+                  onChange={event => onImageUpload(event.target.files[0])}
                   type="file"
                   ref={this.imgInputAnchor}
                 />
               </>
             }
           />
-          <CardContent>
-            {backgroundImage === undefined ? (
+          {image === undefined ? (
+            <CardContent>
               <div>
                 <div className={classes.imageContainer}>
-                  <img className={classes.image} src={placeholderImage} />
+                  <Skeleton />
                 </div>
               </div>
-            ) : backgroundImage === null ? (
-              <div className={classes.PhotosIconContainer}>
-                <AddPhotoIcon className={classes.PhotosIcon} />
-              </div>
-            ) : (
-              <ImageTile
-                image={backgroundImage}
-                onImageDelete={onImageDelete}
-              />
-            )}
-          </CardContent>
+            </CardContent>
+          ) : image === null ? (
+            <ImageUpload onImageUpload={onImageUpload} />
+          ) : (
+            <CardContent>
+              <ImageTile image={image} onImageDelete={onImageDelete} />
+            </CardContent>
+          )}
+
+          {image && (
+            <>
+              <Hr />
+              <CardContent>
+                <TextField
+                  name="backgroundImageAlt"
+                  label={i18n.t("Description")}
+                  helperText={i18n.t("Optional")}
+                  value={data.backgroundImageAlt}
+                  onChange={onChange}
+                  fullWidth
+                  multiline
+                />
+              </CardContent>
+            </>
+          )}
         </Card>
       );
     }

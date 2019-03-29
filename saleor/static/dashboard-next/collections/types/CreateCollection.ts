@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { CollectionCreateInput } from "./../../types/globalTypes";
@@ -15,6 +16,7 @@ export interface CreateCollection_collectionCreate_errors {
 
 export interface CreateCollection_collectionCreate_collection_backgroundImage {
   __typename: "Image";
+  alt: string | null;
   url: string;
 }
 
@@ -24,13 +26,14 @@ export interface CreateCollection_collectionCreate_collection {
   isPublished: boolean;
   name: string;
   backgroundImage: CreateCollection_collectionCreate_collection_backgroundImage | null;
+  descriptionJson: any;
   seoDescription: string | null;
   seoTitle: string | null;
 }
 
 export interface CreateCollection_collectionCreate {
   __typename: "CollectionCreate";
-  errors: (CreateCollection_collectionCreate_errors | null)[] | null;
+  errors: CreateCollection_collectionCreate_errors[] | null;
   collection: CreateCollection_collectionCreate_collection | null;
 }
 

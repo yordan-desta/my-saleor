@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/core/styles";
+import { createStyles, withStyles, WithStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -7,7 +7,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import * as React from "react";
 
-import DateFormatter from "../../../components/DateFormatter";
+import { DateTime } from "../../../components/Date";
 import Money from "../../../components/Money";
 import Skeleton from "../../../components/Skeleton";
 import StatusLabel from "../../../components/StatusLabel";
@@ -22,22 +22,20 @@ import {
 import { ListProps } from "../../../types";
 import { OrderList_orders_edges_node } from "../../types/OrderList";
 
-interface OrderListProps extends ListProps {
+const styles = createStyles({
+  link: {
+    cursor: "pointer"
+  },
+  textRight: {
+    textAlign: "right"
+  }
+});
+
+interface OrderListProps extends ListProps, WithStyles<typeof styles> {
   orders: OrderList_orders_edges_node[];
 }
 
-const decorate = withStyles(
-  {
-    link: {
-      cursor: "pointer"
-    },
-    textRight: {
-      textAlign: "right" as "right"
-    }
-  },
-  { name: "OrderList" }
-);
-export const OrderList = decorate<OrderListProps>(
+export const OrderList = withStyles(styles, { name: "OrderList" })(
   ({
     classes,
     disabled,
@@ -46,7 +44,7 @@ export const OrderList = decorate<OrderListProps>(
     onPreviousPage,
     onNextPage,
     onRowClick
-  }) => {
+  }: OrderListProps) => {
     const orderList = orders
       ? orders.map(order => ({
           ...order,
@@ -110,7 +108,7 @@ export const OrderList = decorate<OrderListProps>(
                 </TableCell>
                 <TableCell padding="dense">
                   {maybe(() => order.created) ? (
-                    <DateFormatter date={order.created} />
+                    <DateTime date={order.created} />
                   ) : (
                     <Skeleton />
                   )}

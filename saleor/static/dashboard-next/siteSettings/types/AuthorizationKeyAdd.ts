@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { AuthorizationKeyInput, AuthorizationKeyType } from "./../../types/globalTypes";
@@ -34,7 +35,7 @@ export interface AuthorizationKeyAdd_authorizationKeyAdd_shop {
 
 export interface AuthorizationKeyAdd_authorizationKeyAdd {
   __typename: "AuthorizationKeyAdd";
-  errors: (AuthorizationKeyAdd_authorizationKeyAdd_errors | null)[] | null;
+  errors: AuthorizationKeyAdd_authorizationKeyAdd_errors[] | null;
   shop: AuthorizationKeyAdd_authorizationKeyAdd_shop | null;
 }
 

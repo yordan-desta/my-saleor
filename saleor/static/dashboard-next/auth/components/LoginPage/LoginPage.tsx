@@ -1,16 +1,22 @@
 import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import { withStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import * as React from "react";
 import SVG from "react-inlinesvg";
 
-import * as saleorLogo from "../../../../images/logo-document.svg";
-import Container from "../../../components/Container";
+import * as backgroundArt from "../../../../images/login-background.svg";
+import * as saleorDarkLogo from "../../../../images/logo-dark.svg";
+import * as saleorLightLogo from "../../../../images/logo-light.svg";
 import { ControlledCheckbox } from "../../../components/ControlledCheckbox";
 import Form from "../../../components/Form";
 import { FormSpacer } from "../../../components/FormSpacer";
+import useTheme from "../../../hooks/useTheme";
 import i18n from "../../../i18n";
 
 export interface FormData {
@@ -19,122 +25,173 @@ export interface FormData {
   password: string;
   rememberMe: boolean;
 }
-export interface LoginCardProps {
+
+const styles = (theme: Theme) =>
+  createStyles({
+    buttonContainer: {
+      display: "flex",
+      justifyContent: "space-between"
+    },
+    link: {
+      color: theme.palette.primary.main,
+      cursor: "pointer",
+      textAlign: "center"
+    },
+    loginButton: {
+      width: 140
+    },
+    logo: {
+      "& svg": {
+        display: "block",
+        height: 40,
+        marginBottom: theme.spacing.unit * 4
+      }
+    },
+    mainPanel: {
+      [theme.breakpoints.down("sm")]: {
+        padding: theme.spacing.unit * 2
+      },
+      background: theme.palette.background.paper,
+      display: "flex",
+      flexDirection: "column",
+      height: "100vh",
+      justifyContent: "center",
+      padding: theme.spacing.unit * 6,
+      width: "100%"
+    },
+    mainPanelContent: {
+      [theme.breakpoints.up("xs")]: {
+        width: "100%"
+      },
+      [theme.breakpoints.up("sm")]: {
+        width: 328
+      },
+      "@media (min-width: 1440px)": {
+        width: 464
+      },
+      margin: "auto",
+      width: "100%"
+    },
+    panel: {
+      "& span": {
+        color: theme.palette.error.contrastText
+      },
+      background: theme.palette.error.main,
+      borderRadius: theme.spacing.unit,
+      marginBottom: theme.spacing.unit * 3,
+      padding: theme.spacing.unit * 1.5
+    },
+    root: {
+      [theme.breakpoints.up("lg")]: {
+        gridTemplateColumns: "376px 1fr"
+      },
+      "@media (min-width: 1440px)": {
+        gridTemplateColumns: "520px 1fr"
+      },
+      display: "grid",
+      gridTemplateColumns: "1fr",
+      height: "100vh",
+      overflow: "hidden",
+      width: "100vw"
+    },
+    sidebar: {
+      [theme.breakpoints.up("lg")]: {
+        display: "block"
+      },
+      display: "none"
+    },
+    sidebarArt: {
+      "& svg": {
+        width: "100%"
+      }
+    }
+  });
+
+export interface LoginCardProps extends WithStyles<typeof styles> {
   error: boolean;
   disableLoginButton: boolean;
   onPasswordRecovery: () => void;
   onSubmit?(event: FormData);
 }
 
-const decorate = withStyles(theme => ({
-  card: {
-    [theme.breakpoints.down("xs")]: {
-      boxShadow: "none" as "none",
-      padding: theme.spacing.unit * 4,
-      width: "100%"
-    },
-    padding: `${theme.spacing.unit * 10.5}px ${theme.spacing.unit * 17}px`,
-    width: "100%"
-  },
-  link: {
-    color: theme.palette.primary.main,
-    cursor: "pointer" as "pointer",
-    textAlign: "center" as "center"
-  },
-  loginButton: {
-    width: "100%"
-  },
-  logo: {
-    "& svg": {
-      display: "block" as "block",
-      margin: `0 auto ${theme.spacing.unit * 7}px`
-    }
-  },
-  panel: {
-    "& span": {
-      color: theme.palette.error.contrastText
-    },
-    background: theme.palette.error.main,
-    borderRadius: theme.spacing.unit,
-    marginBottom: theme.spacing.unit * 3,
-    padding: theme.spacing.unit * 1.5
-  },
-  root: {
-    [theme.breakpoints.down("xs")]: {
-      background: "#fff",
-      boxShadow: "none" as "none"
-    },
-    alignItems: "center" as "center",
-    display: "flex",
-    height: "100vh"
-  }
-}));
-const LoginCard = decorate<LoginCardProps>(
-  ({ classes, error, disableLoginButton, onSubmit }) => {
+const LoginCard = withStyles(styles, { name: "LoginCard" })(
+  ({ classes, error, disableLoginButton, onSubmit }: LoginCardProps) => {
+    const { isDark } = useTheme();
+
     return (
       <Form
         initial={{ email: "", password: "", rememberMe: false }}
         onSubmit={onSubmit}
       >
         {({ change: handleChange, data, submit: handleSubmit }) => (
-          <Container className={classes.root} width="sm">
-            <Card className={classes.card}>
-              <SVG className={classes.logo} src={saleorLogo} />
-              {error && (
-                <div className={classes.panel}>
-                  <Typography
-                    variant="caption"
-                    dangerouslySetInnerHTML={{
-                      __html: i18n.t(
-                        "Sorry, your username and/or password are incorrect. <br />Please try again."
-                      )
-                    }}
+          <div className={classes.root}>
+            <div className={classes.sidebar}>
+              <SVG className={classes.sidebarArt} src={backgroundArt} />
+            </div>
+            <div className={classes.mainPanel}>
+              <div className={classes.mainPanelContent}>
+                <SVG
+                  className={classes.logo}
+                  src={isDark ? saleorDarkLogo : saleorLightLogo}
+                />
+                {error && (
+                  <div className={classes.panel}>
+                    <Typography
+                      variant="caption"
+                      dangerouslySetInnerHTML={{
+                        __html: i18n.t(
+                          "Sorry, your username and/or password are incorrect. <br />Please try again."
+                        )
+                      }}
+                    />
+                  </div>
+                )}
+                <TextField
+                  autoFocus
+                  fullWidth
+                  autoComplete="username"
+                  label={i18n.t("Email", { context: "form" })}
+                  name="email"
+                  onChange={handleChange}
+                  value={data.email}
+                />
+                <FormSpacer />
+                <TextField
+                  fullWidth
+                  autoComplete="current-password"
+                  label={i18n.t("Password")}
+                  name="password"
+                  onChange={handleChange}
+                  type="password"
+                  value={data.password}
+                />
+                <FormSpacer />
+                <div className={classes.buttonContainer}>
+                  <ControlledCheckbox
+                    checked={data.rememberMe}
+                    label={i18n.t("Remember me")}
+                    name="rememberMe"
+                    onChange={handleChange}
                   />
+                  <FormSpacer />
+                  <Button
+                    className={classes.loginButton}
+                    color="primary"
+                    disabled={disableLoginButton}
+                    variant="contained"
+                    onClick={handleSubmit}
+                    type="submit"
+                  >
+                    {i18n.t("Login")}
+                  </Button>
                 </div>
-              )}
-              <TextField
-                autoFocus
-                fullWidth
-                autoComplete="username"
-                label={i18n.t("Email", { context: "form" })}
-                name="email"
-                onChange={handleChange}
-                value={data.email}
-              />
-              <FormSpacer />
-              <TextField
-                fullWidth
-                autoComplete="current-password"
-                label={i18n.t("Password")}
-                name="password"
-                onChange={handleChange}
-                type="password"
-                value={data.password}
-              />
-              <FormSpacer />
-              <ControlledCheckbox
-                checked={data.rememberMe}
-                label={i18n.t("Remember me")}
-                name="rememberMe"
-                onChange={handleChange}
-              />
-              <FormSpacer />
-              <Button
-                className={classes.loginButton}
-                color="secondary"
-                disabled={disableLoginButton}
-                variant="raised"
-                onClick={handleSubmit}
-                type="submit"
-              >
-                {i18n.t("Login")}
-              </Button>
-              {/* <FormSpacer />
+                {/* <FormSpacer />
                 <Typography className={classes.link}>
                   {i18n.t("Reset your password")}
                 </Typography> */}
-            </Card>
-          </Container>
+              </div>
+            </div>
+          </div>
         )}
       </Form>
     );

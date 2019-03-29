@@ -5,9 +5,12 @@ from graphene import relay
 from graphql_jwt.decorators import permission_required
 
 from ...account import models
+from ...checkout.utils import get_user_cart
 from ...core.permissions import get_permissions
-from ..core.types.common import (
-    CountableDjangoObjectType, CountryDisplay, PermissionDisplay)
+from ..checkout.types import Checkout
+from ..core.connection import CountableDjangoObjectType
+from ..core.fields import PrefetchingConnectionField
+from ..core.types import CountryDisplay, PermissionDisplay
 from ..utils import format_permissions_for_display
 
 
@@ -28,6 +31,12 @@ class AddressInput(graphene.InputObjectType):
 class Address(CountableDjangoObjectType):
     country = graphene.Field(
         CountryDisplay, required=True, description='Default shop\'s country')
+    is_default_shipping_address = graphene.Boolean(
+        required=False,
+        description='Address is user\'s default shipping address')
+    is_default_billing_address = graphene.Boolean(
+        required=False,
+        description='Address is user\'s default billing address')
 
     class Meta:
         exclude_fields = ['user_set', 'user_addresses']
@@ -39,21 +48,67 @@ class Address(CountableDjangoObjectType):
         return CountryDisplay(
             code=self.country.code, country=self.country.name)
 
+    def resolve_is_default_shipping_address(self, info):
+        """
+        This field is added through annotation when using the
+        `resolve_addresses` resolver. It's invalid for
+        `resolve_default_shipping_address` and
+        `resolve_default_billing_address`
+        """
+        if not hasattr(self, 'user_default_shipping_address_pk'):
+            return None
+
+        user_default_shipping_address_pk = getattr(
+            self, 'user_default_shipping_address_pk')
+        if user_default_shipping_address_pk == self.pk:
+            return True
+        return False
+
+    def resolve_is_default_billing_address(self, info):
+        """
+        This field is added through annotation when using the
+        `resolve_addresses` resolver. It's invalid for
+        `resolve_default_shipping_address` and
+        `resolve_default_billing_address`
+        """
+        if not hasattr(self, 'user_default_billing_address_pk'):
+            return None
+
+        user_default_billing_address_pk = getattr(
+            self, 'user_default_billing_address_pk')
+        if user_default_billing_address_pk == self.pk:
+            return True
+        return False
+
 
 class User(CountableDjangoObjectType):
+    addresses = gql_optimizer.field(
+        graphene.List(Address, description='List of all user\'s addresses.'),
+        model_field='addresses')
+    checkout = graphene.Field(
+        Checkout,
+        description='Returns the last open checkout of this user.')
+    note = graphene.String(description='A note about the customer')
+    orders = gql_optimizer.field(
+        PrefetchingConnectionField(
+            'saleor.graphql.order.types.Order',
+            description='List of user\'s orders.'),
+        model_field='orders')
     permissions = graphene.List(
         PermissionDisplay, description='List of user\'s permissions.')
-    addresses = gql_optimizer.field(
-        graphene.List(
-            Address, description='List of all user\'s addresses.'),
-        model_field='addresses')
-    note = graphene.String(description='A note about the customer')
 
     class Meta:
-        exclude_fields = ['password', 'is_superuser', 'OrderEvent_set']
+        exclude_fields = [
+            'carts', 'password', 'is_superuser', 'OrderEvent_set']
         description = 'Represents user data.'
         interfaces = [relay.Node]
         model = get_user_model()
+
+    def resolve_addresses(self, info, **kwargs):
+        return self.addresses.annotate_default(self).all()
+
+    def resolve_checkout(self, info, **kwargs):
+        return get_user_cart(self)
 
     def resolve_permissions(self, info, **kwargs):
         if self.is_superuser:
@@ -63,12 +118,15 @@ class User(CountableDjangoObjectType):
                 'content_type').order_by('codename')
         return format_permissions_for_display(permissions)
 
-    def resolve_addresses(self, info, **kwargs):
-        return self.addresses.all()
-
     @permission_required('account.manage_users')
     def resolve_note(self, info):
         return self.note
+
+    def resolve_orders(self, info, **kwargs):
+        viewer = info.context.user
+        if viewer.has_perm('order.manage_orders'):
+            return self.orders.all()
+        return self.orders.confirmed()
 
 
 class AddressValidationInput(graphene.InputObjectType):
@@ -93,6 +151,8 @@ class AddressValidationData(graphene.ObjectType):
     country_area_type = graphene.String()
     country_area_choices = graphene.List(ChoiceValue)
     city_type = graphene.String()
+    city_choices = graphene.List(ChoiceValue)
+    city_area_type = graphene.String()
     city_area_choices = graphene.List(ChoiceValue)
     postal_code_type = graphene.String()
     postal_code_matchers = graphene.List(graphene.String)

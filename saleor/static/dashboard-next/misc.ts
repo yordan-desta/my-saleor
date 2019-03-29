@@ -1,11 +1,29 @@
+import { MutationFn, MutationResult } from "react-apollo";
+import { ConfirmButtonTransitionState } from "./components/ConfirmButton/ConfirmButton";
 import { AddressType } from "./customers/types";
 import i18n from "./i18n";
+import { PartialMutationProviderOutput, UserError } from "./types";
 import {
   AuthorizationKeyType,
   OrderStatus,
   PaymentChargeStatusEnum,
   TaxRateType
 } from "./types/globalTypes";
+
+export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
+  T,
+  Exclude<keyof T, Keys>
+> &
+  { [K in Keys]-?: Required<Pick<T, K>> }[Keys];
+
+export type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<
+  T,
+  Exclude<keyof T, Keys>
+> &
+  {
+    [K in Keys]-?: Required<Pick<T, K>> &
+      Partial<Record<Exclude<Keys, K>, undefined>>
+  }[Keys];
 
 export function renderCollection<T>(
   collection: T[],
@@ -25,8 +43,11 @@ export function renderCollection<T>(
   return collection.map(renderItem);
 }
 
-export function decimal(value: string) {
-  return value === "" ? null : value;
+export function decimal(value: string | number) {
+  if (typeof value === "string") {
+    return value === "" ? null : value;
+  }
+  return value;
 }
 
 export const removeDoubleSlashes = (url: string) =>
@@ -34,10 +55,14 @@ export const removeDoubleSlashes = (url: string) =>
 
 export const transformPaymentStatus = (status: string) => {
   switch (status) {
-    case PaymentChargeStatusEnum.CHARGED:
-      return { localized: i18n.t("Paid"), status: "success" };
+    case PaymentChargeStatusEnum.PARTIALLY_CHARGED:
+      return { localized: i18n.t("Partially paid"), status: "error" };
+    case PaymentChargeStatusEnum.FULLY_CHARGED:
+      return { localized: i18n.t("Fully paid"), status: "success" };
+    case PaymentChargeStatusEnum.PARTIALLY_REFUNDED:
+      return { localized: i18n.t("Partially refunded"), status: "error" };
     case PaymentChargeStatusEnum.FULLY_REFUNDED:
-      return { localized: i18n.t("Refunded"), status: "success" };
+      return { localized: i18n.t("Fully refunded"), status: "success" };
     default:
       return { localized: i18n.t("Unpaid"), status: "error" };
   }
@@ -66,7 +91,10 @@ export const transformAddressToForm = (data: AddressType) => ({
   city: maybe(() => data.city, ""),
   cityArea: maybe(() => data.cityArea, ""),
   companyName: maybe(() => data.companyName, ""),
-  country: maybe(() => data.country.code, ""),
+  country: {
+    label: maybe(() => data.country.country, ""),
+    value: maybe(() => data.country.code, "")
+  },
   countryArea: maybe(() => data.countryArea, ""),
   firstName: maybe(() => data.firstName, ""),
   lastName: maybe(() => data.lastName, ""),
@@ -131,4 +159,63 @@ export function only<T>(obj: T, key: keyof T): boolean {
 
 export function empty(obj: object): boolean {
   return Object.keys(obj).every(key => obj[key] === undefined);
+}
+
+export function hasErrors(errorList: UserError[] | null): boolean {
+  return !(
+    errorList === undefined ||
+    errorList === null ||
+    errorList.length === 0
+  );
+}
+
+export function getMutationState(
+  called: boolean,
+  loading: boolean,
+  ...errorList: UserError[][]
+): ConfirmButtonTransitionState {
+  if (loading) {
+    return "loading";
+  }
+  if (called) {
+    return errorList.map(hasErrors).reduce((acc, curr) => acc || curr, false)
+      ? "error"
+      : "success";
+  }
+  return "default";
+}
+
+export function getMutationProviderData<TData, TVariables>(
+  mutateFn: MutationFn<TData, TVariables>,
+  opts: MutationResult<TData>
+): PartialMutationProviderOutput<TData, TVariables> {
+  return {
+    mutate: variables => mutateFn({ variables }),
+    opts
+  };
+}
+
+interface User {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export function getUserName(user?: User, returnEmail?: boolean) {
+  return user && (user.email || (user.firstName && user.lastName))
+    ? user.firstName && user.lastName
+      ? [user.firstName, user.lastName].join(" ")
+      : returnEmail
+      ? user.email
+      : user.email.split("@")[0]
+    : undefined;
+}
+
+export function getUserInitials(user?: User) {
+  return user && (user.email || (user.firstName && user.lastName))
+    ? (user.firstName && user.lastName
+        ? user.firstName[0] + user.lastName[0]
+        : user.email.slice(0, 2)
+      ).toUpperCase()
+    : undefined;
 }

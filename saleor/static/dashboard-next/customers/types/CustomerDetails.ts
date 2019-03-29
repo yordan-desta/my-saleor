@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { PaymentChargeStatusEnum } from "./../../types/globalTypes";
@@ -101,6 +102,8 @@ export interface CustomerDetails_user {
   __typename: "User";
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   dateJoined: any;
   lastLogin: any | null;
   defaultShippingAddress: CustomerDetails_user_defaultShippingAddress | null;

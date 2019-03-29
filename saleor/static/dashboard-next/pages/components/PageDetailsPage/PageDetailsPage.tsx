@@ -1,122 +1,136 @@
-import { withStyles } from "@material-ui/core/styles";
+import {
+  ContentState,
+  convertFromRaw,
+  convertToRaw,
+  RawDraftContentState
+} from "draft-js";
 import * as React from "react";
 
-import { Container } from "../../../components/Container";
-import Form, { FormProps } from "../../../components/Form";
+import AppHeader from "../../../components/AppHeader";
+import CardSpacer from "../../../components/CardSpacer";
+import { ConfirmButtonTransitionState } from "../../../components/ConfirmButton";
+import Container from "../../../components/Container";
+import Form from "../../../components/Form";
+import Grid from "../../../components/Grid";
 import PageHeader from "../../../components/PageHeader";
-import SaveButtonBar, {
-  SaveButtonBarState
-} from "../../../components/SaveButtonBar";
-import Toggle from "../../../components/Toggle";
-import PageContent from "../PageContent";
-import PageDeleteDialog from "../PageDeleteDialog";
-import PageProperties from "../PageProperties";
+import SaveButtonBar from "../../../components/SaveButtonBar";
+import SeoForm from "../../../components/SeoForm";
+import i18n from "../../../i18n";
+import { maybe } from "../../../misc";
+import { UserError } from "../../../types";
+import { PageDetails_page } from "../../types/PageDetails";
+import PageAvailability from "../PageAvailability";
+import PageInfo from "../PageInfo";
+import PageSlug from "../PageSlug";
 
-interface PageInput {
-  title: string;
-  content: string;
-  slug: string;
+export interface FormData {
   availableOn: string;
+  content: RawDraftContentState;
   isVisible: boolean;
-}
-interface PageDetailsPageProps {
-  page?: PageInput & {
-    created?: string;
-  };
-  errors?: Array<{
-    field: string;
-    message: string;
-  }>;
-  disabled?: boolean;
-  title?: string;
-  saveButtonBarState?: SaveButtonBarState;
-  onBack?();
-  onDelete?();
-  onSubmit(data: PageInput);
+  seoDescription: string;
+  seoTitle: string;
+  slug: string;
+  title: string;
 }
 
-const defaultPage = {
-  availableOn: "",
-  content: "",
-  isVisible: false,
-  slug: "",
-  title: ""
-};
-const PageForm: React.ComponentType<FormProps<PageInput>> = Form;
-const decorate = withStyles(theme => ({
-  root: {
-    display: "grid" as "grid",
-    gridColumnGap: `${theme.spacing.unit * 2}px`,
-    gridTemplateColumns: "3fr 1fr"
-  }
-}));
-const PageDetailsPage = decorate<PageDetailsPageProps>(
-  ({
-    classes,
-    errors,
-    disabled,
-    page,
-    title,
-    saveButtonBarState,
-    onBack,
-    onDelete,
-    onSubmit
-  }) => (
-    <PageForm
-      errors={errors}
-      key={page ? "ready" : "loading"}
-      initial={page ? page : defaultPage}
-      onSubmit={onSubmit}
-    >
-      {({ change, data, errors, hasChanged, submit }) => (
-        <Toggle>
-          {(opened, { toggle: togglePageDeleteDialog }) => (
-            <Container width="md">
-              <>
-                <PageHeader onBack={onBack} title={title} />
-                <div className={classes.root}>
-                  <div>
-                    <PageContent
-                      errors={errors}
-                      loading={disabled}
-                      onChange={change}
-                      content={data.content}
-                      title={data.title}
-                    />
-                  </div>
-                  <div>
-                    <PageProperties
-                      availableOn={data.availableOn}
-                      created={page ? page.created : undefined}
-                      isVisible={data.isVisible}
-                      loading={disabled}
-                      onChange={change}
-                      slug={data.slug}
-                    />
-                  </div>
-                </div>
-                <SaveButtonBar
-                  disabled={disabled || !onSubmit || !hasChanged}
-                  state={saveButtonBarState}
-                  onCancel={onBack}
-                  onDelete={togglePageDeleteDialog}
-                  onSave={submit}
-                />
-                {!disabled && (
-                  <PageDeleteDialog
-                    opened={opened}
-                    onConfirm={onDelete}
-                    onClose={togglePageDeleteDialog}
-                    title={page.title}
-                  />
+export interface PageDetailsPageProps {
+  disabled: boolean;
+  errors: UserError[];
+  page: PageDetails_page;
+  saveButtonBarState: ConfirmButtonTransitionState;
+  onBack: () => void;
+  onRemove: () => void;
+  onSubmit: (data: FormData) => void;
+}
+
+const PageDetailsPage: React.StatelessComponent<PageDetailsPageProps> = ({
+  disabled,
+  errors,
+  page,
+  saveButtonBarState,
+  onBack,
+  onRemove,
+  onSubmit
+}) => {
+  const initialForm: FormData = {
+    availableOn: maybe(() => page.availableOn, ""),
+    content: maybe(
+      () => JSON.parse(page.contentJson),
+      convertToRaw(ContentState.createFromText(""))
+    ),
+    isVisible: maybe(() => page.isVisible, false),
+    seoDescription: maybe(() => page.seoDescription || "", ""),
+    seoTitle: maybe(() => page.seoTitle || "", ""),
+    slug: maybe(() => page.slug, ""),
+    title: maybe(() => page.title, "")
+  };
+  return (
+    <Form errors={errors} initial={initialForm} onSubmit={onSubmit}>
+      {({ change, data, errors: formErrors, hasChanged, submit }) => (
+        <Container>
+          <AppHeader onBack={onBack}>{i18n.t("Pages")}</AppHeader>
+          <PageHeader
+            title={
+              page === null
+                ? i18n.t("Add Page", {
+                    context: "header"
+                  })
+                : maybe(() => page.title)
+            }
+          />
+          <Grid>
+            <div>
+              <PageInfo
+                data={data}
+                disabled={disabled}
+                errors={formErrors}
+                page={page}
+                onChange={change}
+              />
+              <CardSpacer />
+              <SeoForm
+                description={data.seoDescription}
+                disabled={disabled}
+                descriptionPlaceholder={maybe(() => {
+                  return convertFromRaw(data.content)
+                    .getPlainText()
+                    .slice(0, 300);
+                }, "")}
+                onChange={change}
+                title={data.seoTitle}
+                titlePlaceholder={data.title}
+                helperText={i18n.t(
+                  "Add search engine title and description to make this page easier to find"
                 )}
-              </>
-            </Container>
-          )}
-        </Toggle>
+              />
+            </div>
+            <div>
+              <PageSlug
+                data={data}
+                disabled={disabled}
+                errors={formErrors}
+                onChange={change}
+              />
+              <CardSpacer />
+              <PageAvailability
+                data={data}
+                disabled={disabled}
+                errors={formErrors}
+                onChange={change}
+              />
+            </div>
+          </Grid>
+          <SaveButtonBar
+            disabled={disabled || !hasChanged}
+            state={saveButtonBarState}
+            onCancel={onBack}
+            onDelete={page === null ? undefined : onRemove}
+            onSave={submit}
+          />
+        </Container>
       )}
-    </PageForm>
-  )
-);
+    </Form>
+  );
+};
 PageDetailsPage.displayName = "PageDetailsPage";
 export default PageDetailsPage;

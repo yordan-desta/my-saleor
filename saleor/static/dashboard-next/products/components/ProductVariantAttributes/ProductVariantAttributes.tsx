@@ -1,16 +1,33 @@
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import { withStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import * as React from "react";
 
 import CardTitle from "../../../components/CardTitle";
-import { FormSpacer } from "../../../components/FormSpacer";
 import SingleAutocompleteSelectField from "../../../components/SingleAutocompleteSelectField";
 import Skeleton from "../../../components/Skeleton";
 import i18n from "../../../i18n";
 import { ProductVariant_attributes_attribute } from "../../types/ProductVariant";
 
-interface ProductVariantAttributesProps {
+const styles = (theme: Theme) =>
+  createStyles({
+    card: {
+      overflow: "visible"
+    },
+    grid: {
+      display: "grid",
+      gridColumnGap: `${theme.spacing.unit * 2}px`,
+      gridRowGap: `${theme.spacing.unit * 3}px`,
+      gridTemplateColumns: "1fr 1fr"
+    }
+  });
+
+interface ProductVariantAttributesProps extends WithStyles<typeof styles> {
   attributes?: ProductVariant_attributes_attribute[];
   data: {
     attributes?: Array<{
@@ -30,19 +47,16 @@ interface ProductVariantAttributesProps {
   ) => void;
 }
 
-const decorate = withStyles(theme => ({
-  card: {
-    overflow: "visible" as "visible"
-  },
-  grid: {
-    display: "grid",
-    gridGap: `${theme.spacing.unit * 2}px`,
-    gridTemplateColumns: "1fr 1fr"
-  }
-}));
-
-const ProductVariantAttributes = decorate<ProductVariantAttributesProps>(
-  ({ attributes, classes, data, disabled, onChange }) => {
+const ProductVariantAttributes = withStyles(styles, {
+  name: "ProductVariantAttributes"
+})(
+  ({
+    attributes,
+    classes,
+    data,
+    disabled,
+    onChange
+  }: ProductVariantAttributesProps) => {
     return (
       <Card className={classes.card}>
         <CardTitle title={i18n.t("General Information")} />
@@ -103,19 +117,16 @@ const ProductVariantAttributes = decorate<ProductVariantAttributesProps>(
                 });
 
               return (
-                <React.Fragment key={index}>
-                  <SingleAutocompleteSelectField
-                    disabled={disabled}
-                    name={item.slug}
-                    label={item.name}
-                    onChange={handleAttributeValueSelect}
-                    value={getAttributeValue(item.slug)}
-                    choices={getAttributeValues(item.slug)}
-                    key={index}
-                    custom
-                  />
-                  <FormSpacer />
-                </React.Fragment>
+                <SingleAutocompleteSelectField
+                  key={index}
+                  disabled={disabled}
+                  name={item.slug}
+                  label={item.name}
+                  onChange={handleAttributeValueSelect}
+                  value={getAttributeValue(item.slug)}
+                  choices={getAttributeValues(item.slug)}
+                  custom
+                />
               );
             })
           )}

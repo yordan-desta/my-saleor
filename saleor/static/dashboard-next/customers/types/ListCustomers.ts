@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -14,6 +15,8 @@ export interface ListCustomers_customers_edges_node {
   __typename: "User";
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   orders: ListCustomers_customers_edges_node_orders | null;
 }
 

@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { OrderUpdateShippingInput } from "./../../types/globalTypes";
@@ -54,7 +55,7 @@ export interface OrderShippingMethodUpdate_orderUpdateShipping_order {
 
 export interface OrderShippingMethodUpdate_orderUpdateShipping {
   __typename: "OrderUpdateShipping";
-  errors: (OrderShippingMethodUpdate_orderUpdateShipping_errors | null)[] | null;
+  errors: OrderShippingMethodUpdate_orderUpdateShipping_errors[] | null;
   order: OrderShippingMethodUpdate_orderUpdateShipping_order | null;
 }
 

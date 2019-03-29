@@ -1,3 +1,4 @@
+import { content } from "../storybook/stories/components/RichTextEditor";
 import { CollectionDetails_collection } from "./types/CollectionDetails";
 import { CollectionList_collections_edges_node } from "./types/CollectionList";
 
@@ -33,8 +34,10 @@ export const collection: (
   __typename: "Collection",
   backgroundImage: {
     __typename: "Image",
+    alt: "Alt text",
     url: placeholderCollectionImage
   },
+  descriptionJson: JSON.stringify(content),
   id: "Q29sbGVjdGlvbjox",
   isPublished: true,
   name: "Summer collection",
@@ -54,7 +57,7 @@ export const collection: (
             id: "UHJvZHVjdFR5cGU6Mg==",
             name: "Mugs"
           },
-          thumbnailUrl: placeholderImage
+          thumbnail: { __typename: "Image", url: placeholderImage }
         }
       },
       {
@@ -70,7 +73,7 @@ export const collection: (
             id: "UHJvZHVjdFR5cGU6Mw==",
             name: "Coffee"
           },
-          thumbnailUrl: placeholderImage
+          thumbnail: { __typename: "Image", url: placeholderImage }
         }
       },
       {
@@ -86,7 +89,7 @@ export const collection: (
             id: "UHJvZHVjdFR5cGU6Mw==",
             name: "Coffee"
           },
-          thumbnailUrl: placeholderImage
+          thumbnail: { __typename: "Image", url: placeholderImage }
         }
       },
       {
@@ -102,7 +105,7 @@ export const collection: (
             id: "UHJvZHVjdFR5cGU6Ng==",
             name: "Books"
           },
-          thumbnailUrl: placeholderImage
+          thumbnail: { __typename: "Image", url: placeholderImage }
         }
       }
     ],

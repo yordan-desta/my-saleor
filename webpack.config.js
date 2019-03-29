@@ -1,5 +1,5 @@
 const autoprefixer = require('autoprefixer');
-const { CheckerPlugin } = require('awesome-typescript-loader');
+const CheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 const url = require('url');
@@ -20,7 +20,10 @@ const providePlugin = new webpack.ProvidePlugin({
   'query-string': 'query-string'
 });
 
-const checkerPlugin = new CheckerPlugin();
+const checkerPlugin = new CheckerPlugin({
+  reportFiles: ['saleor/**/*.{ts,tsx}'],
+  tslint: true
+});
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
@@ -28,14 +31,10 @@ module.exports = (env, argv) => {
   let extractCssPlugin;
   let fileLoaderPath;
   let output;
-  let reactPath;
-  let reactDomPath;
 
   if (!devMode) {
     const baseStaticPath = process.env.STATIC_URL || '/static/';
     const publicPath = url.resolve(baseStaticPath, 'assets/');
-    reactPath = 'node_modules/react/cjs/react.production.min.js';
-    reactDomPath = 'node_modules/react-dom/cjs/react-dom.production.min.js';
     output = {
       path: resolve('saleor/static/assets/'),
       filename: '[name].[chunkhash].js',
@@ -48,8 +47,6 @@ module.exports = (env, argv) => {
       chunkFilename: '[id].[chunkhash].css'
     });
   } else {
-    reactPath = 'node_modules/react/cjs/react.development.js';
-    reactDomPath = 'node_modules/react-dom/cjs/react-dom.development.js';
     output = {
       path: resolve('saleor/static/assets/'),
       filename: '[name].js',
@@ -108,12 +105,10 @@ module.exports = (env, argv) => {
         {
           test: /\.tsx?$/,
           exclude: /node_modules/,
-          loader: 'awesome-typescript-loader',
+          loader: 'ts-loader',
           options: {
-            reportFiles: [
-              'saleor/**/*.{ts,tsx}'
-            ],
-            useCache: true
+            experimentalWatchApi: true,
+            transpileOnly: true
           }
         },
         {
@@ -128,6 +123,11 @@ module.exports = (env, argv) => {
         }
       ]
     },
+    optimization: {
+      removeAvailableModules: false,
+      removeEmptyChunks: false,
+      splitChunks: false
+    },
     plugins: [
       bundleTrackerPlugin,
       extractCssPlugin,
@@ -136,9 +136,7 @@ module.exports = (env, argv) => {
     ],
     resolve: {
       alias: {
-        jquery: resolve('node_modules/jquery/dist/jquery.js'),
-        react: resolve(reactPath),
-        'react-dom': resolve(reactDomPath)
+        jquery: resolve('node_modules/jquery/dist/jquery.js')
       },
       extensions: ['.ts', '.tsx', '.js', '.jsx']
     },

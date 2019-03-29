@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -128,8 +129,10 @@ export interface ProductDetails_product_variants {
   sku: string;
   name: string;
   priceOverride: ProductDetails_product_variants_priceOverride | null;
-  stockQuantity: number;
   margin: number | null;
+  quantity: number;
+  quantityAllocated: number;
+  stockQuantity: number;
 }
 
 export interface ProductDetails_product_productType {
@@ -143,7 +146,7 @@ export interface ProductDetails_product {
   __typename: "Product";
   id: string;
   name: string;
-  description: string;
+  descriptionJson: any;
   seoTitle: string | null;
   seoDescription: string | null;
   category: ProductDetails_product_category;
@@ -153,7 +156,7 @@ export interface ProductDetails_product {
   purchaseCost: ProductDetails_product_purchaseCost | null;
   isPublished: boolean;
   chargeTaxes: boolean;
-  availableOn: any | null;
+  publicationDate: any | null;
   attributes: ProductDetails_product_attributes[];
   availability: ProductDetails_product_availability | null;
   images: (ProductDetails_product_images | null)[] | null;
@@ -162,42 +165,8 @@ export interface ProductDetails_product {
   url: string;
 }
 
-export interface ProductDetails_collections_edges_node {
-  __typename: "Collection";
-  id: string;
-  name: string;
-}
-
-export interface ProductDetails_collections_edges {
-  __typename: "CollectionCountableEdge";
-  node: ProductDetails_collections_edges_node;
-}
-
-export interface ProductDetails_collections {
-  __typename: "CollectionCountableConnection";
-  edges: ProductDetails_collections_edges[];
-}
-
-export interface ProductDetails_categories_edges_node {
-  __typename: "Category";
-  id: string;
-  name: string;
-}
-
-export interface ProductDetails_categories_edges {
-  __typename: "CategoryCountableEdge";
-  node: ProductDetails_categories_edges_node;
-}
-
-export interface ProductDetails_categories {
-  __typename: "CategoryCountableConnection";
-  edges: ProductDetails_categories_edges[];
-}
-
 export interface ProductDetails {
   product: ProductDetails_product | null;
-  collections: ProductDetails_collections | null;
-  categories: ProductDetails_categories | null;
 }
 
 export interface ProductDetailsVariables {

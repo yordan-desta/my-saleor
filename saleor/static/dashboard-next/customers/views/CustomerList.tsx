@@ -3,16 +3,14 @@ import * as React from "react";
 import Navigator from "../../components/Navigator";
 import { createPaginationState, Paginator } from "../../components/Paginator";
 import { maybe } from "../../misc";
+import { Pagination } from "../../types";
 import CustomerListPage from "../components/CustomerListPage";
 import { TypedCustomerListQuery } from "../queries";
 import { customerAddUrl, customerUrl } from "../urls";
 
 const PAGINATE_BY = 20;
 
-export type CustomerListQueryParams = Partial<{
-  after: string;
-  before: string;
-}>;
+export type CustomerListQueryParams = Pagination;
 
 interface CustomerListProps {
   params: CustomerListQueryParams;
@@ -42,8 +40,7 @@ export const CustomerList: React.StatelessComponent<CustomerListProps> = ({
                   onAdd={() => navigate(customerAddUrl)}
                   onNextPage={loadNextPage}
                   onPreviousPage={loadPreviousPage}
-                  onRowClick={id => () =>
-                    navigate(customerUrl(encodeURIComponent(id)))}
+                  onRowClick={id => () => navigate(customerUrl(id))}
                 />
               )}
             </Paginator>

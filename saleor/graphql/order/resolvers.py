@@ -3,20 +3,16 @@ import graphene_django_optimizer as gql_optimizer
 
 from ...order import OrderEvents, OrderStatus, models
 from ...order.utils import sum_order_totals
-from ...shipping import models as shipping_models
 from ..utils import filter_by_period, filter_by_query_param
-from .types import Order, OrderStatusFilter
+from .enums import OrderStatusFilter
+from .types import Order
+from .utils import applicable_shipping_methods
 
 ORDER_SEARCH_FIELDS = (
     'id', 'discount_name', 'token', 'user_email', 'user__email')
 
 
-def resolve_orders(info, created, status, query):
-    user = info.context.user
-    if user.has_perm('order.manage_orders'):
-        qs = models.Order.objects.all()
-    else:
-        qs = user.orders.confirmed()
+def filter_orders(qs, info, created, status, query):
     qs = filter_by_query_param(qs, query, ORDER_SEARCH_FIELDS)
 
     # filter orders by status
@@ -31,6 +27,16 @@ def resolve_orders(info, created, status, query):
         qs = filter_by_period(qs, created, 'created')
 
     return gql_optimizer.query(qs, info)
+
+
+def resolve_orders(info, created, status, query):
+    qs = models.Order.objects.confirmed()
+    return filter_orders(qs, info, created, status, query)
+
+
+def resolve_draft_orders(info, created, query):
+    qs = models.Order.objects.drafts()
+    return filter_orders(qs, info, created, None, query)
 
 
 def resolve_orders_total(info, period):
@@ -49,15 +55,7 @@ def resolve_order(info, id):
 
 
 def resolve_shipping_methods(obj, info, price):
-    if not obj.is_shipping_required():
-        return None
-    if not obj.shipping_address:
-        return None
-
-    qs = shipping_models.ShippingMethod.objects
-    return qs.applicable_shipping_methods(
-        price=price, weight=obj.get_total_weight(),
-        country_code=obj.shipping_address.country.code)
+    return applicable_shipping_methods(obj, info, price)
 
 
 def resolve_homepage_events(info):
@@ -66,3 +64,7 @@ def resolve_homepage_events(info):
         OrderEvents.PLACED.value, OrderEvents.PLACED_FROM_DRAFT.value,
         OrderEvents.ORDER_FULLY_PAID.value]
     return models.OrderEvent.objects.filter(type__in=types)
+
+
+def resolve_order_by_token(info, token):
+    return models.Order.objects.filter(token=token).first()

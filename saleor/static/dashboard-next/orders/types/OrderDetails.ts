@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { OrderEventsEmails, OrderEvents, FulfillmentStatus, PaymentChargeStatusEnum, OrderStatus, OrderAction, WeightUnitsEnum } from "./../../types/globalTypes";
@@ -31,6 +32,7 @@ export interface OrderDetails_order_billingAddress {
 
 export interface OrderDetails_order_events_user {
   __typename: "User";
+  id: string;
   email: string;
 }
 
@@ -68,6 +70,7 @@ export interface OrderDetails_order_fulfillments_lines_orderLine_unitPrice {
 export interface OrderDetails_order_fulfillments_lines_orderLine {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -113,6 +116,7 @@ export interface OrderDetails_order_lines_unitPrice {
 export interface OrderDetails_order_lines {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -223,7 +227,9 @@ export interface OrderDetails_order {
   __typename: "Order";
   id: string;
   billingAddress: OrderDetails_order_billingAddress | null;
+  canFinalize: boolean;
   created: any;
+  customerNote: string;
   events: (OrderDetails_order_events | null)[] | null;
   fulfillments: (OrderDetails_order_fulfillments | null)[];
   lines: (OrderDetails_order_lines | null)[];

@@ -1,5 +1,5 @@
 import Card from "@material-ui/core/Card";
-import { withStyles } from "@material-ui/core/styles";
+import { createStyles, withStyles, WithStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -12,46 +12,42 @@ import Skeleton from "../../../components/Skeleton";
 import StatusLabel from "../../../components/StatusLabel";
 import TablePagination from "../../../components/TablePagination";
 import i18n from "../../../i18n";
-import { renderCollection } from "../../../misc";
+import { maybe, renderCollection } from "../../../misc";
 import { ListProps } from "../../../types";
+import { PageList_pages_edges_node } from "../../types/PageList";
 
-interface PageListProps extends ListProps {
-  pages?: Array<{
-    id: string;
-    title: string;
-    slug: string;
-    isVisible: boolean;
-  }>;
+export interface PageListProps extends ListProps {
+  pages: PageList_pages_edges_node[];
 }
 
-const decorate = withStyles(theme => ({
+const styles = createStyles({
   link: {
-    color: theme.palette.secondary.main,
-    cursor: "pointer" as "pointer",
-    textDecoration: "none"
-  },
-  textRight: {
-    textAlign: "right" as "right"
+    cursor: "pointer"
   }
-}));
-
-export const PageList = decorate<PageListProps>(
+});
+const PageList = withStyles(styles, { name: "PageList" })(
   ({
     classes,
-    disabled,
-    pageInfo,
     pages,
+    disabled,
     onNextPage,
-    onPreviousPage,
-    onRowClick
-  }) => (
+    pageInfo,
+    onRowClick,
+    onPreviousPage
+  }: PageListProps & WithStyles<typeof styles>) => (
     <Card>
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>{i18n.t("Name", { context: "object" })}</TableCell>
-            <TableCell>{i18n.t("Url", { context: "object" })}</TableCell>
-            <TableCell>{i18n.t("Visibility", { context: "object" })}</TableCell>
+            <TableCell padding="dense">
+              {i18n.t("Title", { context: "table header" })}
+            </TableCell>
+            <TableCell padding="dense">
+              {i18n.t("Slug", { context: "table header" })}
+            </TableCell>
+            <TableCell padding="dense">
+              {i18n.t("Visibility", { context: "table header" })}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableFooter>
@@ -59,10 +55,10 @@ export const PageList = decorate<PageListProps>(
             <TablePagination
               colSpan={3}
               hasNextPage={pageInfo && !disabled ? pageInfo.hasNextPage : false}
+              onNextPage={onNextPage}
               hasPreviousPage={
                 pageInfo && !disabled ? pageInfo.hasPreviousPage : false
               }
-              onNextPage={onNextPage}
               onPreviousPage={onPreviousPage}
             />
           </TableRow>
@@ -71,25 +67,30 @@ export const PageList = decorate<PageListProps>(
           {renderCollection(
             pages,
             page => (
-              <TableRow key={page ? page.id : "skeleton"}>
-                <TableCell
-                  onClick={page && onRowClick(page.id)}
-                  className={classes.link}
-                >
-                  {page ? page.title : <Skeleton />}
-                </TableCell>
-                <TableCell>{page ? `/${page.slug}` : <Skeleton />}</TableCell>
+              <TableRow
+                hover={!!page}
+                className={!!page ? classes.link : undefined}
+                onClick={page ? onRowClick(page.id) : undefined}
+                key={page ? page.id : "skeleton"}
+              >
                 <TableCell>
-                  {page ? (
-                    <StatusLabel
-                      label={
-                        page.isVisible
-                          ? i18n.t("Published", { context: "object" })
-                          : i18n.t("Not published", { context: "object" })
-                      }
-                      status={page.isVisible ? "success" : "error"}
-                    />
-                  ) : (
+                  {maybe<React.ReactNode>(() => page.title, <Skeleton />)}
+                </TableCell>
+                <TableCell>
+                  {maybe<React.ReactNode>(() => page.slug, <Skeleton />)}
+                </TableCell>
+                <TableCell>
+                  {maybe<React.ReactNode>(
+                    () => (
+                      <StatusLabel
+                        label={
+                          page.isVisible
+                            ? i18n.t("Published")
+                            : i18n.t("Not Published")
+                        }
+                        status={page.isVisible ? "success" : "error"}
+                      />
+                    ),
                     <Skeleton />
                   )}
                 </TableCell>

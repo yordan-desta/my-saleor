@@ -10,7 +10,6 @@ from django.template.response import TemplateResponse
 from django.utils.translation import npgettext_lazy, pgettext_lazy
 from django.views.decorators.http import require_POST
 
-from . import forms
 from ...core.utils import get_paginator_items
 from ...discount.models import Sale
 from ...product.models import (
@@ -20,6 +19,7 @@ from ...product.utils.availability import get_availability
 from ...product.utils.costs import (
     get_margin_for_variant, get_product_costs_data)
 from ..views import staff_member_required
+from . import forms
 from .filters import AttributeFilter, ProductFilter, ProductTypeFilter
 
 
@@ -192,7 +192,7 @@ def product_bulk_update(request):
             'Dashboard message',
             '%(count)d product has been updated',
             '%(count)d products have been updated',
-            number=count) % {'count': count}
+            number='count') % {'count': count}
         messages.success(request, msg)
     return redirect('dashboard:product-list')
 
@@ -206,7 +206,7 @@ def ajax_products_list(request):
     queryset = (
         Product.objects.all()
         if request.user.has_perm('product.manage_products')
-        else Product.objects.available_products())
+        else Product.objects.published())
     search_query = request.GET.get('q', '')
     if search_query:
         queryset = queryset.filter(Q(name__icontains=search_query))
@@ -405,7 +405,7 @@ def ajax_available_variants_list(request):
 
     Response format is that of a Select2 JS widget.
     """
-    available_products = Product.objects.available_products().prefetch_related(
+    available_products = Product.objects.published().prefetch_related(
         'category',
         'product_type__product_attributes')
     queryset = ProductVariant.objects.filter(

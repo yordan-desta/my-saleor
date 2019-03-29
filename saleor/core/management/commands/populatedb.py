@@ -1,3 +1,6 @@
+from io import StringIO
+
+from django.apps import apps
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -5,10 +8,9 @@ from django.db import connection
 
 from ...utils import create_superuser
 from ...utils.random_data import (
-    add_address_to_admin, create_collections_by_schema, create_menus,
-    create_orders, create_page, create_product_sales,
-    create_products_by_schema, create_shipping_zones, create_users,
-    create_vouchers, set_homepage_collection)
+    add_address_to_admin, create_menus, create_orders, create_page,
+    create_product_sales, create_products_by_schema, create_shipping_zones,
+    create_users, create_vouchers, set_homepage_collection)
 
 
 class Command(BaseCommand):
@@ -34,6 +36,12 @@ class Command(BaseCommand):
             dest='withoutsearch',
             default=False,
             help='Don\'t update search index')
+        parser.add_argument(
+            '--skipsequencereset',
+            action='store_true',
+            dest='skipsequencereset',
+            default=False,
+            help='Don\'t reset SQL sequences that are out of sync.')
 
     def make_database_faster(self):
         """Sacrifice some of the safeguards of sqlite3 for speed.
@@ -50,6 +58,22 @@ class Command(BaseCommand):
         if settings.ES_URL:
             call_command('search_index', '--rebuild', force=True)
 
+    def sequence_reset(self):
+        """Runs SQL sequence reset on all saleor.* apps.
+
+        When a value is manually assigned to an auto-incrementing field
+        it doesn't update the field's sequence, which might cause a conflict
+        later on.
+        """
+        commands = StringIO()
+        for app in apps.get_app_configs():
+            if 'saleor' in app.name:
+                call_command(
+                    'sqlsequencereset', app.label,
+                    stdout=commands, no_color=True)
+        with connection.cursor() as cursor:
+            cursor.execute(commands.getvalue())
+
     def handle(self, *args, **options):
         self.make_database_faster()
         create_images = not options['withoutimages']
@@ -65,8 +89,6 @@ class Command(BaseCommand):
             self.stdout.write(msg)
         for msg in create_orders(20):
             self.stdout.write(msg)
-        for msg in create_collections_by_schema(self.placeholders_dir):
-            self.stdout.write(msg)
         for msg in set_homepage_collection():
             self.stdout.write(msg)
         for msg in create_page():
@@ -81,3 +103,5 @@ class Command(BaseCommand):
             add_address_to_admin(credentials['email'])
         if not options['withoutsearch']:
             self.populate_search_index()
+        if not options['skipsequencereset']:
+            self.sequence_reset()

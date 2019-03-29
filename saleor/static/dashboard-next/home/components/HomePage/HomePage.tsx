@@ -1,12 +1,18 @@
-import { withStyles } from "@material-ui/core/styles";
-import AttachMoney from "@material-ui/icons/AttachMoney";
-import LocalShipping from "@material-ui/icons/LocalShipping";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import * as React from "react";
 
 import CardSpacer from "../../../components/CardSpacer";
 import Container from "../../../components/Container";
+import Grid from "../../../components/Grid";
 import Money from "../../../components/Money";
 import Skeleton from "../../../components/Skeleton";
+import Orders from "../../../icons/Orders";
+import Sales from "../../../icons/Sales";
 import {
   Home_activities_edges_node,
   Home_productTopToday_edges_node,
@@ -18,7 +24,22 @@ import HomeHeader from "../HomeHeader";
 import HomeNotificationTable from "../HomeNotificationTable/HomeNotificationTable";
 import HomeProductListCard from "../HomeProductListCard";
 
-export interface HomePageProps {
+const styles = (theme: Theme) =>
+  createStyles({
+    cardContainer: {
+      display: "grid",
+      gridColumnGap: `${theme.spacing.unit * 3}px`,
+      gridTemplateColumns: "1fr 1fr",
+      [theme.breakpoints.down("sm")]: {
+        gridColumnGap: `${theme.spacing.unit}px`
+      },
+      [theme.breakpoints.down("xs")]: {
+        gridTemplateColumns: "1fr"
+      }
+    }
+  });
+
+export interface HomePageProps extends WithStyles<typeof styles> {
   activities: Home_activities_edges_node[];
   orders: number;
   ordersToCapture: number;
@@ -33,35 +54,10 @@ export interface HomePageProps {
   onProductsOutOfStockClick: () => void;
 }
 
-const decorate = withStyles(theme => ({
-  cardContainer: {
-    display: "grid",
-    gridColumnGap: `${theme.spacing.unit * 3}px`,
-    gridTemplateColumns: "1fr 1fr",
-    [theme.breakpoints.down("sm")]: {
-      gridColumnGap: `${theme.spacing.unit}px`
-    },
-    [theme.breakpoints.down("xs")]: {
-      gridTemplateColumns: "1fr"
-    }
-  },
-
-  root: {
-    display: "grid" as "grid",
-    gridColumnGap: `${theme.spacing.unit * 3}px`,
-    gridTemplateColumns: "2fr 1fr",
-    [theme.breakpoints.down("sm")]: {
-      gridColumnGap: `${theme.spacing.unit}px`
-    },
-    [theme.breakpoints.down("sm")]: {
-      gridTemplateColumns: "1fr"
-    }
-  }
-}));
-const HomePage = decorate<HomePageProps>(
+const HomePage = withStyles(styles, { name: "HomePage" })(
   ({
-    userName,
     classes,
+    userName,
     orders,
     sales,
     topProducts,
@@ -73,16 +69,16 @@ const HomePage = decorate<HomePageProps>(
     ordersToCapture,
     ordersToFulfill,
     productsOutOfStock
-  }) => (
-    <Container width="md">
+  }: HomePageProps) => (
+    <Container>
       <HomeHeader userName={userName} />
       <CardSpacer />
-      <div className={classes.root}>
+      <Grid>
         <div>
           <div className={classes.cardContainer}>
             <HomeAnalyticsCard
               title={"Sales"}
-              icon={<AttachMoney fontSize={"inherit"} />}
+              icon={<Sales fontSize={"inherit"} viewBox="0 0 48 48" />}
             >
               {sales ? (
                 <Money money={sales} />
@@ -92,7 +88,7 @@ const HomePage = decorate<HomePageProps>(
             </HomeAnalyticsCard>
             <HomeAnalyticsCard
               title={"Orders"}
-              icon={<LocalShipping fontSize={"inherit"} />}
+              icon={<Orders fontSize={"inherit"} viewBox="0 0 48 48" />}
             >
               {orders === undefined ? (
                 <Skeleton style={{ width: "5em" }} />
@@ -119,7 +115,7 @@ const HomePage = decorate<HomePageProps>(
         <div>
           <HomeActivityCard activities={activities} />
         </div>
-      </div>
+      </Grid>
     </Container>
   )
 );

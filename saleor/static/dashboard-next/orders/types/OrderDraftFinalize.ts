@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { OrderEventsEmails, OrderEvents, FulfillmentStatus, PaymentChargeStatusEnum, OrderStatus, OrderAction } from "./../../types/globalTypes";
@@ -37,6 +38,7 @@ export interface OrderDraftFinalize_draftOrderComplete_order_billingAddress {
 
 export interface OrderDraftFinalize_draftOrderComplete_order_events_user {
   __typename: "User";
+  id: string;
   email: string;
 }
 
@@ -74,6 +76,7 @@ export interface OrderDraftFinalize_draftOrderComplete_order_fulfillments_lines_
 export interface OrderDraftFinalize_draftOrderComplete_order_fulfillments_lines_orderLine {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -119,6 +122,7 @@ export interface OrderDraftFinalize_draftOrderComplete_order_lines_unitPrice {
 export interface OrderDraftFinalize_draftOrderComplete_order_lines {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -229,7 +233,9 @@ export interface OrderDraftFinalize_draftOrderComplete_order {
   __typename: "Order";
   id: string;
   billingAddress: OrderDraftFinalize_draftOrderComplete_order_billingAddress | null;
+  canFinalize: boolean;
   created: any;
+  customerNote: string;
   events: (OrderDraftFinalize_draftOrderComplete_order_events | null)[] | null;
   fulfillments: (OrderDraftFinalize_draftOrderComplete_order_fulfillments | null)[];
   lines: (OrderDraftFinalize_draftOrderComplete_order_lines | null)[];
@@ -252,7 +258,7 @@ export interface OrderDraftFinalize_draftOrderComplete_order {
 
 export interface OrderDraftFinalize_draftOrderComplete {
   __typename: "DraftOrderComplete";
-  errors: (OrderDraftFinalize_draftOrderComplete_errors | null)[] | null;
+  errors: OrderDraftFinalize_draftOrderComplete_errors[] | null;
   order: OrderDraftFinalize_draftOrderComplete_order | null;
 }
 

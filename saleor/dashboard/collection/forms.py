@@ -19,15 +19,21 @@ class CollectionForm(forms.ModelForm):
 
     class Meta:
         model = Collection
-        exclude = ['slug']
+        exclude = ['slug', 'description_json']
         labels = {
             'name': pgettext_lazy('Item name', 'Name'),
             'background_image': pgettext_lazy(
                 'Background image of a collection',
                 'Background image'),
+            'background_image_alt': pgettext_lazy(
+                'Description of a collection image', 'Image description'),
             'is_published': pgettext_lazy(
                 'Collection published toggle',
                 'Published'),
+            'publication_date': pgettext_lazy(
+                'The publication date field, can be a posterior date for '
+                'a planned publication.',
+                'Publication date'),
             'description': pgettext_lazy(
                 'Description field of a collection',
                 'Description')}

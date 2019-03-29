@@ -1,6 +1,14 @@
 import gql from "graphql-tag";
 
 import { TypedQuery } from "../queries";
+import {
+  CategorySearch,
+  CategorySearchVariables
+} from "./types/CategorySearch";
+import {
+  CollectionSearch,
+  CollectionSearchVariables
+} from "./types/CollectionSearch";
 import { ProductCreateData } from "./types/ProductCreateData";
 import {
   ProductDetails,
@@ -42,7 +50,7 @@ export const fragmentProduct = gql`
   fragment Product on Product {
     id
     name
-    description
+    descriptionJson
     seoTitle
     seoDescription
     category {
@@ -70,7 +78,7 @@ export const fragmentProduct = gql`
     }
     isPublished
     chargeTaxes
-    availableOn
+    publicationDate
     attributes {
       attribute {
         id
@@ -112,8 +120,10 @@ export const fragmentProduct = gql`
       priceOverride {
         ...Money
       }
-      stockQuantity
       margin
+      quantity
+      quantityAllocated
+      stockQuantity
     }
     productType {
       id
@@ -163,7 +173,9 @@ export const fragmentVariant = gql`
         ...ProductImageFragment
       }
       name
-      thumbnailUrl
+      thumbnail {
+        url
+      }
       variants {
         id
         name
@@ -200,7 +212,9 @@ const productListQuery = gql`
         node {
           id
           name
-          thumbnailUrl
+          thumbnail {
+            url
+          }
           availability {
             available
           }
@@ -233,22 +247,6 @@ const productDetailsQuery = gql`
     product(id: $id) {
       ...Product
     }
-    collections {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
-    categories {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
   }
 `;
 export const TypedProductDetailsQuery = TypedQuery<
@@ -271,7 +269,7 @@ export const TypedProductVariantQuery = TypedQuery<
 
 const productCreateQuery = gql`
   query ProductCreateData {
-    productTypes {
+    productTypes(first: 20) {
       edges {
         node {
           id
@@ -291,22 +289,6 @@ const productCreateQuery = gql`
         }
       }
     }
-    collections {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
-    categories {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
   }
 `;
 export const TypedProductCreateQuery = TypedQuery<ProductCreateData, {}>(
@@ -322,6 +304,7 @@ const productVariantCreateQuery = gql`
         sortOrder
         url
       }
+      name
       productType {
         id
         variantAttributes {
@@ -357,6 +340,7 @@ const productImageQuery = gql`
   query ProductImageById($productId: ID!, $imageId: ID!) {
     product(id: $productId) {
       id
+      name
       mainImage: imageById(id: $imageId) {
         id
         alt
@@ -373,3 +357,37 @@ export const TypedProductImageQuery = TypedQuery<
   ProductImageById,
   ProductImageByIdVariables
 >(productImageQuery);
+
+const categorySearch = gql`
+  query CategorySearch($query: String) {
+    categories(first: 5, query: $query) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+export const TypedCategorySearchQuery = TypedQuery<
+  CategorySearch,
+  CategorySearchVariables
+>(categorySearch);
+
+const collectionSearch = gql`
+  query CollectionSearch($query: String) {
+    collections(first: 5, query: $query) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+export const TypedCollectionSearchQuery = TypedQuery<
+  CollectionSearch,
+  CollectionSearchVariables
+>(collectionSearch);

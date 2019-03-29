@@ -2,6 +2,10 @@ import gql from "graphql-tag";
 
 import { TypedQuery } from "../queries";
 import { OrderDetails, OrderDetailsVariables } from "./types/OrderDetails";
+import {
+  OrderDraftList,
+  OrderDraftListVariables
+} from "./types/OrderDraftList";
 import { OrderList, OrderListVariables } from "./types/OrderList";
 import {
   OrderVariantSearch,
@@ -20,6 +24,7 @@ export const fragmentOrderEvent = gql`
     quantity
     type
     user {
+      id
       email
     }
   }
@@ -47,6 +52,7 @@ export const fragmentAddress = gql`
 export const fragmentOrderLine = gql`
   fragment OrderLineFragment on OrderLine {
     id
+    isShippingRequired
     productName
     productSku
     quantity
@@ -74,7 +80,9 @@ export const fragmentOrderDetails = gql`
     billingAddress {
       ...AddressFragment
     }
+    canFinalize
     created
+    customerNote
     events {
       ...OrderEventFragment
     }
@@ -202,6 +210,51 @@ export const TypedOrderListQuery = TypedQuery<OrderList, OrderListVariables>(
   orderListQuery
 );
 
+export const orderDraftListQuery = gql`
+  ${fragmentAddress}
+  query OrderDraftList(
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+  ) {
+    draftOrders(before: $before, after: $after, first: $first, last: $last) {
+      edges {
+        node {
+          __typename
+          billingAddress {
+            ...AddressFragment
+          }
+          created
+          id
+          number
+          paymentStatus
+          status
+          total {
+            __typename
+            gross {
+              __typename
+              amount
+              currency
+            }
+          }
+          userEmail
+        }
+      }
+      pageInfo {
+        hasPreviousPage
+        hasNextPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+export const TypedOrderDraftListQuery = TypedQuery<
+  OrderDraftList,
+  OrderDraftListVariables
+>(orderDraftListQuery);
+
 export const orderDetailsQuery = gql`
   ${fragmentOrderDetails}
   query OrderDetails($id: ID!) {
@@ -223,19 +276,31 @@ export const TypedOrderDetailsQuery = TypedQuery<
 >(orderDetailsQuery);
 
 export const orderVariantSearchQuery = gql`
-  query OrderVariantSearch($search: String!) {
-    products(query: $search, first: 20) {
+  query OrderVariantSearch($search: String!, $after: String) {
+    products(query: $search, first: 5, after: $after) {
       edges {
         node {
           id
           name
+          thumbnail {
+            url
+          }
           variants {
             id
             name
             sku
-            stockQuantity
+            price {
+              amount
+              currency
+            }
           }
         }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
       }
     }
   }
@@ -247,7 +312,7 @@ export const TypedOrderVariantSearch = TypedQuery<
 
 export const userSearchQuery = gql`
   query UserSearch($search: String!) {
-    customers(query: $search, first: 20) {
+    customers(query: $search, first: 5) {
       edges {
         node {
           id

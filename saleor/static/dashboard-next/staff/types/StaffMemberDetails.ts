@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { PermissionEnum } from "./../../types/globalTypes";
@@ -17,7 +18,9 @@ export interface StaffMemberDetails_user {
   __typename: "User";
   id: string;
   email: string;
+  firstName: string;
   isActive: boolean;
+  lastName: string;
   permissions: (StaffMemberDetails_user_permissions | null)[] | null;
 }
 

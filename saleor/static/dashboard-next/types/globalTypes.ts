@@ -1,9 +1,15 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 //==============================================================
 // START Enums and Input Objects
 //==============================================================
+
+export enum AddressTypeEnum {
+  BILLING = "BILLING",
+  SHIPPING = "SHIPPING",
+}
 
 export enum AttributeTypeEnum {
   PRODUCT = "PRODUCT",
@@ -13,6 +19,11 @@ export enum AttributeTypeEnum {
 export enum AuthorizationKeyType {
   FACEBOOK = "FACEBOOK",
   GOOGLE_OAUTH2 = "GOOGLE_OAUTH2",
+}
+
+export enum DiscountValueTypeEnum {
+  FIXED = "FIXED",
+  PERCENTAGE = "PERCENTAGE",
 }
 
 export enum FulfillmentStatus {
@@ -68,9 +79,11 @@ export enum OrderStatusFilter {
 }
 
 export enum PaymentChargeStatusEnum {
-  CHARGED = "CHARGED",
+  FULLY_CHARGED = "FULLY_CHARGED",
   FULLY_REFUNDED = "FULLY_REFUNDED",
   NOT_CHARGED = "NOT_CHARGED",
+  PARTIALLY_CHARGED = "PARTIALLY_CHARGED",
+  PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED",
 }
 
 export enum PermissionEnum {
@@ -83,7 +96,18 @@ export enum PermissionEnum {
   MANAGE_SETTINGS = "MANAGE_SETTINGS",
   MANAGE_SHIPPING = "MANAGE_SHIPPING",
   MANAGE_STAFF = "MANAGE_STAFF",
+  MANAGE_TRANSLATIONS = "MANAGE_TRANSLATIONS",
   MANAGE_USERS = "MANAGE_USERS",
+}
+
+export enum SaleType {
+  FIXED = "FIXED",
+  PERCENTAGE = "PERCENTAGE",
+}
+
+export enum ShippingMethodTypeEnum {
+  PRICE = "PRICE",
+  WEIGHT = "WEIGHT",
 }
 
 export enum StockAvailability {
@@ -116,13 +140,35 @@ export enum TaxRateType {
   SOCIAL_HOUSING = "SOCIAL_HOUSING",
   STANDARD = "STANDARD",
   WATER = "WATER",
+  WINE = "WINE",
+}
+
+export enum VoucherDiscountValueType {
+  FIXED = "FIXED",
+  PERCENTAGE = "PERCENTAGE",
+}
+
+export enum VoucherType {
+  CATEGORY = "CATEGORY",
+  COLLECTION = "COLLECTION",
+  PRODUCT = "PRODUCT",
+  SHIPPING = "SHIPPING",
+  VALUE = "VALUE",
+}
+
+export enum VoucherTypeEnum {
+  CATEGORY = "CATEGORY",
+  COLLECTION = "COLLECTION",
+  PRODUCT = "PRODUCT",
+  SHIPPING = "SHIPPING",
+  VALUE = "VALUE",
 }
 
 export enum WeightUnitsEnum {
-  g = "g",
-  kg = "kg",
-  lb = "lb",
-  oz = "oz",
+  G = "G",
+  KG = "KG",
+  LB = "LB",
+  OZ = "OZ",
 }
 
 export interface AddressInput {
@@ -165,12 +211,20 @@ export interface AuthorizationKeyInput {
   password: string;
 }
 
+export interface CatalogueInput {
+  products?: (string | null)[] | null;
+  categories?: (string | null)[] | null;
+  collections?: (string | null)[] | null;
+}
+
 export interface CategoryInput {
   description?: string | null;
+  descriptionJson?: any | null;
   name?: string | null;
   slug?: string | null;
   seo?: SeoInput | null;
   backgroundImage?: any | null;
+  backgroundImageAlt?: string | null;
 }
 
 export interface CollectionCreateInput {
@@ -178,8 +232,11 @@ export interface CollectionCreateInput {
   name?: string | null;
   slug?: string | null;
   description?: string | null;
+  descriptionJson?: any | null;
   backgroundImage?: any | null;
+  backgroundImageAlt?: string | null;
   seo?: SeoInput | null;
+  publicationDate?: any | null;
   products?: (string | null)[] | null;
 }
 
@@ -188,13 +245,18 @@ export interface CollectionInput {
   name?: string | null;
   slug?: string | null;
   description?: string | null;
+  descriptionJson?: any | null;
   backgroundImage?: any | null;
+  backgroundImageAlt?: string | null;
   seo?: SeoInput | null;
+  publicationDate?: any | null;
 }
 
 export interface CustomerInput {
   defaultBillingAddress?: AddressInput | null;
   defaultShippingAddress?: AddressInput | null;
+  firstName?: string | null;
+  lastName?: string | null;
   email?: string | null;
   isActive?: boolean | null;
   note?: string | null;
@@ -253,6 +315,16 @@ export interface OrderUpdateShippingInput {
   shippingMethod?: string | null;
 }
 
+export interface PageInput {
+  slug?: string | null;
+  title?: string | null;
+  content?: string | null;
+  contentJson?: any | null;
+  isPublished?: boolean | null;
+  publicationDate?: string | null;
+  seo?: SeoInput | null;
+}
+
 export interface ProductTypeInput {
   name?: string | null;
   hasVariants?: boolean | null;
@@ -263,9 +335,47 @@ export interface ProductTypeInput {
   taxRate?: TaxRateType | null;
 }
 
+export interface ProductVariantInput {
+  attributes?: (AttributeValueInput | null)[] | null;
+  costPrice?: any | null;
+  priceOverride?: any | null;
+  sku?: string | null;
+  quantity?: number | null;
+  trackInventory?: boolean | null;
+  weight?: any | null;
+}
+
+export interface SaleInput {
+  name?: string | null;
+  type?: DiscountValueTypeEnum | null;
+  value?: any | null;
+  products?: (string | null)[] | null;
+  categories?: (string | null)[] | null;
+  collections?: (string | null)[] | null;
+  startDate?: any | null;
+  endDate?: any | null;
+}
+
 export interface SeoInput {
   title?: string | null;
   description?: string | null;
+}
+
+export interface ShippingPriceInput {
+  name?: string | null;
+  price?: any | null;
+  minimumOrderPrice?: any | null;
+  maximumOrderPrice?: any | null;
+  minimumOrderWeight?: any | null;
+  maximumOrderWeight?: any | null;
+  type?: ShippingMethodTypeEnum | null;
+  shippingZone?: string | null;
+}
+
+export interface ShippingZoneInput {
+  name?: string | null;
+  countries?: (string | null)[] | null;
+  default?: boolean | null;
 }
 
 export interface ShopSettingsInput {
@@ -273,6 +383,7 @@ export interface ShopSettingsInput {
   description?: string | null;
   includeTaxesInPrices?: boolean | null;
   displayGrossPrices?: boolean | null;
+  chargeTaxesOnShipping?: boolean | null;
   trackInventoryByDefault?: boolean | null;
   defaultWeightUnit?: WeightUnitsEnum | null;
 }
@@ -283,27 +394,48 @@ export interface SiteDomainInput {
 }
 
 export interface StaffCreateInput {
+  firstName?: string | null;
+  lastName?: string | null;
   email?: string | null;
   isActive?: boolean | null;
   note?: string | null;
-  permissions?: (string | null)[] | null;
+  permissions?: (PermissionEnum | null)[] | null;
   sendPasswordEmail?: boolean | null;
 }
 
 export interface StaffInput {
+  firstName?: string | null;
+  lastName?: string | null;
   email?: string | null;
   isActive?: boolean | null;
   note?: string | null;
-  permissions?: (string | null)[] | null;
+  permissions?: (PermissionEnum | null)[] | null;
 }
 
 export interface UserCreateInput {
   defaultBillingAddress?: AddressInput | null;
   defaultShippingAddress?: AddressInput | null;
+  firstName?: string | null;
+  lastName?: string | null;
   email?: string | null;
   isActive?: boolean | null;
   note?: string | null;
   sendPasswordEmail?: boolean | null;
+}
+
+export interface VoucherInput {
+  type?: VoucherTypeEnum | null;
+  name?: string | null;
+  code?: string | null;
+  startDate?: any | null;
+  endDate?: any | null;
+  discountValueType?: DiscountValueTypeEnum | null;
+  discountValue?: any | null;
+  products?: (string | null)[] | null;
+  collections?: (string | null)[] | null;
+  categories?: (string | null)[] | null;
+  minAmountSpent?: any | null;
+  countries?: (string | null)[] | null;
 }
 
 //==============================================================

@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -128,8 +129,10 @@ export interface Product_variants {
   sku: string;
   name: string;
   priceOverride: Product_variants_priceOverride | null;
-  stockQuantity: number;
   margin: number | null;
+  quantity: number;
+  quantityAllocated: number;
+  stockQuantity: number;
 }
 
 export interface Product_productType {
@@ -143,7 +146,7 @@ export interface Product {
   __typename: "Product";
   id: string;
   name: string;
-  description: string;
+  descriptionJson: any;
   seoTitle: string | null;
   seoDescription: string | null;
   category: Product_category;
@@ -153,7 +156,7 @@ export interface Product {
   purchaseCost: Product_purchaseCost | null;
   isPublished: boolean;
   chargeTaxes: boolean;
-  availableOn: any | null;
+  publicationDate: any | null;
   attributes: Product_attributes[];
   availability: Product_availability | null;
   images: (Product_images | null)[] | null;

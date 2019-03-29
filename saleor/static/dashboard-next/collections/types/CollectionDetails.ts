@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -7,6 +8,7 @@
 
 export interface CollectionDetails_collection_backgroundImage {
   __typename: "Image";
+  alt: string | null;
   url: string;
 }
 
@@ -16,13 +18,18 @@ export interface CollectionDetails_collection_products_edges_node_productType {
   name: string;
 }
 
+export interface CollectionDetails_collection_products_edges_node_thumbnail {
+  __typename: "Image";
+  url: string;
+}
+
 export interface CollectionDetails_collection_products_edges_node {
   __typename: "Product";
   id: string;
   isPublished: boolean;
   name: string;
   productType: CollectionDetails_collection_products_edges_node_productType;
-  thumbnailUrl: string | null;
+  thumbnail: CollectionDetails_collection_products_edges_node_thumbnail | null;
 }
 
 export interface CollectionDetails_collection_products_edges {
@@ -50,6 +57,7 @@ export interface CollectionDetails_collection {
   isPublished: boolean;
   name: string;
   backgroundImage: CollectionDetails_collection_backgroundImage | null;
+  descriptionJson: any;
   seoDescription: string | null;
   seoTitle: string | null;
   products: CollectionDetails_collection_products | null;

@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -65,6 +66,11 @@ export interface VariantImageAssign_variantImageAssign_productVariant_product_im
   url: string;
 }
 
+export interface VariantImageAssign_variantImageAssign_productVariant_product_thumbnail {
+  __typename: "Image";
+  url: string;
+}
+
 export interface VariantImageAssign_variantImageAssign_productVariant_product_variants_images {
   __typename: "ProductImage";
   id: string;
@@ -84,7 +90,7 @@ export interface VariantImageAssign_variantImageAssign_productVariant_product {
   id: string;
   images: (VariantImageAssign_variantImageAssign_productVariant_product_images | null)[] | null;
   name: string;
-  thumbnailUrl: string | null;
+  thumbnail: VariantImageAssign_variantImageAssign_productVariant_product_thumbnail | null;
   variants: (VariantImageAssign_variantImageAssign_productVariant_product_variants | null)[] | null;
 }
 
@@ -104,7 +110,7 @@ export interface VariantImageAssign_variantImageAssign_productVariant {
 
 export interface VariantImageAssign_variantImageAssign {
   __typename: "VariantImageAssign";
-  errors: (VariantImageAssign_variantImageAssign_errors | null)[] | null;
+  errors: VariantImageAssign_variantImageAssign_errors[] | null;
   productVariant: VariantImageAssign_variantImageAssign_productVariant | null;
 }
 

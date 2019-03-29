@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -13,7 +14,7 @@ export interface CategoryDelete_categoryDelete_errors {
 
 export interface CategoryDelete_categoryDelete {
   __typename: "CategoryDelete";
-  errors: (CategoryDelete_categoryDelete_errors | null)[] | null;
+  errors: CategoryDelete_categoryDelete_errors[] | null;
 }
 
 export interface CategoryDelete {

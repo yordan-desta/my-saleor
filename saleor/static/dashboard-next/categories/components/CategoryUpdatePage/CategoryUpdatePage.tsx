@@ -1,15 +1,16 @@
-import { withStyles } from "@material-ui/core/styles";
+import { RawDraftContentState } from "draft-js";
 import * as React from "react";
 
+import AppHeader from "../../../components/AppHeader";
 import { CardSpacer } from "../../../components/CardSpacer";
+import { ConfirmButtonTransitionState } from "../../../components/ConfirmButton/ConfirmButton";
 import Container from "../../../components/Container";
 import Form from "../../../components/Form";
 import PageHeader from "../../../components/PageHeader";
-import SaveButtonBar, {
-  SaveButtonBarState
-} from "../../../components/SaveButtonBar/SaveButtonBar";
+import SaveButtonBar from "../../../components/SaveButtonBar/SaveButtonBar";
 import SeoForm from "../../../components/SeoForm";
-import Tabs, { Tab } from "../../../components/Tab";
+import { Tab } from "../../../components/Tab";
+import TabContainer from "../../../components/Tab/TabContainer";
 import i18n from "../../../i18n";
 import { maybe } from "../../../misc";
 import { UserError } from "../../../types";
@@ -20,20 +21,27 @@ import {
   CategoryDetails_category_children_edges_node,
   CategoryDetails_category_products_edges_node
 } from "../../types/CategoryDetails";
-// import CategoryBackground from "../CategoryBackground";
+import CategoryBackground from "../CategoryBackground";
 import CategoryProductsCard from "../CategoryProductsCard";
 
-interface FormData {
-  description: string;
+export interface FormData {
+  backgroundImageAlt: string;
+  description: RawDraftContentState;
   name: string;
   seoTitle: string;
   seoDescription: string;
 }
 
+export enum CategoryPageTab {
+  categories = "categories",
+  products = "products"
+}
+
 export interface CategoryUpdatePageProps {
+  changeTab: (index: CategoryPageTab) => void;
+  currentTab: CategoryPageTab;
   errors: UserError[];
   disabled: boolean;
-  placeholderImage: string;
   category: CategoryDetails_category;
   products: CategoryDetails_category_products_edges_node[];
   subcategories: CategoryDetails_category_children_edges_node[];
@@ -41,10 +49,10 @@ export interface CategoryUpdatePageProps {
     hasNextPage: boolean;
     hasPreviousPage: boolean;
   };
-  saveButtonBarState?: SaveButtonBarState;
+  saveButtonBarState: ConfirmButtonTransitionState;
   onImageDelete: () => void;
   onSubmit: (data: FormData) => void;
-  onImageUpload(event: React.ChangeEvent<any>);
+  onImageUpload(file: File);
   onNextPage();
   onPreviousPage();
   onProductClick(id: string): () => void;
@@ -55,144 +63,141 @@ export interface CategoryUpdatePageProps {
   onCategoryClick(id: string): () => void;
 }
 
-const decorate = withStyles({
-  tabsBorder: {
-    borderBottom: "1px solid #eeeeee"
-  }
-});
+const CategoriesTab = Tab(CategoryPageTab.categories);
+const ProductsTab = Tab(CategoryPageTab.products);
 
-export const CategoryUpdatePage = decorate<CategoryUpdatePageProps>(
-  ({
-    category,
-    classes,
-    disabled,
-    errors: userErrors,
-    pageInfo,
-    products,
-    saveButtonBarState,
-    subcategories,
-    onAddCategory,
-    onAddProduct,
-    onBack,
-    onCategoryClick,
-    onDelete,
-    onNextPage,
-    onPreviousPage,
-    onProductClick,
-    onSubmit
-  }) => {
-    const initialData = category
-      ? {
-          description: category.description || "",
-          name: category.name,
-          seoDescription: category.seoDescription || "",
-          seoTitle: category.seoTitle || ""
-        }
-      : {
-          description: "",
-          name: "",
-          seoDescription: "",
-          seoTitle: ""
-        };
-    return (
-      <Form
-        onSubmit={onSubmit}
-        initial={initialData}
-        errors={userErrors}
-        key={JSON.stringify(category)}
-      >
-        {({ data, change, errors, submit, hasChanged }) => (
-          <Container width="md">
-            <PageHeader
-              title={category ? category.name : undefined}
-              onBack={onBack}
-            />
-            <CategoryDetailsForm
-              data={data}
+export const CategoryUpdatePage: React.StatelessComponent<
+  CategoryUpdatePageProps
+> = ({
+  changeTab,
+  currentTab,
+  category,
+  disabled,
+  errors: userErrors,
+  pageInfo,
+  products,
+  saveButtonBarState,
+  subcategories,
+  onAddCategory,
+  onAddProduct,
+  onBack,
+  onCategoryClick,
+  onDelete,
+  onNextPage,
+  onPreviousPage,
+  onProductClick,
+  onSubmit,
+  onImageDelete,
+  onImageUpload
+}: CategoryUpdatePageProps) => {
+  const initialData: FormData = category
+    ? {
+        backgroundImageAlt: maybe(() => category.backgroundImage.alt, ""),
+        description: maybe(() => JSON.parse(category.descriptionJson)),
+        name: category.name || "",
+        seoDescription: category.seoDescription || "",
+        seoTitle: category.seoTitle || ""
+      }
+    : {
+        backgroundImageAlt: "",
+        description: "",
+        name: "",
+        seoDescription: "",
+        seoTitle: ""
+      };
+  return (
+    <Form
+      onSubmit={onSubmit}
+      initial={initialData}
+      errors={userErrors}
+      confirmLeave
+    >
+      {({ data, change, errors, submit, hasChanged }) => (
+        <Container>
+          <AppHeader onBack={onBack}>{i18n.t("Categories")}</AppHeader>
+          <PageHeader title={category ? category.name : undefined} />
+          <CategoryDetailsForm
+            category={category}
+            data={data}
+            disabled={disabled}
+            errors={errors}
+            onChange={change}
+          />
+          <CardSpacer />
+          <CategoryBackground
+            data={data}
+            onImageUpload={onImageUpload}
+            onImageDelete={onImageDelete}
+            image={maybe(() => category.backgroundImage)}
+            onChange={change}
+          />
+          <CardSpacer />
+          <SeoForm
+            helperText={i18n.t(
+              "Add search engine title and description to make this category easier to find"
+            )}
+            title={data.seoTitle}
+            titlePlaceholder={data.name}
+            description={data.seoDescription}
+            descriptionPlaceholder={data.name}
+            loading={!category}
+            onChange={change}
+            disabled={disabled}
+          />
+          <CardSpacer />
+          <TabContainer>
+            <CategoriesTab
+              isActive={currentTab === CategoryPageTab.categories}
+              changeTab={changeTab}
+            >
+              {i18n.t("Subcategories")}
+            </CategoriesTab>
+            <ProductsTab
+              isActive={currentTab === CategoryPageTab.products}
+              changeTab={changeTab}
+            >
+              {i18n.t("Products")}
+            </ProductsTab>
+          </TabContainer>
+          <CardSpacer />
+          {currentTab === CategoryPageTab.categories && (
+            <CategoryList
               disabled={disabled}
-              errors={errors}
-              onChange={change}
+              isRoot={false}
+              categories={subcategories}
+              onAdd={onAddCategory}
+              onRowClick={onCategoryClick}
+              onNextPage={onNextPage}
+              onPreviousPage={onPreviousPage}
+              pageInfo={pageInfo}
             />
-            <CardSpacer />
-            {/* TODO: Uncomment this section after API fixes */}
-            {/* <CategoryBackground
-              onImageUpload={onImageUpload}
-              onImageDelete={onImageDelete}
-              backgroundImage={maybe(() => category.backgroundImage)}
-              placeholderImage={placeholderImage}
-            /> */}
-            <CardSpacer />
-            <SeoForm
-              helperText={i18n.t(
-                "Add search engine title and description to make this category easier to find"
-              )}
-              title={data.seoTitle}
-              titlePlaceholder={data.name}
-              description={data.seoDescription}
-              descriptionPlaceholder={data.description}
-              loading={!category}
-              onChange={change}
+          )}
+          {currentTab === CategoryPageTab.products && (
+            <CategoryProductsCard
+              categoryName={maybe(() => category.name)}
+              products={products}
               disabled={disabled}
+              pageInfo={pageInfo}
+              onNextPage={onNextPage}
+              onPreviousPage={onPreviousPage}
+              onRowClick={onProductClick}
+              onAdd={onAddProduct}
             />
-            <CardSpacer />
-            <Tabs>
-              {({ changeTab, currentTab }) => (
-                <>
-                  <div className={classes.tabsBorder}>
-                    <Tab
-                      isActive={currentTab === 0}
-                      value={0}
-                      changeTab={changeTab}
-                    >
-                      {i18n.t("Subcategories")}
-                    </Tab>
-                    <Tab
-                      isActive={currentTab === 1}
-                      value={1}
-                      changeTab={changeTab}
-                    >
-                      {i18n.t("Products")}
-                    </Tab>
-                  </div>
-                  <CardSpacer />
-                  {currentTab === 0 && (
-                    <CategoryList
-                      isRoot={false}
-                      categories={subcategories}
-                      onAdd={onAddCategory}
-                      onRowClick={onCategoryClick}
-                    />
-                  )}
-                  {currentTab === 1 && (
-                    <CategoryProductsCard
-                      categoryName={maybe(() => category.name)}
-                      products={products}
-                      disabled={disabled}
-                      pageInfo={pageInfo}
-                      onNextPage={onNextPage}
-                      onPreviousPage={onPreviousPage}
-                      onRowClick={onProductClick}
-                      onAdd={onAddProduct}
-                    />
-                  )}
-                </>
-              )}
-            </Tabs>
-            <SaveButtonBar
-              onCancel={onBack}
-              onDelete={onDelete}
-              onSave={submit}
-              labels={{
-                delete: i18n.t("Delete category")
-              }}
-              state={saveButtonBarState}
-              disabled={disabled || !hasChanged}
-            />
-          </Container>
-        )}
-      </Form>
-    );
-  }
-);
+          )}
+          <SaveButtonBar
+            onCancel={onBack}
+            onDelete={onDelete}
+            onSave={submit}
+            labels={{
+              delete: i18n.t("Delete category")
+            }}
+            state={saveButtonBarState}
+            disabled={disabled || !hasChanged}
+          />
+        </Container>
+      )}
+    </Form>
+  );
+};
 CategoryUpdatePage.displayName = "CategoryUpdatePage";
 export default CategoryUpdatePage;

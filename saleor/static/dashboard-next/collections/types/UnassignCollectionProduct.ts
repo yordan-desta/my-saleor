@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -53,7 +54,7 @@ export interface UnassignCollectionProduct_collectionRemoveProducts_collection {
 
 export interface UnassignCollectionProduct_collectionRemoveProducts {
   __typename: "CollectionRemoveProducts";
-  errors: (UnassignCollectionProduct_collectionRemoveProducts_errors | null)[] | null;
+  errors: UnassignCollectionProduct_collectionRemoveProducts_errors[] | null;
   collection: UnassignCollectionProduct_collectionRemoveProducts_collection | null;
 }
 

@@ -1,3 +1,4 @@
+import { Omit } from "@material-ui/core";
 import { storiesOf } from "@storybook/react";
 import * as React from "react";
 
@@ -8,7 +9,7 @@ import { customer } from "../../../customers/fixtures";
 import Decorator from "../../Decorator";
 import { formError } from "../../misc";
 
-const props: CustomerDetailsPageProps = {
+const props: Omit<CustomerDetailsPageProps, "classes"> = {
   customer,
   disabled: false,
   errors: [],
@@ -21,6 +22,13 @@ const props: CustomerDetailsPageProps = {
   saveButtonBar: "default"
 };
 
+interface CustomerDetailsPageErrors {
+  firstName: string;
+  email: string;
+  lastName: string;
+  note: string;
+}
+
 storiesOf("Views / Customers / Customer details", module)
   .addDecorator(Decorator)
   .add("default", () => <CustomerDetailsPage {...props} />)
@@ -30,7 +38,9 @@ storiesOf("Views / Customers / Customer details", module)
   .add("form errors", () => (
     <CustomerDetailsPage
       {...props}
-      errors={[formError("email"), formError("note")]}
+      errors={(["email", "firstName", "lastName"] as Array<
+        keyof CustomerDetailsPageErrors
+      >).map(field => formError(field))}
     />
   ))
   .add("different addresses", () => (
@@ -63,6 +73,34 @@ storiesOf("Views / Customers / Customer details", module)
           ...customer.lastPlacedOrder,
           edges: []
         }
+      }}
+    />
+  ))
+  .add("no default billing address", () => (
+    <CustomerDetailsPage
+      {...props}
+      customer={{
+        ...customer,
+        defaultBillingAddress: null
+      }}
+    />
+  ))
+  .add("no default shipping address", () => (
+    <CustomerDetailsPage
+      {...props}
+      customer={{
+        ...customer,
+        defaultShippingAddress: null
+      }}
+    />
+  ))
+  .add("no address at all", () => (
+    <CustomerDetailsPage
+      {...props}
+      customer={{
+        ...customer,
+        defaultBillingAddress: null,
+        defaultShippingAddress: null
       }}
     />
   ));

@@ -162,7 +162,8 @@
                 <a href="#base-modal" data-href="{% url 'dashboard:capture-payment' order_pk=order.pk payment_pk=payment.pk %}" class="btn-flat modal-trigger-custom waves-effect">
                   {% trans "Capture" context "Order summary card action" %}
                 </a>
-              {% elif order.can_refund %}
+              {% endif %}
+              {% if order.can_refund %}
                 <a href="#base-modal" data-href="{% url 'dashboard:refund-payment' order_pk=order.pk payment_pk=payment.pk %}" class="btn-flat modal-trigger-custom waves-effect">
                   {% trans "Refund" context "Order summary card action" %}
                 </a>
@@ -198,6 +199,9 @@
               </span>
               {% if order.user %}
                 <a href="{% url 'dashboard:customer-details' pk=order.user.pk %}">{{ order.user }}</a>
+                {% if order.user.get_full_name != order.user.email %}
+                  <p>{{ order.user.get_full_name|truncatechars:80 }}</p>
+                {% endif %}
                 {% if order.user.note %}
                   <p>{{ order.user.note|truncatechars:80 }}</p>
                 {% endif %}
@@ -337,6 +341,7 @@
                   <p>
                     {% trans "Subtotal" context "Order subtotal" %}
                   </p>
+                  {% if order.is_shipping_required or order.shipping_method %}
                   <p>
                     {% if order.is_draft %}
                       <a href="#base-modal" data-href="{% url 'dashboard:order-shipping-edit' order_pk=order.pk %}"
@@ -359,6 +364,7 @@
                       {% endif %}
                     {% endif %}
                   </p>
+                  {% endif %}
                   <p>
                     {% if order.display_gross_prices %}
                       {% trans "Taxes (included)" context "Order total taxes" %}
@@ -410,9 +416,11 @@
                   <p>
                     {% price order.get_subtotal display_gross=order.display_gross_prices %}
                   </p>
+                  {% if order.is_shipping_required or order.shipping_method %}
                   <p>
                     {% price order.shipping_price display_gross=order.display_gross_prices %}
                   </p>
+                  {% endif %}
                   <p>{% price order.total.tax %}</p>
                   {% if order.is_draft or order.discount_amount %}
                     <p>{% discount_as_negative order.discount_amount html=True %}</p>

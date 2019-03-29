@@ -10,7 +10,6 @@ from django.utils.translation import pgettext_lazy
 from django_prices_vatlayer.utils import get_tax_rate_types
 from mptt.forms import TreeNodeChoiceField
 
-from . import ProductBulkAction
 from ...core import TaxRateType
 from ...core.utils.taxes import DEFAULT_TAX_RATE_NAME, include_taxes_in_prices
 from ...core.weight import WeightField
@@ -24,6 +23,7 @@ from ..forms import ModelChoiceOrCreationField, OrderedModelMultipleChoiceField
 from ..seo.fields import SeoDescriptionField, SeoTitleField
 from ..seo.utils import prepare_seo_description
 from ..widgets import RichTextEditorWidget
+from . import ProductBulkAction
 from .widgets import ImagePreviewWidget
 
 
@@ -58,7 +58,7 @@ class ProductTypeSelectorForm(forms.Form):
 
 
 def get_tax_rate_type_choices():
-    rate_types = get_tax_rate_types() + [DEFAULT_TAX_RATE_NAME, '']
+    rate_types = get_tax_rate_types() + [DEFAULT_TAX_RATE_NAME]
     translations = dict(TaxRateType.CHOICES)
     choices = [
         (rate_name, translations.get(rate_name, '---------'))
@@ -232,7 +232,7 @@ class ProductForm(forms.ModelForm, AttributesMixin):
         required=False, queryset=Collection.objects.all(),
         label=pgettext_lazy('Add to collection select', 'Collections'))
     description = RichTextField(
-        label=pgettext_lazy('Description', 'Description'))
+        label=pgettext_lazy('Description', 'Description'), required=True)
     weight = WeightField(
         required=False, label=pgettext_lazy('ProductType weight', 'Weight'),
         help_text=pgettext_lazy(
@@ -244,11 +244,12 @@ class ProductForm(forms.ModelForm, AttributesMixin):
 
     class Meta:
         model = Product
-        exclude = ['attributes', 'product_type', 'updated_at']
+        exclude = [
+            'attributes', 'product_type', 'updated_at', 'description_json']
         labels = {
             'name': pgettext_lazy('Item name', 'Name'),
             'price': pgettext_lazy('Currency amount', 'Price'),
-            'available_on': pgettext_lazy(
+            'publication_date': pgettext_lazy(
                 'Availability date', 'Publish product on'),
             'is_published': pgettext_lazy(
                 'Product published toggle', 'Published'),

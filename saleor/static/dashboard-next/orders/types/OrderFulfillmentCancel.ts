@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { FulfillmentCancelInput, OrderEventsEmails, OrderEvents, FulfillmentStatus, PaymentChargeStatusEnum, OrderStatus, OrderAction } from "./../../types/globalTypes";
@@ -37,6 +38,7 @@ export interface OrderFulfillmentCancel_orderFulfillmentCancel_order_billingAddr
 
 export interface OrderFulfillmentCancel_orderFulfillmentCancel_order_events_user {
   __typename: "User";
+  id: string;
   email: string;
 }
 
@@ -74,6 +76,7 @@ export interface OrderFulfillmentCancel_orderFulfillmentCancel_order_fulfillment
 export interface OrderFulfillmentCancel_orderFulfillmentCancel_order_fulfillments_lines_orderLine {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -119,6 +122,7 @@ export interface OrderFulfillmentCancel_orderFulfillmentCancel_order_lines_unitP
 export interface OrderFulfillmentCancel_orderFulfillmentCancel_order_lines {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -229,7 +233,9 @@ export interface OrderFulfillmentCancel_orderFulfillmentCancel_order {
   __typename: "Order";
   id: string;
   billingAddress: OrderFulfillmentCancel_orderFulfillmentCancel_order_billingAddress | null;
+  canFinalize: boolean;
   created: any;
+  customerNote: string;
   events: (OrderFulfillmentCancel_orderFulfillmentCancel_order_events | null)[] | null;
   fulfillments: (OrderFulfillmentCancel_orderFulfillmentCancel_order_fulfillments | null)[];
   lines: (OrderFulfillmentCancel_orderFulfillmentCancel_order_lines | null)[];
@@ -252,7 +258,7 @@ export interface OrderFulfillmentCancel_orderFulfillmentCancel_order {
 
 export interface OrderFulfillmentCancel_orderFulfillmentCancel {
   __typename: "FulfillmentCancel";
-  errors: (OrderFulfillmentCancel_orderFulfillmentCancel_errors | null)[] | null;
+  errors: OrderFulfillmentCancel_orderFulfillmentCancel_errors[] | null;
   order: OrderFulfillmentCancel_orderFulfillmentCancel_order | null;
 }
 

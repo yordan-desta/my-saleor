@@ -1,12 +1,11 @@
 import * as React from "react";
 
-import ErrorMessageCard from "../../components/ErrorMessageCard";
 import Messages from "../../components/messages";
 import Navigator from "../../components/Navigator";
 import Shop from "../../components/Shop";
 import { WindowTitle } from "../../components/WindowTitle";
 import i18n from "../../i18n";
-import { decimal, maybe } from "../../misc";
+import { decimal, getMutationState, maybe } from "../../misc";
 import ProductVariantCreatePage from "../components/ProductVariantCreatePage";
 import { TypedVariantCreateMutation } from "../mutations";
 import { TypedProductVariantCreateQuery } from "../queries";
@@ -40,28 +39,16 @@ export const ProductVariant: React.StatelessComponent<ProductUpdateProps> = ({
               <TypedProductVariantCreateQuery
                 displayLoader
                 variables={{ id: productId }}
+                require={["product"]}
               >
-                {({ data, error, loading: productLoading }) => {
-                  if (error) {
-                    return (
-                      <ErrorMessageCard
-                        message={i18n.t("Something went wrong")}
-                      />
-                    );
-                  }
-
+                {({ data, loading: productLoading }) => {
                   const handleCreateSuccess = (data: VariantCreate) => {
-                    if (
-                      data.productVariantCreate.errors &&
-                      data.productVariantCreate.errors.length === 0
-                    ) {
+                    if (data.productVariantCreate.errors.length === 0) {
                       pushMessage({ text: i18n.t("Product created") });
                       navigate(
                         productVariantEditUrl(
-                          encodeURIComponent(productId),
-                          encodeURIComponent(
-                            data.productVariantCreate.productVariant.id
-                          )
+                          productId,
+                          data.productVariantCreate.productVariant.id
                         )
                       );
                     }
@@ -72,16 +59,8 @@ export const ProductVariant: React.StatelessComponent<ProductUpdateProps> = ({
                       onCompleted={handleCreateSuccess}
                     >
                       {(variantCreate, variantCreateResult) => {
-                        if (variantCreateResult.error) {
-                          return (
-                            <ErrorMessageCard
-                              message={i18n.t("Something went wrong")}
-                            />
-                          );
-                        }
-
                         const handleBack = () =>
-                          navigate(productUrl(encodeURIComponent(productId)));
+                          navigate(productUrl(productId));
                         const handleSubmit = (formData: FormData) =>
                           variantCreate({
                             variables: {
@@ -95,15 +74,20 @@ export const ProductVariant: React.StatelessComponent<ProductUpdateProps> = ({
                             }
                           });
                         const handleVariantClick = (id: string) =>
-                          navigate(
-                            productVariantEditUrl(
-                              encodeURIComponent(productId),
-                              encodeURIComponent(id)
-                            )
-                          );
+                          navigate(productVariantEditUrl(productId, id));
 
-                        const loading =
+                        const disableForm =
                           productLoading || variantCreateResult.loading;
+
+                        const formTransitionstate = getMutationState(
+                          variantCreateResult.called,
+                          variantCreateResult.loading,
+                          maybe(
+                            () =>
+                              variantCreateResult.data.productVariantCreate
+                                .errors
+                          )
+                        );
                         return (
                           <>
                             <WindowTitle title={i18n.t("Create variant")} />
@@ -116,11 +100,12 @@ export const ProductVariant: React.StatelessComponent<ProductUpdateProps> = ({
                                 []
                               )}
                               header={i18n.t("Add Variant")}
-                              loading={loading}
+                              loading={disableForm}
                               product={maybe(() => data.product)}
                               onBack={handleBack}
                               onSubmit={handleSubmit}
                               onVariantClick={handleVariantClick}
+                              saveButtonBarState={formTransitionstate}
                             />
                           </>
                         );

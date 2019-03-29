@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { SiteDomainInput, ShopSettingsInput, AuthorizationKeyType } from "./../../types/globalTypes";
@@ -34,7 +35,7 @@ export interface ShopSettingsUpdate_shopSettingsUpdate_shop {
 
 export interface ShopSettingsUpdate_shopSettingsUpdate {
   __typename: "ShopSettingsUpdate";
-  errors: (ShopSettingsUpdate_shopSettingsUpdate_errors | null)[] | null;
+  errors: ShopSettingsUpdate_shopSettingsUpdate_errors[] | null;
   shop: ShopSettingsUpdate_shopSettingsUpdate_shop | null;
 }
 
@@ -57,7 +58,7 @@ export interface ShopSettingsUpdate_shopDomainUpdate_shop {
 
 export interface ShopSettingsUpdate_shopDomainUpdate {
   __typename: "ShopDomainUpdate";
-  errors: (ShopSettingsUpdate_shopDomainUpdate_errors | null)[] | null;
+  errors: ShopSettingsUpdate_shopDomainUpdate_errors[] | null;
   shop: ShopSettingsUpdate_shopDomainUpdate_shop | null;
 }
 

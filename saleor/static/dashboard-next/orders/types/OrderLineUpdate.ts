@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { OrderLineInput, OrderEventsEmails, OrderEvents, FulfillmentStatus, PaymentChargeStatusEnum, OrderStatus, OrderAction } from "./../../types/globalTypes";
@@ -37,6 +38,7 @@ export interface OrderLineUpdate_draftOrderLineUpdate_order_billingAddress {
 
 export interface OrderLineUpdate_draftOrderLineUpdate_order_events_user {
   __typename: "User";
+  id: string;
   email: string;
 }
 
@@ -74,6 +76,7 @@ export interface OrderLineUpdate_draftOrderLineUpdate_order_fulfillments_lines_o
 export interface OrderLineUpdate_draftOrderLineUpdate_order_fulfillments_lines_orderLine {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -119,6 +122,7 @@ export interface OrderLineUpdate_draftOrderLineUpdate_order_lines_unitPrice {
 export interface OrderLineUpdate_draftOrderLineUpdate_order_lines {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -229,7 +233,9 @@ export interface OrderLineUpdate_draftOrderLineUpdate_order {
   __typename: "Order";
   id: string;
   billingAddress: OrderLineUpdate_draftOrderLineUpdate_order_billingAddress | null;
+  canFinalize: boolean;
   created: any;
+  customerNote: string;
   events: (OrderLineUpdate_draftOrderLineUpdate_order_events | null)[] | null;
   fulfillments: (OrderLineUpdate_draftOrderLineUpdate_order_fulfillments | null)[];
   lines: (OrderLineUpdate_draftOrderLineUpdate_order_lines | null)[];
@@ -252,7 +258,7 @@ export interface OrderLineUpdate_draftOrderLineUpdate_order {
 
 export interface OrderLineUpdate_draftOrderLineUpdate {
   __typename: "DraftOrderLineUpdate";
-  errors: (OrderLineUpdate_draftOrderLineUpdate_errors | null)[] | null;
+  errors: OrderLineUpdate_draftOrderLineUpdate_errors[] | null;
   order: OrderLineUpdate_draftOrderLineUpdate_order | null;
 }
 

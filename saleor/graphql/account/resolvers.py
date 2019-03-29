@@ -8,7 +8,8 @@ from ..utils import filter_by_query_param
 from .types import AddressValidationData, ChoiceValue
 
 USER_SEARCH_FIELDS = (
-    'email', 'default_shipping_address__first_name',
+    'email', 'first_name', 'last_name',
+    'default_shipping_address__first_name',
     'default_shipping_address__last_name', 'default_shipping_address__city',
     'default_shipping_address__country')
 
@@ -59,8 +60,13 @@ def resolve_address_validator(info, input):
             ChoiceValue(area[0], area[1])
             for area in rules.country_area_choices],
         city_type=rules.city_type,
+        city_choices=[
+            ChoiceValue(area[0], area[1])
+            for area in rules.city_choices],
+        city_area_type=rules.city_type,
         city_area_choices=[
-            ChoiceValue(area[0], area[1]) for area in rules.city_area_choices],
+            ChoiceValue(area[0], area[1])
+            for area in rules.city_area_choices],
         postal_code_type=rules.postal_code_type,
         postal_code_matchers=[
             compiled.pattern for compiled in rules.postal_code_matchers],

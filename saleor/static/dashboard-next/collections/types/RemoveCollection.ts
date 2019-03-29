@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -13,7 +14,7 @@ export interface RemoveCollection_collectionDelete_errors {
 
 export interface RemoveCollection_collectionDelete {
   __typename: "CollectionDelete";
-  errors: (RemoveCollection_collectionDelete_errors | null)[] | null;
+  errors: RemoveCollection_collectionDelete_errors[] | null;
 }
 
 export interface RemoveCollection {

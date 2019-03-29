@@ -1,6 +1,12 @@
+import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import { withStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import * as React from "react";
 
@@ -11,60 +17,76 @@ import i18n from "../../../i18n";
 import { maybe } from "../../../misc";
 import { CustomerDetails_user } from "../../types/CustomerDetails";
 
-export interface CustomerAddressesProps {
+const styles = (theme: Theme) =>
+  createStyles({
+    label: {
+      fontWeight: 600,
+      marginBottom: theme.spacing.unit
+    }
+  });
+
+export interface CustomerAddressesProps extends WithStyles<typeof styles> {
   customer: CustomerDetails_user;
   disabled: boolean;
   onAddressManageClick: () => void;
 }
 
-const decorate = withStyles(theme => ({
-  label: {
-    fontWeight: 600 as 600,
-    marginBottom: theme.spacing.unit
-  }
-}));
-const CustomerAddresses = decorate<CustomerAddressesProps>(
-  ({ classes, customer }) => (
+const CustomerAddresses = withStyles(styles, { name: "CustomerAddresses" })(
+  ({
+    classes,
+    customer,
+    disabled,
+    onAddressManageClick
+  }: CustomerAddressesProps) => (
     <Card>
       <CardTitle
         title={i18n.t("Address Information")}
-        // toolbar={ // TODO: add address management #3173
-        //   <Button
-        //     color="secondary"
-        //     disabled={disabled}
-        //     variant="flat"
-        //     onClick={onAddressManageClick}
-        //   >
-        //     {i18n.t("Manage", { context: "button" })}
-        //   </Button>
-        // }
+        toolbar={
+          <Button
+            color="secondary"
+            disabled={disabled}
+            variant="text"
+            onClick={onAddressManageClick}
+          >
+            {i18n.t("Manage", { context: "button" })}
+          </Button>
+        }
       />
-      {customer &&
-      customer.defaultBillingAddress &&
-      customer.defaultBillingAddress.id &&
-      customer.defaultShippingAddress &&
-      customer.defaultShippingAddress.id &&
-      customer.defaultBillingAddress.id !==
-        customer.defaultShippingAddress.id ? (
+      {maybe(() => customer.defaultBillingAddress.id) !==
+      maybe(() => customer.defaultShippingAddress.id) ? (
         <>
-          <CardContent>
-            <Typography className={classes.label}>
-              {i18n.t("Billing address")}
-            </Typography>
-            <AddressFormatter
-              address={maybe(() => customer.defaultBillingAddress)}
-            />
-          </CardContent>
-          <Hr />
-          <CardContent>
-            <Typography className={classes.label}>
-              {i18n.t("Shipping address")}
-            </Typography>
-            <AddressFormatter
-              address={maybe(() => customer.defaultShippingAddress)}
-            />
-          </CardContent>
+          {maybe(() => customer.defaultBillingAddress) !== null && (
+            <CardContent>
+              <Typography className={classes.label}>
+                {i18n.t("Billing address")}
+              </Typography>
+              <AddressFormatter
+                address={maybe(() => customer.defaultBillingAddress)}
+              />
+            </CardContent>
+          )}
+          {maybe(
+            () =>
+              customer.defaultBillingAddress && customer.defaultShippingAddress
+          ) && <Hr />}
+          {maybe(() => customer.defaultShippingAddress) && (
+            <CardContent>
+              <Typography className={classes.label}>
+                {i18n.t("Shipping address")}
+              </Typography>
+              <AddressFormatter
+                address={maybe(() => customer.defaultShippingAddress)}
+              />
+            </CardContent>
+          )}
         </>
+      ) : maybe(() => customer.defaultBillingAddress) === null &&
+        maybe(() => customer.defaultShippingAddress) === null ? (
+        <CardContent>
+          <Typography>
+            {i18n.t("This customer has no addresses yet")}
+          </Typography>
+        </CardContent>
       ) : (
         <CardContent>
           <Typography className={classes.label}>{i18n.t("Address")}</Typography>

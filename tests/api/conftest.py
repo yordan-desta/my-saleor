@@ -1,7 +1,9 @@
 import json
 
+import graphene
 import pytest
 from django.contrib.auth.models import AnonymousUser
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import reverse
 from django.test.client import MULTIPART_CONTENT, Client
 from graphql_jwt.shortcuts import get_token
@@ -35,7 +37,7 @@ class ApiClient(Client):
         handling multipart requests in Graphene.
         """
         if data:
-            data = json.dumps(data)
+            data = json.dumps(data, cls=DjangoJSONEncoder)
         kwargs['content_type'] = 'application/json'
         return super().post(API_PATH, data, **kwargs)
 
@@ -51,7 +53,7 @@ class ApiClient(Client):
         if variables is not None:
             data['variables'] = variables
         if data:
-            data = json.dumps(data)
+            data = json.dumps(data, cls=DjangoJSONEncoder)
         kwargs['content_type'] = 'application/json'
 
         if permissions:
@@ -89,3 +91,9 @@ def user_api_client(customer_user):
 @pytest.fixture
 def api_client():
     return ApiClient(user=AnonymousUser())
+
+
+@pytest.fixture
+def schema_context():
+    params = {'user': AnonymousUser()}
+    return graphene.types.Context(**params)

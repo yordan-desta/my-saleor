@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { OrderEventsEmails, OrderEvents, FulfillmentStatus, PaymentChargeStatusEnum, OrderStatus, OrderAction } from "./../../types/globalTypes";
@@ -37,6 +38,7 @@ export interface OrderCapture_orderCapture_order_billingAddress {
 
 export interface OrderCapture_orderCapture_order_events_user {
   __typename: "User";
+  id: string;
   email: string;
 }
 
@@ -74,6 +76,7 @@ export interface OrderCapture_orderCapture_order_fulfillments_lines_orderLine_un
 export interface OrderCapture_orderCapture_order_fulfillments_lines_orderLine {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -119,6 +122,7 @@ export interface OrderCapture_orderCapture_order_lines_unitPrice {
 export interface OrderCapture_orderCapture_order_lines {
   __typename: "OrderLine";
   id: string;
+  isShippingRequired: boolean;
   productName: string;
   productSku: string;
   quantity: number;
@@ -229,7 +233,9 @@ export interface OrderCapture_orderCapture_order {
   __typename: "Order";
   id: string;
   billingAddress: OrderCapture_orderCapture_order_billingAddress | null;
+  canFinalize: boolean;
   created: any;
+  customerNote: string;
   events: (OrderCapture_orderCapture_order_events | null)[] | null;
   fulfillments: (OrderCapture_orderCapture_order_fulfillments | null)[];
   lines: (OrderCapture_orderCapture_order_lines | null)[];
@@ -252,7 +258,7 @@ export interface OrderCapture_orderCapture_order {
 
 export interface OrderCapture_orderCapture {
   __typename: "OrderCapture";
-  errors: (OrderCapture_orderCapture_errors | null)[] | null;
+  errors: OrderCapture_orderCapture_errors[] | null;
   order: OrderCapture_orderCapture_order | null;
 }
 

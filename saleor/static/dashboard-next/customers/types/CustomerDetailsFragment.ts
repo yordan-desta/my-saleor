@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -53,6 +54,8 @@ export interface CustomerDetailsFragment {
   __typename: "User";
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   dateJoined: any;
   lastLogin: any | null;
   defaultShippingAddress: CustomerDetailsFragment_defaultShippingAddress | null;

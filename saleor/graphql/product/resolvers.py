@@ -1,40 +1,56 @@
 import graphene
 import graphene_django_optimizer as gql_optimizer
-from django.db.models import Sum, Q
+from django.db.models import Q, Sum
 
 from ...order import OrderStatus
 from ...product import models
+from ...search.backends import picker
 from ..utils import (
-    filter_by_query_param, filter_by_period, get_database_id, get_nodes)
+    filter_by_period, filter_by_query_param, get_database_id, get_nodes)
+from .enums import StockAvailability
 from .filters import (
     filter_products_by_attributes, filter_products_by_categories,
     filter_products_by_collections, filter_products_by_price, sort_qs)
-from .types import Category, Collection, ProductVariant, StockAvailability
+from .types import Category, Collection, ProductVariant
 
-PRODUCT_SEARCH_FIELDS = ('name', 'description', 'category__name')
+PRODUCT_SEARCH_FIELDS = ('name', 'description')
 CATEGORY_SEARCH_FIELDS = ('name', 'slug', 'description', 'parent__name')
 COLLECTION_SEARCH_FIELDS = ('name', 'slug')
 ATTRIBUTES_SEARCH_FIELDS = ('name', 'slug')
 
 
-def resolve_attributes(info, category_id, query):
+def _filter_attributes_by_product_types(attribute_qs, product_qs):
+    product_types = set(product_qs.values_list('product_type_id', flat=True))
+    return attribute_qs.filter(
+        Q(product_type__in=product_types)
+        | Q(product_variant_type__in=product_types))
+
+
+def resolve_attributes(info, category_id=None, collection_id=None, query=None):
     qs = models.Attribute.objects.all()
     qs = filter_by_query_param(qs, query, ATTRIBUTES_SEARCH_FIELDS)
+
     if category_id:
-        # Get attributes that are used with product types
-        # within the given category.
+        # Filter attributes by product types belonging to the given category.
         category = graphene.Node.get_node_from_global_id(
             info, category_id, Category)
-        if category is None:
-            return qs.none()
-        tree = category.get_descendants(include_self=True)
-        product_types = {
-            obj[0]
-            for obj in models.Product.objects.filter(
-                category__in=tree).values_list('product_type_id')}
-        qs = qs.filter(
-            Q(product_type__in=product_types)
-            | Q(product_variant_type__in=product_types))
+        if category:
+            tree = category.get_descendants(include_self=True)
+            product_qs = models.Product.objects.filter(category__in=tree)
+            qs = _filter_attributes_by_product_types(qs, product_qs)
+        else:
+            qs = qs.none()
+
+    if collection_id:
+        # Filter attributes by product types belonging to the given collection.
+        collection = graphene.Node.get_node_from_global_id(
+            info, collection_id, Collection)
+        if collection:
+            product_qs = collection.products.all()
+            qs = _filter_attributes_by_product_types(qs, product_qs)
+        else:
+            qs = qs.none()
+
     qs = qs.order_by('name')
     qs = qs.distinct()
     return gql_optimizer.query(qs, info)
@@ -65,7 +81,10 @@ def resolve_products(
 
     user = info.context.user
     qs = models.Product.objects.visible_to_user(user)
-    qs = filter_by_query_param(qs, query, PRODUCT_SEARCH_FIELDS)
+
+    if query:
+        search = picker.pick_backend()
+        qs &= search(query)
 
     if attributes:
         qs = filter_products_by_attributes(qs, attributes)
@@ -98,7 +117,11 @@ def resolve_product_types(info):
 
 
 def resolve_product_variants(info, ids=None):
-    qs = models.ProductVariant.objects.all()
+    user = info.context.user
+    visible_products = models.Product.objects.visible_to_user(
+        user).values_list('pk', flat=True)
+    qs = models.ProductVariant.objects.filter(
+        product__id__in=visible_products)
     if ids:
         db_ids = [
             get_database_id(info, node_id, only_type=ProductVariant)

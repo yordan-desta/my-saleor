@@ -1,15 +1,16 @@
 import * as React from "react";
 
-import ErrorMessageCard from "../../components/ErrorMessageCard";
 import Navigator from "../../components/Navigator";
 import { createPaginationState, Paginator } from "../../components/Paginator";
-import i18n from "../../i18n";
 import { maybe } from "../../misc";
 import PageListPage from "../components/PageListPage/PageListPage";
 import { TypedPageListQuery } from "../queries";
-import { pageAddUrl, pageUrl } from "../urls";
+import { pageCreateUrl, pageUrl } from "../urls";
 
-export type PageListQueryParams = Partial<{ after: string; before: string }>;
+export type PageListQueryParams = Partial<{
+  after: string;
+  before: string;
+}>;
 
 interface PageListProps {
   params: PageListQueryParams;
@@ -23,42 +24,28 @@ export const PageList: React.StatelessComponent<PageListProps> = ({
   <Navigator>
     {navigate => {
       const paginationState = createPaginationState(PAGINATE_BY, params);
-      const handleEditClick = (id: string) => () => navigate(pageUrl(id));
+
       return (
         <TypedPageListQuery displayLoader variables={paginationState}>
-          {({ data, loading, error }) => {
-            if (error) {
-              return (
-                <ErrorMessageCard
-                  message={i18n.t("Something went terribly wrong.")}
+          {({ data, loading }) => (
+            <Paginator
+              pageInfo={maybe(() => data.pages.pageInfo)}
+              paginationState={paginationState}
+              queryString={params}
+            >
+              {({ loadNextPage, loadPreviousPage, pageInfo }) => (
+                <PageListPage
+                  disabled={loading}
+                  pages={maybe(() => data.pages.edges.map(edge => edge.node))}
+                  pageInfo={pageInfo}
+                  onAdd={() => navigate(pageCreateUrl)}
+                  onNextPage={loadNextPage}
+                  onPreviousPage={loadPreviousPage}
+                  onRowClick={id => () => navigate(pageUrl(id))}
                 />
-              );
-            }
-
-            return (
-              <Paginator
-                pageInfo={maybe(() => data.pages.pageInfo)}
-                paginationState={paginationState}
-                queryString={params}
-              >
-                {({ loadNextPage, loadPreviousPage, pageInfo }) => (
-                  <PageListPage
-                    disabled={loading}
-                    pages={
-                      data && data.pages
-                        ? data.pages.edges.map(edge => edge.node)
-                        : undefined
-                    }
-                    pageInfo={pageInfo}
-                    onAdd={() => navigate(pageAddUrl)}
-                    onRowClick={handleEditClick}
-                    onNextPage={loadNextPage}
-                    onPreviousPage={loadPreviousPage}
-                  />
-                )}
-              </Paginator>
-            );
-          }}
+              )}
+            </Paginator>
+          )}
         </TypedPageListQuery>
       );
     }}

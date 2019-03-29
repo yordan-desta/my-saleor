@@ -19,7 +19,6 @@ interface PaginationState {
 interface QueryString {
   after?: string;
   before?: string;
-  [key: string]: string;
 }
 
 interface PaginatorProps {
@@ -29,7 +28,7 @@ interface PaginatorProps {
       loadPreviousPage: () => void;
       pageInfo: PageInfo;
     }
-  ) => React.ReactNode;
+  ) => React.ReactElement<any>;
   pageInfo: PageInfo;
   paginationState: PaginationState;
   queryString: QueryString;

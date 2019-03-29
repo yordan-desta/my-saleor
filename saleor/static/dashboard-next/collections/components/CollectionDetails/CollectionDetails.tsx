@@ -1,30 +1,44 @@
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import { withStyles } from "@material-ui/core/styles";
+import { createStyles, withStyles, WithStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
+import { RawDraftContentState } from "draft-js";
 import * as React from "react";
 
 import CardTitle from "../../../components/CardTitle";
+import FormSpacer from "../../../components/FormSpacer";
+import RichTextEditor from "../../../components/RichTextEditor";
 import i18n from "../../../i18n";
+import { maybe } from "../../../misc";
+import { FormErrors } from "../../../types";
+import { CollectionDetails_collection } from "../../types/CollectionDetails";
 
-export interface CollectionDetailsProps {
-  data: {
-    name: string;
-  };
-  disabled: boolean;
-  errors: {
-    name?: string;
-  };
-  onChange: (event: React.ChangeEvent<any>) => void;
-}
-
-const decorate = withStyles({
+const styles = createStyles({
   name: {
     width: "80%"
   }
 });
-const CollectionDetails = decorate<CollectionDetailsProps>(
-  ({ classes, disabled, data, onChange, errors }) => (
+
+export interface CollectionDetailsProps extends WithStyles<typeof styles> {
+  collection?: CollectionDetails_collection;
+  data: {
+    description: RawDraftContentState;
+    name: string;
+  };
+  disabled: boolean;
+  errors: FormErrors<"descriptionJson" | "name">;
+  onChange: (event: React.ChangeEvent<any>) => void;
+}
+
+const CollectionDetails = withStyles(styles, { name: "CollectionDetails" })(
+  ({
+    classes,
+    collection,
+    disabled,
+    data,
+    onChange,
+    errors
+  }: CollectionDetailsProps) => (
     <Card>
       <CardTitle title={i18n.t("General information")} />
       <CardContent>
@@ -37,6 +51,16 @@ const CollectionDetails = decorate<CollectionDetailsProps>(
           onChange={onChange}
           error={!!errors.name}
           helperText={errors.name}
+        />
+        <FormSpacer />
+        <RichTextEditor
+          error={!!errors.descriptionJson}
+          helperText={errors.descriptionJson}
+          initial={maybe(() => JSON.parse(collection.descriptionJson))}
+          label={i18n.t("Description")}
+          name="description"
+          disabled={disabled}
+          onChange={onChange}
         />
       </CardContent>
     </Card>

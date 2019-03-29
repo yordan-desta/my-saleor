@@ -1,32 +1,40 @@
-import { withStyles } from "@material-ui/core/styles";
+import { RawDraftContentState } from "draft-js";
 import * as React from "react";
 
+import AppHeader from "../../../components/AppHeader";
+import CardSpacer from "../../../components/CardSpacer";
+import { ConfirmButtonTransitionState } from "../../../components/ConfirmButton/ConfirmButton";
 import Container from "../../../components/Container";
 import Form from "../../../components/Form";
+import Grid from "../../../components/Grid";
 import PageHeader from "../../../components/PageHeader";
-import SaveButtonBar, {
-  SaveButtonBarState
-} from "../../../components/SaveButtonBar/SaveButtonBar";
+import SaveButtonBar from "../../../components/SaveButtonBar/SaveButtonBar";
 import SeoForm from "../../../components/SeoForm";
 import i18n from "../../../i18n";
+import { maybe } from "../../../misc";
 import { UserError } from "../../../types";
 import { ProductCreateData_productTypes_edges_node_productAttributes } from "../../types/ProductCreateData";
 import ProductAvailabilityForm from "../ProductAvailabilityForm";
 import ProductDetailsForm from "../ProductDetailsForm";
 import ProductOrganization from "../ProductOrganization";
 import ProductPricing from "../ProductPricing";
+import ProductStock from "../ProductStock";
 
-interface FormData {
+interface ChoiceType {
+  label: string;
+  value: string;
+}
+export interface FormData {
   attributes: Array<{
     slug: string;
     value: string;
   }>;
   available: boolean;
-  availableOn: string;
-  category: string;
+  publicationDate: string;
+  category: ChoiceType;
   chargeTaxes: boolean;
-  collections: string[];
-  description: string;
+  collections: ChoiceType[];
+  description: RawDraftContentState;
   name: string;
   price: number;
   productType: {
@@ -43,6 +51,7 @@ interface FormData {
   sku: string;
   stockQuantity: number;
 }
+
 interface ProductCreatePageProps {
   errors: UserError[];
   collections?: Array<{
@@ -62,76 +71,73 @@ interface ProductCreatePageProps {
     productAttributes: ProductCreateData_productTypes_edges_node_productAttributes[];
   }>;
   header: string;
-  saveButtonBarState?: SaveButtonBarState;
+  saveButtonBarState: ConfirmButtonTransitionState;
+  fetchCategories: (data: string) => void;
+  fetchCollections: (data: string) => void;
   onAttributesEdit: () => void;
   onBack?();
   onSubmit?(data: FormData);
 }
 
-const decorate = withStyles(theme => ({
-  cardContainer: {
-    marginTop: theme.spacing.unit * 2,
-    [theme.breakpoints.down("sm")]: {
-      marginTop: theme.spacing.unit
-    }
-  },
-  root: {
-    display: "grid",
-    gridGap: theme.spacing.unit * 2 + "px",
-    gridTemplateColumns: "9fr 4fr",
-    marginTop: theme.spacing.unit * 2,
-    [theme.breakpoints.down("sm")]: {
-      gridGap: theme.spacing.unit + "px",
-      gridTemplateColumns: "1fr",
-      marginTop: theme.spacing.unit
-    }
-  }
-}));
+export const ProductCreatePage: React.StatelessComponent<
+  ProductCreatePageProps
+> = ({
+  currency,
+  disabled,
+  categories,
+  collections,
+  errors: userErrors,
+  fetchCategories,
+  fetchCollections,
+  header,
+  productTypes,
+  saveButtonBarState,
+  onBack,
+  onSubmit
+}: ProductCreatePageProps) => {
+  const initialData: FormData = {
+    attributes: [],
+    available: false,
+    category: {
+      label: "",
+      value: ""
+    },
+    chargeTaxes: false,
+    collections: [],
+    description: {} as any,
+    name: "",
+    price: 0,
+    productType: {
+      label: "",
+      value: {
+        hasVariants: false,
+        id: "",
+        name: "",
+        productAttributes: [] as ProductCreateData_productTypes_edges_node_productAttributes[]
+      }
+    },
+    publicationDate: "",
+    seoDescription: "",
+    seoTitle: "",
+    sku: null,
+    stockQuantity: null
+  };
 
-export const ProductCreatePage = decorate<ProductCreatePageProps>(
-  ({
-    classes,
-    currency,
-    disabled,
-    categories,
-    collections,
-    errors: userErrors,
-    header,
-    productTypes,
-    saveButtonBarState,
-    onBack,
-    onSubmit
-  }) => {
-    const initialData: FormData = {
-      attributes: [],
-      available: false,
-      availableOn: "",
-      category: "",
-      chargeTaxes: false,
-      collections: [],
-      description: "",
-      name: "",
-      price: 0,
-      productType: {
-        label: "",
-        value: {
-          hasVariants: false,
-          id: "",
-          name: "",
-          productAttributes: [] as ProductCreateData_productTypes_edges_node_productAttributes[]
-        }
-      },
-      seoDescription: "",
-      seoTitle: "",
-      sku: null,
-      stockQuantity: null
-    };
-    return (
-      <Form onSubmit={onSubmit} errors={userErrors} initial={initialData}>
-        {({ change, data, errors, hasChanged, submit }) => (
-          <Container width="md">
-            <PageHeader title={header} onBack={onBack} />
-            <div className={classes.root}>
+  return (
+    <Form
+      onSubmit={onSubmit}
+      errors={userErrors}
+      initial={initialData}
+      confirmLeave
+    >
+      {({ change, data, errors, hasChanged, submit }) => {
+        const hasVariants =
+          data.productType && data.productType.value.hasVariants;
+        return (
+          <Container>
+            <AppHeader onBack={onBack}>{i18n.t("Products")}</AppHeader>
+            <PageHeader title={header} />
+            <Grid>
               <div>
                 <ProductDetailsForm
                   data={data}
@@ -139,64 +145,72 @@ export const ProductCreatePage = decorate<ProductCreatePageProps>(
                   errors={errors}
                   onChange={change}
                 />
-                <div className={classes.cardContainer}>
-                  <ProductPricing
-                    currency={currency}
-                    data={data}
-                    disabled={disabled}
-                    onChange={change}
-                  />
-                </div>
-                <div className={classes.cardContainer}>
-                  <SeoForm
-                    helperText={i18n.t(
-                      "Add search engine title and description to make this product easier to find"
-                    )}
-                    title={data.seoTitle}
-                    titlePlaceholder={data.name}
-                    description={data.seoDescription}
-                    descriptionPlaceholder={data.description}
-                    loading={disabled}
-                    onChange={change}
-                  />
-                </div>
+                <CardSpacer />
+                <ProductPricing
+                  currency={currency}
+                  data={data}
+                  disabled={disabled}
+                  onChange={change}
+                />
+                <CardSpacer />
+                {!hasVariants && (
+                  <>
+                    <ProductStock
+                      data={data}
+                      disabled={disabled}
+                      product={undefined}
+                      onChange={change}
+                    />
+                    <CardSpacer />
+                  </>
+                )}
+                <SeoForm
+                  helperText={i18n.t(
+                    "Add search engine title and description to make this product easier to find"
+                  )}
+                  title={data.seoTitle}
+                  titlePlaceholder={data.name}
+                  description={data.seoDescription}
+                  descriptionPlaceholder={data.seoTitle}
+                  loading={disabled}
+                  onChange={change}
+                />
               </div>
               <div>
                 <ProductOrganization
-                  category={data.category}
-                  categories={
-                    categories !== undefined && categories !== null
-                      ? categories.map(category => ({
-                          label: category.name,
-                          value: category.id
-                        }))
-                      : []
-                  }
+                  categories={maybe(
+                    () =>
+                      categories.map(category => ({
+                        label: category.name,
+                        value: category.id
+                      })),
+                    []
+                  )}
                   errors={errors}
-                  productCollections={data.collections}
-                  collections={
-                    collections !== undefined && collections !== null
-                      ? collections.map(collection => ({
-                          label: collection.name,
-                          value: collection.id
-                        }))
-                      : []
-                  }
+                  fetchCategories={fetchCategories}
+                  fetchCollections={fetchCollections}
+                  collections={maybe(
+                    () =>
+                      collections.map(collection => ({
+                        label: collection.name,
+                        value: collection.id
+                      })),
+                    []
+                  )}
                   productTypes={productTypes}
                   data={data}
                   disabled={disabled}
                   onChange={change}
                 />
-                <div className={classes.cardContainer}>
-                  <ProductAvailabilityForm
-                    data={data}
-                    errors={errors}
-                    loading={disabled}
-                    onChange={change}
-                  />
-                </div>
+                <CardSpacer />
+                <ProductAvailabilityForm
+                  data={data}
+                  errors={errors}
+                  loading={disabled}
+                  onChange={change}
+                />
               </div>
-            </div>
+            </Grid>
             <SaveButtonBar
               onCancel={onBack}
               onSave={submit}
@@ -204,10 +218,10 @@ export const ProductCreatePage = decorate<ProductCreatePageProps>(
               disabled={disabled || !onSubmit || !hasChanged}
             />
           </Container>
-        )}
-      </Form>
-    );
-  }
-);
+        );
+      }}
+    </Form>
+  );
+};
 ProductCreatePage.displayName = "ProductCreatePage";
 export default ProductCreatePage;

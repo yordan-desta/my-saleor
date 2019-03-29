@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -18,7 +19,7 @@ export interface ProductDelete_productDelete_product {
 
 export interface ProductDelete_productDelete {
   __typename: "ProductDelete";
-  errors: (ProductDelete_productDelete_errors | null)[] | null;
+  errors: ProductDelete_productDelete_errors[] | null;
   product: ProductDelete_productDelete_product | null;
 }
 

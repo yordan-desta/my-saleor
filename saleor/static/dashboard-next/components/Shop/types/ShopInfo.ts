@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { WeightUnitsEnum } from "./../../../types/globalTypes";
@@ -6,6 +7,12 @@ import { WeightUnitsEnum } from "./../../../types/globalTypes";
 // ====================================================
 // GraphQL query operation: ShopInfo
 // ====================================================
+
+export interface ShopInfo_shop_countries {
+  __typename: "CountryDisplay";
+  country: string;
+  code: string;
+}
 
 export interface ShopInfo_shop_defaultCountry {
   __typename: "CountryDisplay";
@@ -21,12 +28,13 @@ export interface ShopInfo_shop_domain {
 
 export interface ShopInfo_shop {
   __typename: "Shop";
+  countries: (ShopInfo_shop_countries | null)[];
   defaultCountry: ShopInfo_shop_defaultCountry | null;
   defaultCurrency: string;
   defaultWeightUnit: WeightUnitsEnum | null;
-  displayGrossPrices: boolean | null;
+  displayGrossPrices: boolean;
   domain: ShopInfo_shop_domain;
-  includeTaxesInPrices: boolean | null;
+  includeTaxesInPrices: boolean;
   name: string;
   trackInventoryByDefault: boolean | null;
 }

@@ -3,7 +3,12 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { withStyles } from "@material-ui/core/styles";
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -12,6 +17,9 @@ import TableRow from "@material-ui/core/TableRow";
 import TextField from "@material-ui/core/TextField";
 import * as React from "react";
 
+import ConfirmButton, {
+  ConfirmButtonTransitionState
+} from "../../../components/ConfirmButton/ConfirmButton";
 import Form from "../../../components/Form";
 import { FormSpacer } from "../../../components/FormSpacer";
 import TableCellAvatar from "../../../components/TableCellAvatar";
@@ -24,15 +32,8 @@ export interface FormData {
   trackingNumber: string;
 }
 
-export interface OrderFulfillmentDialogProps {
-  open: boolean;
-  lines: OrderDetails_order_lines[];
-  onClose();
-  onSubmit(data: FormData);
-}
-
-const decorate = withStyles(
-  theme => ({
+const styles = (theme: Theme) =>
+  createStyles({
     avatarCell: {
       paddingLeft: theme.spacing.unit * 2,
       paddingRight: theme.spacing.unit * 3,
@@ -41,14 +42,37 @@ const decorate = withStyles(
     quantityInput: {
       width: "4rem"
     },
+    quantityInputContainer: {
+      paddingRight: theme.spacing.unit,
+      textAlign: "right" as "right"
+    },
+    remainingQuantity: {
+      paddingBottom: 4
+    },
     textRight: {
       textAlign: "right" as "right"
     }
-  }),
-  { name: "OrderFulfillmentDialog" }
-);
-const OrderFulfillmentDialog = decorate<OrderFulfillmentDialogProps>(
-  ({ classes, open, lines, onClose, onSubmit }) => (
+  });
+
+export interface OrderFulfillmentDialogProps extends WithStyles<typeof styles> {
+  confirmButtonState: ConfirmButtonTransitionState;
+  open: boolean;
+  lines: OrderDetails_order_lines[];
+  onClose();
+  onSubmit(data: FormData);
+}
+
+const OrderFulfillmentDialog = withStyles(styles, {
+  name: "OrderFulfillmentDialog"
+})(
+  ({
+    classes,
+    confirmButtonState,
+    open,
+    lines,
+    onClose,
+    onSubmit
+  }: OrderFulfillmentDialogProps) => (
     <Dialog open={open}>
       <Form
         initial={{
@@ -86,7 +110,7 @@ const OrderFulfillmentDialog = decorate<OrderFulfillmentDialogProps>(
                     <TableCell />
                     <TableCell>{i18n.t("Product name")}</TableCell>
                     <TableCell>{i18n.t("SKU")}</TableCell>
-                    <TableCell className={classes.textRight}>
+                    <TableCell className={classes.textRight} colSpan={2}>
                       {i18n.t("Quantity")}
                     </TableCell>
                   </TableRow>
@@ -100,7 +124,7 @@ const OrderFulfillmentDialog = decorate<OrderFulfillmentDialogProps>(
                         <TableCellAvatar thumbnail={product.thumbnailUrl} />
                         <TableCell>{product.productName}</TableCell>
                         <TableCell>{product.productSku}</TableCell>
-                        <TableCell className={classes.textRight}>
+                        <TableCell className={classes.quantityInputContainer}>
                           <TextField
                             type="number"
                             inputProps={{
@@ -113,8 +137,12 @@ const OrderFulfillmentDialog = decorate<OrderFulfillmentDialogProps>(
                               handleQuantityChange(productIndex, event)
                             }
                             error={remainingQuantity < data.lines[productIndex]}
-                          />{" "}
-                          / {remainingQuantity}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className={classes.remainingQuantity}>
+                            / {remainingQuantity}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -135,9 +163,14 @@ const OrderFulfillmentDialog = decorate<OrderFulfillmentDialogProps>(
                 <Button onClick={onClose}>
                   {i18n.t("Cancel", { context: "button" })}
                 </Button>
-                <Button color="primary" variant="raised" type="submit">
+                <ConfirmButton
+                  transitionState={confirmButtonState}
+                  color="primary"
+                  variant="contained"
+                  type="submit"
+                >
                   {i18n.t("Confirm", { context: "button" })}
-                </Button>
+                </ConfirmButton>
               </DialogActions>
             </>
           );

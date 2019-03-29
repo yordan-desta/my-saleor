@@ -7,7 +7,8 @@ from django.views.generic import View
 from graphene_django.settings import graphene_settings
 from graphene_django.views import instantiate_middleware
 from graphql import get_default_backend
-from graphql.error import GraphQLError, format_error as format_graphql_error
+from graphql.error import (
+    GraphQLError, GraphQLSyntaxError, format_error as format_graphql_error)
 from graphql.execution import ExecutionResult
 
 
@@ -46,7 +47,10 @@ class GraphQLView(View):
     def dispatch(self, request, *args, **kwargs):
         # Handle options method the GraphQlView restricts it.
         if request.method == 'GET':
-            return render_to_response('graphql/playground.html')
+            if settings.DEBUG:
+                return render_to_response('graphql/playground.html')
+            return HttpResponseNotAllowed(['OPTIONS', 'POST'])
+
         if request.method == 'OPTIONS':
             response = self.options(request, *args, **kwargs)
         elif request.method == 'POST':
@@ -70,6 +74,7 @@ class GraphQLView(View):
                 data={
                     'errors': [self.format_error('Unable to parse query.')]},
                 status=400)
+
         if isinstance(data, list):
             responses = [self.get_response(request, entry) for entry in data]
             result = [response for response, code in responses]
@@ -82,6 +87,7 @@ class GraphQLView(View):
     def get_response(self, request: HttpRequest, data: dict):
         query, variables, operation_name = self.get_graphql_params(
             request, data)
+
         execution_result = self.execute_graphql_request(
             request, query, variables, operation_name)
         status_code = 200
@@ -111,7 +117,7 @@ class GraphQLView(View):
                 invalid=True)
         try:
             document = self.backend.document_from_string(self.schema, query)
-        except ValueError as e:
+        except (ValueError, GraphQLSyntaxError) as e:
             return ExecutionResult(errors=[e], invalid=True)
         extra_options = {}
         if self.executor:
@@ -149,6 +155,7 @@ class GraphQLView(View):
         operation_name = data.get('operationName')
         if operation_name == 'null':
             operation_name = None
+
         if request.content_type == 'multipart/form-data':
             operations = json.loads(data.get('operations', '{}'))
             files_map = json.loads(data.get('map', '{}'))

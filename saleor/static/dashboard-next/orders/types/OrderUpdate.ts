@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 import { OrderUpdateInput } from "./../../types/globalTypes";
@@ -67,7 +68,7 @@ export interface OrderUpdate_orderUpdate_order {
 
 export interface OrderUpdate_orderUpdate {
   __typename: "OrderUpdate";
-  errors: (OrderUpdate_orderUpdate_errors | null)[] | null;
+  errors: OrderUpdate_orderUpdate_errors[] | null;
   order: OrderUpdate_orderUpdate_order | null;
 }
 
