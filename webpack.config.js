@@ -1,5 +1,4 @@
 const autoprefixer = require('autoprefixer');
-const CheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 const url = require('url');
@@ -20,12 +19,7 @@ const providePlugin = new webpack.ProvidePlugin({
   'query-string': 'query-string'
 });
 
-const checkerPlugin = new CheckerPlugin({
-  reportFiles: ['saleor/**/*.{ts,tsx}'],
-  tslint: true
-});
-
-module.exports = (env, argv) => {
+module.exports = (_, argv) => {
   const devMode = argv.mode !== 'production';
 
   let extractCssPlugin;
@@ -63,7 +57,6 @@ module.exports = (env, argv) => {
   return {
     entry: {
       dashboard: './saleor/static/dashboard/js/dashboard.js',
-      'dashboard-next': './saleor/static/dashboard-next/index.tsx',
       document: './saleor/static/dashboard/js/document.js',
       storefront: './saleor/static/js/storefront.js'
     },
@@ -103,15 +96,6 @@ module.exports = (env, argv) => {
           ]
         },
         {
-          test: /\.tsx?$/,
-          exclude: /node_modules/,
-          loader: 'ts-loader',
-          options: {
-            experimentalWatchApi: true,
-            transpileOnly: true
-          }
-        },
-        {
           test: /\.(eot|otf|png|svg|jpg|ttf|woff|woff2)(\?v=[0-9.]+)?$/,
           loader: fileLoaderPath,
           include: [
@@ -131,14 +115,13 @@ module.exports = (env, argv) => {
     plugins: [
       bundleTrackerPlugin,
       extractCssPlugin,
-      providePlugin,
-      checkerPlugin
+      providePlugin
     ],
     resolve: {
       alias: {
         jquery: resolve('node_modules/jquery/dist/jquery.js')
       },
-      extensions: ['.ts', '.tsx', '.js', '.jsx']
+      extensions: ['.js', '.jsx']
     },
     devtool: 'sourceMap'
   };
